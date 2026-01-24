@@ -9,6 +9,9 @@ import type {
   UpdateMealInput,
 } from "~/types/database";
 
+import { useOfflineSync } from "./useOfflineSync";
+import { queueMealCreation } from "~/utils/offlineDB";
+
 export function useMealPlans() {
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -85,6 +88,43 @@ export function useMealPlans() {
   };
 
   const addMealToPlan = async (planId: string, mealData: CreateMealInput) => {
+    const { isOnline, updatePendingCount } = useOfflineSync();
+
+    // If offline, queue the operation
+    if (!isOnline.value) {
+      const plan = mealPlans.value?.find(p => p.id === planId);
+
+      if (!plan) {
+        error.value = "Meal plan not found";
+        throw new Error("Meal plan not found");
+      }
+
+      const tempId = await queueMealCreation(
+        planId,
+        plan.weekStart.toISOString(),
+        mealData
+      );
+
+      const tempMeal = {
+        id: tempId,
+        ...mealData,
+        mealPlanId: planId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        order: 0,
+        _isPending: true,
+      } as Meal & { _isPending: boolean };
+
+      // Optimistically update local data
+      if (plan.meals) {
+        plan.meals.push(tempMeal as any);
+      }
+
+      await updatePendingCount();
+      return tempMeal;
+    }
+
+    // Online - normal flow
     try {
       const newMeal = await $fetch<Meal>(`/api/meal-plans/${planId}/meals`, {
         method: "POST",
