@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getPendingMeals, removePendingMeal } from '~/utils/offlineDb';
+import { getPendingMeals, removePendingMeal, type PendingMeal } from '~/utils/offlineDb';
 import { useOfflineSync } from '~/composables/useOfflineSync';
 
-const pendingMeals = ref<any[]>([]);
+const pendingMeals = ref<PendingMeal[]>([]);
 const { triggerSync } = useOfflineSync();
 
 onMounted(async () => {
@@ -14,7 +14,7 @@ async function loadPendingMeals() {
   pendingMeals.value = await getPendingMeals();
 }
 
-async function retrySync(_id: string) {
+async function retryAll() {
   await triggerSync();
   await loadPendingMeals();
 }
@@ -30,9 +30,7 @@ async function syncAll() {
 }
 
 async function clearAll() {
-  for (const item of pendingMeals.value) {
-    await removePendingMeal(item.id);
-  }
+  await Promise.all(pendingMeals.value.map(item => removePendingMeal(item.id)));
   await loadPendingMeals();
 }
 </script>
@@ -76,9 +74,9 @@ async function clearAll() {
               size="xs"
               variant="ghost"
               icon="i-lucide-refresh-cw"
-              @click="retrySync(item.id)"
+              @click="retryAll"
             >
-              Retry
+              Retry All
             </UButton>
             <UButton
               size="xs"

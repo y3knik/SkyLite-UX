@@ -84,14 +84,22 @@ export default defineEventHandler(async () => {
       try {
         // Get fresh album data from Google Photos API
         const accessToken = await service.getAccessToken();
+
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const response = await fetch(
           `https://photoslibrary.googleapis.com/v1/albums/${album.albumId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
+            signal: controller.signal,
           }
         );
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const albumData = await response.json();

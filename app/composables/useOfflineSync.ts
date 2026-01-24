@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, readonly, onMounted, onUnmounted } from 'vue';
 import {
   getPendingMeals,
   removePendingMeal,
@@ -6,23 +6,13 @@ import {
 } from '~/utils/offlineDb';
 
 export function useOfflineSync() {
-  const isOnline = ref(navigator.onLine);
+  const isOnline = ref(false);
   const isSyncing = ref(false);
   const pendingCount = ref(0);
   const lastSyncTime = ref<Date | null>(null);
   const syncError = ref<string | null>(null);
 
-  // Update online status
-  if (process.client) {
-    window.addEventListener('online', () => {
-      isOnline.value = true;
-      triggerSync();
-    });
-
-    window.addEventListener('offline', () => {
-      isOnline.value = false;
-    });
-  }
+  let syncInterval: NodeJS.Timeout | null = null;
 
   // Load pending count
   async function updatePendingCount() {
@@ -75,24 +65,52 @@ export function useOfflineSync() {
     }
   }
 
-  // Initialize
-  if (process.client) {
+  // Event handlers for cleanup
+  const onOnlineHandler = () => {
+    isOnline.value = true;
+    triggerSync();
+  };
+
+  const onOfflineHandler = () => {
+    isOnline.value = false;
+  };
+
+  // Initialize on client
+  onMounted(() => {
+    // Set initial online status
+    isOnline.value = navigator.onLine;
+
+    // Add event listeners
+    window.addEventListener('online', onOnlineHandler);
+    window.addEventListener('offline', onOfflineHandler);
+
+    // Load pending count
     updatePendingCount();
 
     // Auto-sync periodically when online
-    setInterval(() => {
+    syncInterval = setInterval(() => {
       if (isOnline.value && pendingCount.value > 0) {
         triggerSync();
       }
     }, 30000);
-  }
+  });
+
+  // Cleanup on unmount
+  onUnmounted(() => {
+    window.removeEventListener('online', onOnlineHandler);
+    window.removeEventListener('offline', onOfflineHandler);
+
+    if (syncInterval) {
+      clearInterval(syncInterval);
+    }
+  });
 
   return {
-    isOnline: computed(() => isOnline.value),
-    isSyncing: computed(() => isSyncing.value),
-    pendingCount: computed(() => pendingCount.value),
-    lastSyncTime: computed(() => lastSyncTime.value),
-    syncError: computed(() => syncError.value),
+    isOnline: readonly(isOnline),
+    isSyncing: readonly(isSyncing),
+    pendingCount: readonly(pendingCount),
+    lastSyncTime: readonly(lastSyncTime),
+    syncError: readonly(syncError),
     triggerSync,
     updatePendingCount,
   };

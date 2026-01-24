@@ -3,9 +3,11 @@ import { format } from "date-fns";
 
 import type { Meal, MealType } from "~/types/database";
 
+type MealWithPending = Meal & { _isPending?: boolean };
+
 const props = defineProps<{
   weekStart: Date;
-  meals: Meal[];
+  meals: MealWithPending[];
 }>();
 
 const emit = defineEmits<{

@@ -1,3 +1,4 @@
+import { consola } from 'consola';
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 
 interface OfflineDBSchema extends DBSchema {
@@ -22,6 +23,10 @@ interface OfflineDBSchema extends DBSchema {
   };
 }
 
+type PendingMealData = OfflineDBSchema['pending-meals']['value']['mealData'];
+
+export type PendingMeal = OfflineDBSchema['pending-meals']['value'];
+
 let dbInstance: IDBPDatabase<OfflineDBSchema> | null = null;
 
 export async function getOfflineDB() {
@@ -41,10 +46,10 @@ export async function getOfflineDB() {
 export async function queueMealCreation(
   mealPlanId: string,
   weekStart: string,
-  mealData: any
+  mealData: PendingMealData
 ) {
   const db = await getOfflineDB();
-  const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
   await db.add('pending-meals', {
     id: tempId,
@@ -79,5 +84,7 @@ export async function updatePendingMealStatus(
     meal.status = status;
     if (error) meal.error = error;
     await db.put('pending-meals', meal);
+  } else {
+    consola.warn(`Attempted to update non-existent pending meal: ${id}`);
   }
 }
