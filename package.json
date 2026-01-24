@@ -25,6 +25,7 @@
     "googleapis": "^170.0.0",
     "ical.js": "^2.2.0",
     "idb": "^8.0.3",
+    "magicast": "0.3.5",
     "node-fetch": "^2.7.0",
     "pinia": "^3.0.1",
     "prisma": "^6.9.0",
