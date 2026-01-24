@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CalendarEvent } from "~/types/calendar";
 
-const { photos, fetchPhotos, getPhotoUrl } = usePhotos();
+const { photos, fetchPhotos, getPhotoUrl, refreshAlbums } = usePhotos();
 const { homeSettings, fetchHomeSettings } = useHomeSettings();
 
 const currentPhotoIndex = ref(0);
@@ -99,6 +99,11 @@ onMounted(async () => {
     fetchHomeSettings(),
   ]);
 
+  // Refresh album URLs immediately to ensure fresh URLs
+  if (homeSettings.value?.photosEnabled && photos.value.length > 0) {
+    await refreshAlbums();
+  }
+
   startSlideshow();
   updateClock();
   intervals.value.push(setInterval(updateClock, 1000));
@@ -128,6 +133,12 @@ onMounted(async () => {
   if (homeSettings.value?.mealsEnabled) {
     await fetchTodaysMenu();
     intervals.value.push(setInterval(fetchTodaysMenu, refreshIntervalMs));
+  }
+
+  // Refresh Google Photos album URLs every hour to prevent expiration
+  // Google Photos URLs typically expire after ~60 minutes
+  if (homeSettings.value?.photosEnabled && photos.value.length > 0) {
+    intervals.value.push(setInterval(refreshAlbums, 3600000)); // Refresh every hour
   }
 });
 
