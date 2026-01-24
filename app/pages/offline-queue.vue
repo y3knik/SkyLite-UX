@@ -83,7 +83,7 @@ async function clearAll() {
             <UButton
               size="xs"
               variant="ghost"
-              color="red"
+              color="error"
               icon="i-lucide-trash-2"
               @click="deleteFromQueue(item.id)"
             >
@@ -98,7 +98,7 @@ async function clearAll() {
       <UButton @click="syncAll">
         Sync All
       </UButton>
-      <UButton variant="ghost" color="red" @click="clearAll">
+      <UButton variant="ghost" color="error" @click="clearAll">
         Clear All
       </UButton>
     </div>
