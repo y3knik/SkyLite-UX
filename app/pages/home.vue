@@ -144,7 +144,20 @@ function startSlideshow() {
   const transitionSpeed = (homeSettings.value?.photoTransitionSpeed || 10000);
 
   intervals.value.push(setInterval(() => {
-    currentPhotoIndex.value = (currentPhotoIndex.value + 1) % photos.value.length;
+    const playbackMode = homeSettings.value?.photoPlayback || "sequential";
+
+    if (playbackMode === "random") {
+      // Random: Pick a random photo (but not the current one)
+      let nextIndex;
+      do {
+        nextIndex = Math.floor(Math.random() * photos.value.length);
+      } while (nextIndex === currentPhotoIndex.value && photos.value.length > 1);
+      currentPhotoIndex.value = nextIndex;
+    }
+    else {
+      // Sequential: Increment to next photo
+      currentPhotoIndex.value = (currentPhotoIndex.value + 1) % photos.value.length;
+    }
   }, transitionSpeed));
 }
 
