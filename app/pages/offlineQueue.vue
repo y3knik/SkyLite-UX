@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getPendingMeals, removePendingMeal } from '~/utils/offlineDB';
+import { getPendingMeals, removePendingMeal } from '~/utils/offlineDb';
 import { useOfflineSync } from '~/composables/useOfflineSync';
 
 const pendingMeals = ref<any[]>([]);
@@ -14,7 +14,7 @@ async function loadPendingMeals() {
   pendingMeals.value = await getPendingMeals();
 }
 
-async function retrySync(id: string) {
+async function retrySync(_id: string) {
   await triggerSync();
   await loadPendingMeals();
 }

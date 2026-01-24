@@ -3,7 +3,7 @@ import {
   getPendingMeals,
   removePendingMeal,
   updatePendingMealStatus,
-} from '~/utils/offlineDB';
+} from '~/utils/offlineDb';
 
 export function useOfflineSync() {
   const isOnline = ref(navigator.onLine);
