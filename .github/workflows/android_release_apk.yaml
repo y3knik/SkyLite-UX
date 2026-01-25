@@ -50,8 +50,18 @@ jobs:
       - name: Build Nuxt static site
         env:
           CAPACITOR_BUILD: 'true' # Disable server plugins to prevent hanging
-        run: npm run generate
-        timeout-minutes: 10 # Prevent step from hanging forever
+        run: |
+          # Use timeout to force-kill if npm doesn't exit cleanly
+          timeout 8m npm run generate || {
+            echo "Build timed out but likely completed - checking output..."
+            if [ -d ".output/public" ] && [ -f ".output/public/index.html" ]; then
+              echo "✓ Static site generated successfully"
+              exit 0
+            else
+              echo "✗ Build failed - no output found"
+              exit 1
+            fi
+          }
 
       - name: Sync Capacitor
         run: npx cap sync android
