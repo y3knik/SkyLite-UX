@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getPendingMeals, removePendingMeal, type PendingMeal } from '~/utils/offlineDB';
+import { getPendingMeals, removePendingMeal, type PendingMeal } from '~/utils/offlineDb';
 import { useOfflineSync } from '~/composables/useOfflineSync';
 import { useAlertToast } from '~/composables/useAlertToast';
 
