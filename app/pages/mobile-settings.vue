@@ -85,7 +85,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Preferences } from '@capacitor/preferences';
 import { useOfflineSync } from '~/composables/useOfflineSync';
 
 const serverUrl = ref('');
@@ -99,9 +98,12 @@ const { isOnline, pendingCount, triggerSync } = useOfflineSync();
 
 onMounted(async () => {
   if (isCapacitor) {
+    // Dynamically import Capacitor
+    const { Preferences } = await import('@capacitor/preferences');
+
     // Load current server URL
     const { value } = await Preferences.get({ key: 'serverUrl' });
-    serverUrl.value = value || 'http://192.168.1.100:3000';
+    serverUrl.value = value || '';
   }
 });
 
@@ -114,6 +116,9 @@ async function saveSettings() {
     if (!serverUrl.value.startsWith('http://') && !serverUrl.value.startsWith('https://')) {
       throw new Error('URL must start with http:// or https://');
     }
+
+    // Dynamically import Capacitor
+    const { Preferences } = await import('@capacitor/preferences');
 
     // Save to preferences
     await Preferences.set({ key: 'serverUrl', value: serverUrl.value });

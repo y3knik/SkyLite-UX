@@ -1,11 +1,13 @@
-import { Preferences } from '@capacitor/preferences';
-
 export default defineNuxtPlugin(async () => {
   // @ts-ignore - Capacitor is added via script tag in Capacitor builds
   if (typeof window !== 'undefined' && 'Capacitor' in window) {
-    // Get server URL from preferences (no default - user must configure)
-    const { value } = await Preferences.get({ key: 'serverUrl' });
-    const serverUrl = value || null;
+    try {
+      // Dynamically import Capacitor plugins to avoid SSR issues
+      const { Preferences } = await import('@capacitor/preferences');
+
+      // Get server URL from preferences (no default - user must configure)
+      const { value } = await Preferences.get({ key: 'serverUrl' });
+      const serverUrl = value || null;
 
     // Store serverUrl in window for access by other components
     // @ts-ignore
@@ -32,10 +34,14 @@ export default defineNuxtPlugin(async () => {
       return originalFetch(url, options);
     };
 
-    if (serverUrl) {
-      console.log(`[Capacitor] Server URL configured: ${serverUrl}`);
-    } else {
-      console.log('[Capacitor] No server URL configured. Please configure in Mobile Settings.');
+      if (serverUrl) {
+        console.log(`[Capacitor] Server URL configured: ${serverUrl}`);
+      } else {
+        console.log('[Capacitor] No server URL configured. Please configure in Mobile Settings.');
+      }
+    } catch (error) {
+      console.error('[Capacitor] Failed to initialize:', error);
+      // Continue anyway - let the app load
     }
   }
 });
