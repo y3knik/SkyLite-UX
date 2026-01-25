@@ -47,6 +47,7 @@ jobs:
       - name: Build Nuxt static site
         env:
           CAPACITOR_BUILD: 'true' # Disable server plugins to prevent hanging
+          NODE_ENV: 'production' # Ensure production build (no HMR)
         run: |
           # Use timeout to force-kill if npm doesn't exit cleanly
           timeout 8m npm run generate || {
