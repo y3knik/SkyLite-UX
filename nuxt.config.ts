@@ -156,10 +156,14 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   nitro: {
-    plugins: [
-      "../server/plugins/01.logging.ts",
-      "../server/plugins/02.syncManager.ts",
-    ],
+    // Disable server plugins during static generation to prevent hanging
+    // setInterval in syncManager keeps process alive during 'nuxt generate'
+    plugins: process.env.CAPACITOR_BUILD === 'true'
+      ? []
+      : [
+          "../server/plugins/01.logging.ts",
+          "../server/plugins/02.syncManager.ts",
+        ],
   },
 
   plugins: [

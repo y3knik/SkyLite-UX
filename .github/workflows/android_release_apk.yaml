@@ -48,7 +48,10 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Build Nuxt static site
+        env:
+          CAPACITOR_BUILD: 'true' # Disable server plugins to prevent hanging
         run: npm run generate
+        timeout-minutes: 10 # Prevent step from hanging forever
 
       - name: Sync Capacitor
         run: npx cap sync android
