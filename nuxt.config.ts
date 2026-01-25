@@ -2,6 +2,8 @@
 import pkg from "./package.json";
 
 export default defineNuxtConfig({
+  ssr: false, // Client-only mode for Capacitor
+
   devtools: {
     enabled: true,
   },

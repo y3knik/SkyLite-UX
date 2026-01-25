@@ -10,7 +10,7 @@ import type {
 } from "~/types/database";
 
 import { useOfflineSync } from "./useOfflineSync";
-import { queueMealCreation } from "~/utils/offlineDb";
+import { queueMealCreation } from "~/utils/offlineDB";
 
 export function useMealPlans() {
   const loading = ref(false);

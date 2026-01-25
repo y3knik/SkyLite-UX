@@ -1,9 +1,10 @@
 import { ref, readonly, onMounted, onUnmounted } from 'vue';
+import { Network } from '@capacitor/network';
 import {
   getPendingMeals,
   removePendingMeal,
   updatePendingMealStatus,
-} from '~/utils/offlineDb';
+} from '~/utils/offlineDB';
 
 export function useOfflineSync() {
   const isOnline = ref(false);
@@ -13,6 +14,8 @@ export function useOfflineSync() {
   const syncError = ref<string | null>(null);
 
   let syncInterval: NodeJS.Timeout | null = null;
+  // @ts-ignore - Capacitor is added via script tag in Capacitor builds
+  const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
 
   // Load pending count
   async function updatePendingCount() {
@@ -65,7 +68,7 @@ export function useOfflineSync() {
     }
   }
 
-  // Event handlers for cleanup
+  // Event handlers for cleanup (web only)
   const onOnlineHandler = () => {
     isOnline.value = true;
     triggerSync();
@@ -75,17 +78,34 @@ export function useOfflineSync() {
     isOnline.value = false;
   };
 
-  // Initialize on client
-  onMounted(() => {
-    // Set initial online status
-    isOnline.value = navigator.onLine;
+  // Capacitor Network listener
+  const onNetworkChange = (status: any) => {
+    isOnline.value = status.connected;
+    if (status.connected) {
+      triggerSync();
+    }
+  };
 
-    // Add event listeners
-    window.addEventListener('online', onOnlineHandler);
-    window.addEventListener('offline', onOfflineHandler);
+  // Initialize on client
+  onMounted(async () => {
+    if (isCapacitor) {
+      // Use Capacitor Network API
+      const status = await Network.getStatus();
+      isOnline.value = status.connected;
+
+      // Add event listener for network changes
+      Network.addListener('networkStatusChange', onNetworkChange);
+    } else {
+      // Use browser API
+      isOnline.value = navigator.onLine;
+
+      // Add event listeners
+      window.addEventListener('online', onOnlineHandler);
+      window.addEventListener('offline', onOfflineHandler);
+    }
 
     // Load pending count
-    updatePendingCount();
+    await updatePendingCount();
 
     // Auto-sync periodically when online
     syncInterval = setInterval(() => {
@@ -96,9 +116,15 @@ export function useOfflineSync() {
   });
 
   // Cleanup on unmount
-  onUnmounted(() => {
-    window.removeEventListener('online', onOnlineHandler);
-    window.removeEventListener('offline', onOfflineHandler);
+  onUnmounted(async () => {
+    if (isCapacitor) {
+      // Remove Capacitor Network listeners
+      await Network.removeAllListeners();
+    } else {
+      // Remove browser event listeners
+      window.removeEventListener('online', onOnlineHandler);
+      window.removeEventListener('offline', onOfflineHandler);
+    }
 
     if (syncInterval) {
       clearInterval(syncInterval);
