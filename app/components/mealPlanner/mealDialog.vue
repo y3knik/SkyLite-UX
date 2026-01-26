@@ -20,17 +20,9 @@ const description = ref("");
 const daysInAdvance = ref(0);
 const error = ref<string | null>(null);
 
-// Mobile detection
-const isMobile = ref(false);
-
-onMounted(() => {
-  const checkMobile = () => {
-    isMobile.value = window.innerWidth < 768; // Tailwind 'md' breakpoint
-  };
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-  onUnmounted(() => window.removeEventListener('resize', checkMobile));
-});
+// Mobile detection - use Capacitor detection for reliability
+// @ts-ignore - Capacitor is added via script tag in Capacitor builds
+const isMobile = typeof window !== 'undefined' && 'Capacitor' in window;
 
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const mealTypeLabels: Record<MealType, string> = {
