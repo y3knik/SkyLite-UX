@@ -202,6 +202,26 @@ async function handleTogglePreparation(mealId: string, completed: boolean) {
   }
 }
 
+async function handleMoveMeal(event: { mealId: string; newDayOfWeek: number; newMealType: MealType }) {
+  try {
+    // Update meal with new day and meal type
+    await updateMeal(event.mealId, {
+      dayOfWeek: event.newDayOfWeek,
+      mealType: event.newMealType
+    });
+
+    showSuccess("Meal Moved", "Meal has been moved successfully.");
+
+    // Reload the meal plan
+    await loadWeekMealPlan();
+    await loadUpcomingPrepMeals();
+  }
+  catch (error) {
+    consola.error("Failed to move meal:", error);
+    showError("Move Failed", "Failed to move meal. Please try again.");
+  }
+}
+
 // Load data on mount
 onMounted(() => {
   loadWeekMealPlan();
@@ -284,6 +304,7 @@ watch(currentWeekStart, () => {
           :meals="currentPlan?.meals || []"
           @add-meal="openAddMeal"
           @edit-meal="openEditMeal"
+          @move-meal="handleMoveMeal"
         />
 
         <!-- Preparation Reminders -->

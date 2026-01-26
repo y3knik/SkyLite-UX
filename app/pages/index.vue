@@ -16,8 +16,8 @@ onMounted(async () => {
       // First run - redirect to mobile settings for configuration
       await navigateTo("/mobile-settings");
     } else {
-      // Server configured - proceed to home
-      await navigateTo("/home");
+      // Server configured - proceed to meal planner
+      await navigateTo("/mealplanner");
     }
   } else {
     // Web version - go to home
