@@ -178,7 +178,9 @@ export default defineNuxtConfig({
     // Disable appInit for Capacitor builds - it tries to fetch from /api/* which doesn't exist in static builds
     // eslint-disable-next-line node/no-process-env
     ...(process.env.CAPACITOR_BUILD !== 'true' ? ["~/plugins/02.appInit.ts"] : []),
-    "~/plugins/03.syncManager.client.ts",
+    // Disable syncManager for Capacitor builds - it tries to connect to /api/sync/events via EventSource
+    // eslint-disable-next-line node/no-process-env
+    ...(process.env.CAPACITOR_BUILD !== 'true' ? ["~/plugins/03.syncManager.client.ts"] : []),
   ],
 
   future: {
