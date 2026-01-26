@@ -47,6 +47,11 @@ watch(() => [props.isOpen, props.meal], ([isOpen, meal]) => {
       description.value = meal.description || "";
       daysInAdvance.value = meal.daysInAdvance || 0;
     }
+    // Prevent body scroll when dialog is open
+    document.body.style.overflow = 'hidden';
+  } else {
+    // Restore body scroll when dialog is closed
+    document.body.style.overflow = '';
   }
 }, { immediate: true });
 
@@ -80,36 +85,138 @@ function handleDelete() {
 </script>
 
 <template>
+  <!-- Mobile: Full-screen overlay -->
   <div
-    v-if="isOpen"
-    class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50"
+    v-if="isOpen && isMobile"
+    class="fixed inset-0 z-[100] bg-default flex flex-col"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b border-default bg-default">
+      <h3 class="text-lg font-semibold">
+        {{ meal ? 'Edit Meal' : 'Add Meal' }}
+      </h3>
+      <UButton
+        color="neutral"
+        variant="ghost"
+        icon="i-lucide-x"
+        size="lg"
+        aria-label="Close"
+        @click="emit('close')"
+      />
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div v-if="error" class="bg-error/10 text-error rounded-md px-3 py-2 text-sm">
+        {{ error }}
+      </div>
+
+      <div class="text-sm text-muted">
+        <span class="font-medium">{{ dayNames[dayOfWeek] }}</span> -
+        <span class="font-medium">{{ mealTypeLabels[mealType] }}</span>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-highlighted">Meal Name</label>
+        <UInput
+          v-model="name"
+          placeholder="e.g., Grilled Chicken Salad"
+          class="w-full"
+          size="lg"
+          @keydown.enter="handleSave"
+        />
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-highlighted">Description (optional)</label>
+        <UTextarea
+          v-model="description"
+          placeholder="Notes about the meal..."
+          class="w-full text-base"
+          :rows="4"
+        />
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-highlighted">
+          Days in Advance to Prepare
+        </label>
+        <UInput
+          v-model.number="daysInAdvance"
+          type="number"
+          :min="0"
+          :max="7"
+          class="w-full"
+          size="lg"
+        />
+        <p class="text-xs text-muted">
+          How many days before you need to start preparing this meal (e.g., for defrosting, marinating)
+        </p>
+      </div>
+    </div>
+
+    <!-- Fixed footer with actions -->
+    <div class="border-t border-default bg-default p-4 space-y-3">
+      <div class="flex gap-3">
+        <UButton
+          color="neutral"
+          variant="outline"
+          size="lg"
+          class="flex-1"
+          @click="emit('close')"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="primary"
+          size="lg"
+          class="flex-1"
+          @click="handleSave"
+        >
+          {{ meal ? 'Update' : 'Add' }}
+        </UButton>
+      </div>
+
+      <UButton
+        v-if="meal"
+        color="error"
+        variant="ghost"
+        icon="i-lucide-trash"
+        size="lg"
+        class="w-full"
+        @click="handleDelete"
+      >
+        Delete Meal
+      </UButton>
+    </div>
+  </div>
+
+  <!-- Desktop: Modal dialog -->
+  <div
+    v-else-if="isOpen && !isMobile"
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
     @click="emit('close')"
   >
     <div
-      class="w-full sm:w-[500px] max-w-full sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-default rounded-t-2xl sm:rounded-lg border border-default shadow-lg"
+      class="w-[500px] max-w-[90vw] max-h-[90vh] overflow-y-auto bg-default rounded-lg border border-default shadow-lg"
       @click.stop
     >
-      <!-- Mobile: Drag handle -->
-      <div v-if="isMobile" class="flex justify-center py-2 border-b border-default">
-        <div class="w-12 h-1 bg-muted rounded-full"></div>
-      </div>
-
-      <div class="flex items-center justify-between p-4 sm:p-4 border-b border-default">
-        <h3 class="text-base sm:text-base font-semibold leading-6">
+      <div class="flex items-center justify-between p-4 border-b border-default">
+        <h3 class="text-base font-semibold leading-6">
           {{ meal ? 'Edit Meal' : 'Add Meal' }}
         </h3>
         <UButton
           color="neutral"
           variant="ghost"
           icon="i-lucide-x"
-          :size="isMobile ? 'lg' : 'md'"
+          size="md"
           class="-my-1"
           aria-label="Close dialog"
           @click="emit('close')"
         />
       </div>
 
-      <div class="p-4 sm:p-4 space-y-4">
+      <div class="p-4 space-y-4">
         <div v-if="error" class="bg-error/10 text-error rounded-md px-3 py-2 text-sm">
           {{ error }}
         </div>
@@ -125,7 +232,6 @@ function handleDelete() {
             v-model="name"
             placeholder="e.g., Grilled Chicken Salad"
             class="w-full"
-            :size="isMobile ? 'lg' : 'md'"
             @keydown.enter="handleSave"
           />
         </div>
@@ -150,7 +256,6 @@ function handleDelete() {
             :min="0"
             :max="7"
             class="w-full"
-            :size="isMobile ? 'lg' : 'md'"
           />
           <p class="text-xs text-muted">
             How many days before you need to start preparing this meal (e.g., for defrosting, marinating)
@@ -158,15 +263,13 @@ function handleDelete() {
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row justify-between gap-3 p-4 sm:p-4 border-t border-default">
-        <div class="flex gap-2 justify-center sm:justify-start">
+      <div class="flex justify-between gap-2 p-4 border-t border-default">
+        <div class="flex gap-2">
           <UButton
             v-if="meal"
             color="error"
             variant="ghost"
             icon="i-lucide-trash"
-            :size="isMobile ? 'lg' : 'md'"
-            :class="isMobile ? 'flex-1' : ''"
             @click="handleDelete"
           >
             Delete Meal
@@ -176,16 +279,12 @@ function handleDelete() {
           <UButton
             color="neutral"
             variant="ghost"
-            :size="isMobile ? 'lg' : 'md'"
-            class="flex-1 sm:flex-none"
             @click="emit('close')"
           >
             Cancel
           </UButton>
           <UButton
             color="primary"
-            :size="isMobile ? 'lg' : 'md'"
-            class="flex-1 sm:flex-none"
             @click="handleSave"
           >
             {{ meal ? 'Update Meal' : 'Add Meal' }}
