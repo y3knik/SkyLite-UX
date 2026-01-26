@@ -52,12 +52,6 @@ function isFormActive(dayOfWeek: number, mealType: MealType): boolean {
 }
 
 onMounted(() => {
-  console.log('[MealGrid] Mobile detection:', {
-    isCapacitor: typeof window !== 'undefined' && 'Capacitor' in window,
-    isMobile: isMobile,
-    expandedDay: expandedDay.value,
-    userAgent: navigator.userAgent
-  });
 
   // Set default expanded day
   const { getStableDate } = useStableDate();
@@ -227,17 +221,6 @@ function onAccordionLeave(el: Element) {
 
 <template>
   <div>
-    <!-- DEBUG: Mobile detection badge -->
-    <div class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg border-2 border-yellow-500">
-      <div class="text-sm font-mono">
-        <div><strong>DEBUG INFO:</strong></div>
-        <div>Capacitor Detected: {{ typeof window !== 'undefined' && 'Capacitor' in window }}</div>
-        <div>isMobile: {{ isMobile }}</div>
-        <div>expandedDay: {{ expandedDay }}</div>
-        <div>Layout: {{ isMobile ? '📱 MOBILE (Accordion)' : '🖥️ DESKTOP (Grid)' }}</div>
-      </div>
-    </div>
-
     <!-- Move mode overlay (mobile) -->
     <div
       v-if="movingMeal && isMobile"
