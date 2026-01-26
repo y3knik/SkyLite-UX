@@ -241,22 +241,38 @@ async function saveSettings() {
   saveError.value = null;
 
   try {
+    // Validate URL is not empty
+    const trimmedUrl = serverUrl.value?.trim();
+    if (!trimmedUrl) {
+      throw new Error('Server URL cannot be empty');
+    }
+
     // Validate URL format
-    if (!serverUrl.value.startsWith('http://') && !serverUrl.value.startsWith('https://')) {
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
       throw new Error('URL must start with http:// or https://');
+    }
+
+    // Validate URL is well-formed
+    try {
+      new URL(trimmedUrl);
+    } catch {
+      throw new Error('Invalid URL format. Example: http://192.168.1.100:3000');
     }
 
     // Dynamically import Capacitor
     const { Preferences } = await import('@capacitor/preferences');
 
     // Save to preferences
-    await Preferences.set({ key: 'serverUrl', value: serverUrl.value });
+    await Preferences.set({ key: 'serverUrl', value: trimmedUrl });
 
     // Update global server URL for immediate effect (no restart needed)
     // @ts-ignore
     if (typeof window !== 'undefined') {
-      window.__CAPACITOR_SERVER_URL__ = serverUrl.value;
+      window.__CAPACITOR_SERVER_URL__ = trimmedUrl;
     }
+
+    // Update the local value to the trimmed version
+    serverUrl.value = trimmedUrl;
 
     saveSuccess.value = true;
   } catch (error) {
