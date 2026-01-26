@@ -98,7 +98,7 @@ function handleDelete() {
     </div>
 
     <!-- Scrollable content -->
-    <div class="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-4 space-y-4">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 py-3 space-y-3">
       <div v-if="error" class="bg-error/10 text-error rounded-md px-3 py-2 text-sm">
         {{ error }}
       </div>
@@ -108,7 +108,7 @@ function handleDelete() {
         <span class="font-medium">{{ mealTypeLabels[mealType] }}</span>
       </div>
 
-      <div class="space-y-2">
+      <div class="space-y-1.5">
         <label class="block text-sm font-medium text-highlighted">Meal Name</label>
         <UInput
           v-model="name"
@@ -119,19 +119,19 @@ function handleDelete() {
         />
       </div>
 
-      <div class="space-y-2">
+      <div class="space-y-1.5">
         <label class="block text-sm font-medium text-highlighted">Description (optional)</label>
         <UTextarea
           v-model="description"
           placeholder="Notes about the meal..."
           class="w-full text-base"
-          :rows="4"
+          :rows="3"
         />
       </div>
 
-      <div class="space-y-2">
+      <div class="space-y-1.5">
         <label class="block text-sm font-medium text-highlighted">
-          Days in Advance to Prepare
+          Prep Days in Advance
         </label>
         <UInput
           v-model.number="daysInAdvance"
@@ -142,13 +142,13 @@ function handleDelete() {
           size="lg"
         />
         <p class="text-xs text-muted">
-          How many days before you need to start preparing this meal (e.g., for defrosting, marinating)
+          Days before to start prep (e.g., defrosting)
         </p>
       </div>
     </div>
 
     <!-- Fixed footer with actions -->
-    <div class="flex-shrink-0 border-t border-default bg-default p-4 space-y-3">
+    <div class="flex-shrink-0 border-t border-default bg-default px-4 py-3 space-y-2.5">
       <div class="flex gap-3">
         <UButton
           color="neutral"
