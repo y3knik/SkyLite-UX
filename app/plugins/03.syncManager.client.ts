@@ -5,6 +5,21 @@ import type { ShoppingListWithItemsAndCount, TodoWithUser } from "~/types/databa
 import type { EventSourceStatus, IntegrationSyncData, SyncConnectionStatus, SyncEvent } from "~/types/sync";
 
 export default defineNuxtPlugin(() => {
+  // @ts-ignore - Capacitor is added via script tag in Capacitor builds
+  const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
+
+  if (isCapacitor) {
+    console.log('[Sync Manager] Capacitor detected, skipping sync manager initialization');
+    return {
+      provide: {
+        // Return stub functions so code that depends on this plugin doesn't break
+        syncData: {},
+        connectionStatus: 'disabled',
+        lastHeartbeat: null,
+      }
+    };
+  }
+
   const syncData = useState<IntegrationSyncData>("sync-data", () => ({}));
   const connectionStatus = useState<SyncConnectionStatus>("sync-connection-status", () => "disconnected");
   const lastHeartbeat = useState<Date | null>("sync-last-heartbeat", () => null);
