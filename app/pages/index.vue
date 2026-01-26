@@ -29,18 +29,35 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error during app initialization:', error);
-    errorMessage.value = error instanceof Error ? error.message : 'Failed to initialize app';
 
-    // Fallback navigation after 2 seconds
-    setTimeout(() => {
-      // @ts-ignore
-      const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
+    // Don't show scary technical errors - just navigate
+    // Most errors here are from Nuxt meta file fetches which are non-critical
+    // Just proceed to the appropriate page
+
+    // Determine destination based on platform
+    // @ts-ignore
+    const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
+
+    setTimeout(async () => {
       if (isCapacitor) {
-        navigateTo("/mobile-settings", { replace: true });
+        // Try to check if server URL exists, if not go to settings
+        try {
+          const { Preferences } = await import('@capacitor/preferences');
+          const { value: serverUrl } = await Preferences.get({ key: 'serverUrl' });
+
+          if (!serverUrl || serverUrl.trim() === '') {
+            await navigateTo("/mobile-settings", { replace: true });
+          } else {
+            await navigateTo("/mealplanner", { replace: true });
+          }
+        } catch {
+          // If preferences check fails, default to mealplanner
+          await navigateTo("/mealplanner", { replace: true });
+        }
       } else {
-        navigateTo("/home", { replace: true });
+        await navigateTo("/home", { replace: true });
       }
-    }, 2000);
+    }, 100);
   }
 });
 </script>

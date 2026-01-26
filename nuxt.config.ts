@@ -8,6 +8,13 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  // Disable experimental features for Capacitor builds
+  experimental: {
+    // Disable build manifest to prevent runtime fetch errors in static builds
+    // eslint-disable-next-line node/no-process-env
+    buildManifest: process.env.CAPACITOR_BUILD !== 'true',
+  },
+
   runtimeConfig: {
     // Server-only config (not exposed to client)
     // Can be overridden by NUXT_GOOGLE_CLIENT_ID and NUXT_GOOGLE_CLIENT_SECRET env vars
