@@ -80,10 +80,10 @@ function handleDelete() {
   <!-- Mobile: Full-screen overlay -->
   <div
     v-if="isOpen && isMobile"
-    class="fixed inset-0 z-[100] bg-default flex flex-col"
+    class="fixed inset-0 z-[100] bg-default flex flex-col overflow-hidden"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between p-4 border-b border-default bg-default">
+    <div class="flex-shrink-0 flex items-center justify-between p-4 border-b border-default bg-default">
       <h3 class="text-lg font-semibold">
         {{ meal ? 'Edit Meal' : 'Add Meal' }}
       </h3>
@@ -98,7 +98,7 @@ function handleDelete() {
     </div>
 
     <!-- Scrollable content -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-4 space-y-4">
       <div v-if="error" class="bg-error/10 text-error rounded-md px-3 py-2 text-sm">
         {{ error }}
       </div>
@@ -148,7 +148,7 @@ function handleDelete() {
     </div>
 
     <!-- Fixed footer with actions -->
-    <div class="border-t border-default bg-default p-4 space-y-3">
+    <div class="flex-shrink-0 border-t border-default bg-default p-4 space-y-3">
       <div class="flex gap-3">
         <UButton
           color="neutral"
