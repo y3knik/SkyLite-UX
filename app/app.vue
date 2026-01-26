@@ -2,14 +2,19 @@
 import GlobalAppLoading from "~/components/global/globalAppLoading.vue";
 import GlobalDock from "~/components/global/globalDock.vue";
 import GlobalSideBar from "~/components/global/globalSideBar.vue";
+import DebugLogger from "~/components/DebugLogger.vue";
 
 const dock = false;
 const { isLoading, loadingMessage, setLoading } = useGlobalLoading();
+
+// @ts-ignore - Capacitor is added via script tag in Capacitor builds
+const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
 
 setLoading(true);
 
 onNuxtReady(() => {
   setLoading(false);
+  console.log('[App] Nuxt ready, isCapacitor:', isCapacitor);
 });
 </script>
 
@@ -33,6 +38,9 @@ onNuxtReady(() => {
         <GlobalDock />
       </div>
     </div>
+
+    <!-- Debug logger for Capacitor builds -->
+    <DebugLogger v-if="isCapacitor" />
   </UApp>
 </template>
 
