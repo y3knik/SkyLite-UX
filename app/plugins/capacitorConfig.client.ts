@@ -46,7 +46,18 @@ export default defineNuxtPlugin(async () => {
         url = fullUrl;
       }
 
-      return originalFetch(url, options);
+      return originalFetch(url, options).catch((error) => {
+        console.error('[Capacitor $fetch] Request failed:', {
+          url,
+          error: {
+            name: error.name,
+            message: error.message,
+            cause: error.cause,
+            stack: error.stack
+          }
+        });
+        throw error;
+      });
     };
 
       console.log('[CapacitorConfig] $fetch override installed');
