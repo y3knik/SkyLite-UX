@@ -13,6 +13,15 @@ export default defineNuxtConfig({
     // Disable build manifest to prevent runtime fetch errors in static builds
     // eslint-disable-next-line node/no-process-env
     buildManifest: process.env.CAPACITOR_BUILD !== 'true',
+    // Disable payload extraction to prevent preload errors
+    payloadExtraction: false,
+  },
+
+  // Route rules to prevent preloading errors in Capacitor
+  routeRules: {
+    '/mealplanner': { prerender: false },
+    '/mobile-settings': { prerender: false },
+    '/home': { prerender: false },
   },
 
   runtimeConfig: {

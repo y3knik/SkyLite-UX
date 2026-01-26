@@ -18,6 +18,8 @@ async function performNavigation() {
   console.log('[Index] performNavigation called, isCapacitor:', isCapacitor);
 
   try {
+    let targetRoute = '/home';
+
     if (isCapacitor) {
       console.log('[Index] Capacitor detected, checking server URL');
 
@@ -27,36 +29,35 @@ async function performNavigation() {
       console.log('[Index] Server URL:', serverUrl ? 'configured' : 'not configured');
 
       if (!serverUrl || serverUrl.trim() === '') {
-        console.log('[Index] No server URL, navigating to mobile-settings');
-        hasNavigated = true;
-        await router.replace('/mobile-settings');
+        targetRoute = '/mobile-settings';
       } else {
-        console.log('[Index] Server URL exists, navigating to mealplanner');
-        hasNavigated = true;
-        await router.replace('/mealplanner');
+        targetRoute = '/mealplanner';
       }
-    } else {
-      console.log('[Index] Web version, navigating to home');
-      hasNavigated = true;
-      await router.replace('/home');
     }
 
-    console.log('[Index] Navigation completed successfully');
+    console.log('[Index] Navigating to:', targetRoute);
+    hasNavigated = true;
+
+    // Use push instead of replace and ignore preload errors
+    await router.push(targetRoute).catch((error) => {
+      // Ignore navigation errors related to preloading
+      if (error.name === 'FetchError' || error.message?.includes('preload')) {
+        console.warn('[Index] Ignoring preload error, navigation should still work:', error.name);
+      } else {
+        throw error; // Re-throw other errors
+      }
+    });
+
+    console.log('[Index] Navigation completed');
   } catch (error) {
     console.error('[Index] Navigation error:', error);
 
-    // Fallback navigation - just go somewhere
+    // Fallback: direct navigation
     if (!hasNavigated) {
-      console.log('[Index] Error fallback, attempting navigation to mealplanner');
+      console.log('[Index] Using fallback navigation');
       hasNavigated = true;
-
-      try {
-        await router.replace('/mealplanner');
-      } catch (fallbackError) {
-        console.error('[Index] Fallback navigation also failed:', fallbackError);
-        // Last resort - force navigation via window.location
-        window.location.href = '/mealplanner';
-      }
+      const fallbackRoute = isCapacitor ? '/mealplanner' : '/home';
+      window.location.href = fallbackRoute;
     }
   }
 }
