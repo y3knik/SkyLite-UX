@@ -28,8 +28,9 @@ const mealTypeLabels: Record<MealType, string> = {
   DINNER: "Dinner",
 };
 
-// Mobile detection
-const isMobile = ref(false);
+// Mobile detection - use Capacitor detection for reliability on high DPI devices
+// @ts-ignore - Capacitor is added via script tag in Capacitor builds
+const isMobile = typeof window !== 'undefined' && 'Capacitor' in window;
 const movingMeal = ref<MealWithPending | null>(null);
 
 // Accordion state
@@ -51,17 +52,12 @@ function isFormActive(dayOfWeek: number, mealType: MealType): boolean {
 }
 
 onMounted(() => {
-  const checkMobile = () => {
-    isMobile.value = window.innerWidth < 768; // Tailwind 'md' breakpoint
-    console.log('[MealGrid] Mobile detection:', {
-      width: window.innerWidth,
-      isMobile: isMobile.value,
-      expandedDay: expandedDay.value
-    });
-  };
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-  onUnmounted(() => window.removeEventListener('resize', checkMobile));
+  console.log('[MealGrid] Mobile detection:', {
+    isCapacitor: typeof window !== 'undefined' && 'Capacitor' in window,
+    isMobile: isMobile,
+    expandedDay: expandedDay.value,
+    userAgent: navigator.userAgent
+  });
 
   // Set default expanded day
   const { getStableDate } = useStableDate();
@@ -235,10 +231,10 @@ function onAccordionLeave(el: Element) {
     <div class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg border-2 border-yellow-500">
       <div class="text-sm font-mono">
         <div><strong>DEBUG INFO:</strong></div>
-        <div>Window Width: {{ typeof window !== 'undefined' ? window.innerWidth : 'N/A' }}px</div>
+        <div>Capacitor Detected: {{ typeof window !== 'undefined' && 'Capacitor' in window }}</div>
         <div>isMobile: {{ isMobile }}</div>
         <div>expandedDay: {{ expandedDay }}</div>
-        <div>Layout Shown: {{ isMobile ? 'MOBILE (Accordion)' : 'DESKTOP (Grid)' }}</div>
+        <div>Layout: {{ isMobile ? '📱 MOBILE (Accordion)' : '🖥️ DESKTOP (Grid)' }}</div>
       </div>
     </div>
 
