@@ -81,6 +81,7 @@ function handleDelete() {
   <div
     v-if="isOpen && isMobile"
     class="fixed inset-0 z-[100] bg-default flex flex-col overflow-hidden"
+    style="width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh;"
   >
     <!-- Header -->
     <div class="flex-shrink-0 flex items-center justify-between p-4 border-b border-default bg-default">
@@ -113,7 +114,7 @@ function handleDelete() {
         <UInput
           v-model="name"
           placeholder="e.g., Grilled Chicken Salad"
-          class="w-full"
+          class="w-full max-w-full"
           size="lg"
           @keydown.enter="handleSave"
         />
@@ -124,7 +125,7 @@ function handleDelete() {
         <UTextarea
           v-model="description"
           placeholder="Notes about the meal..."
-          class="w-full text-base"
+          class="w-full max-w-full text-base resize-none"
           :rows="3"
         />
       </div>
@@ -138,7 +139,7 @@ function handleDelete() {
           type="number"
           :min="0"
           :max="7"
-          class="w-full"
+          class="w-full max-w-full"
           size="lg"
         />
         <p class="text-xs text-muted">
