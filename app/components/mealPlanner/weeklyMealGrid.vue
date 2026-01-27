@@ -31,7 +31,8 @@ const mealTypeLabels: Record<MealType, string> = {
 };
 
 // Mobile detection - use Capacitor detection for reliability on high DPI devices
-const isMobile = typeof window !== "undefined" && "Capacitor" in window;
+// Use ref to avoid SSR/hydration mismatch
+const isMobile = ref(false);
 const movingMeal = ref<MealWithPending | null>(null);
 
 // Accordion state
@@ -52,8 +53,8 @@ function isFormActive(dayOfWeek: number, mealType: MealType): boolean {
     && inlineFormState.value?.mealType === mealType;
 }
 
-onMounted(() => {
-  // Set default expanded day
+// Helper to determine default expanded day
+function getDefaultExpandedDay(): number {
   const { getStableDate } = useStableDate();
   const today = getStableDate();
   const weekEnd = new Date(props.weekStart);
@@ -61,35 +62,31 @@ onMounted(() => {
 
   if (today >= props.weekStart && today <= weekEnd) {
     // Current week - expand today
-    expandedDay.value = (today.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
+    return (today.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
   }
-  else {
-    // Other weeks - expand Monday
-    expandedDay.value = 0;
-  }
+  // Other weeks - expand Monday
+  return 0;
+}
+
+onMounted(() => {
+  // Set mobile detection after client-side hydration
+  isMobile.value = typeof window !== "undefined" && "Capacitor" in window;
+
+  // Set default expanded day
+  expandedDay.value = getDefaultExpandedDay();
 });
 
 // Watch for week changes
 watch(() => props.weekStart, () => {
   // Reset expanded day when week changes
-  const { getStableDate } = useStableDate();
-  const today = getStableDate();
-  const weekEnd = new Date(props.weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-
-  if (today >= props.weekStart && today <= weekEnd) {
-    expandedDay.value = (today.getDay() + 6) % 7;
-  }
-  else {
-    expandedDay.value = 0;
-  }
+  expandedDay.value = getDefaultExpandedDay();
 
   // Close any open forms when week changes
   closeInlineForm();
 });
 
 const mealGrid = computed(() => {
-  const grid: Record<number, Record<MealType, Meal[]>> = {};
+  const grid: Record<number, Record<MealType, MealWithPending[]>> = {};
 
   for (let day = 0; day < 7; day++) {
     grid[day] = {

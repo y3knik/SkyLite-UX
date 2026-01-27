@@ -10,6 +10,8 @@ import { getPendingMeals, removePendingMeal } from "~/utils/offlineDb";
 const pendingMeals = ref<PendingMeal[]>([]);
 const { triggerSync, updatePendingCount } = useOfflineSync();
 const { showSuccess, showError } = useAlertToast();
+const isSyncing = ref(false);
+const isClearing = ref(false);
 
 onMounted(async () => {
   await loadPendingMeals();
@@ -19,14 +21,27 @@ async function loadPendingMeals() {
   pendingMeals.value = await getPendingMeals();
 }
 
-async function retrySync() {
+// Shared helper for sync operations
+async function performSync(successTitle: string, successMessage: string) {
   try {
     await triggerSync();
     await loadPendingMeals();
-    showSuccess("Sync Triggered", "Attempting to sync pending meals");
+    showSuccess(successTitle, successMessage);
   }
   catch {
-    showError("Sync Failed", "Failed to trigger sync");
+    showError("Sync Failed", "Failed to sync meals");
+  }
+}
+
+async function retrySync() {
+  if (isSyncing.value)
+    return;
+  isSyncing.value = true;
+  try {
+    await performSync("Sync Triggered", "Attempting to sync pending meals");
+  }
+  finally {
+    isSyncing.value = false;
   }
 }
 
@@ -43,17 +58,27 @@ async function deleteFromQueue(id: string) {
 }
 
 async function syncAll() {
+  if (isSyncing.value)
+    return;
+  isSyncing.value = true;
   try {
-    await triggerSync();
-    await loadPendingMeals();
-    showSuccess("Sync Started", "Syncing all pending meals");
+    await performSync("Sync Started", "Syncing all pending meals");
   }
-  catch {
-    showError("Sync Failed", "Failed to sync meals");
+  finally {
+    isSyncing.value = false;
   }
 }
 
 async function clearAll() {
+  // Confirmation for destructive action
+  // eslint-disable-next-line no-alert
+  const confirmed = confirm("Are you sure you want to clear all pending meals? This cannot be undone.");
+  if (!confirmed)
+    return;
+
+  if (isClearing.value)
+    return;
+  isClearing.value = true;
   try {
     for (const item of pendingMeals.value) {
       await removePendingMeal(item.id);
@@ -64,6 +89,9 @@ async function clearAll() {
   }
   catch {
     showError("Clear Failed", "Failed to clear queue");
+  }
+  finally {
+    isClearing.value = false;
   }
 }
 
@@ -163,13 +191,15 @@ const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
     </div>
 
     <div v-if="pendingMeals.length > 0" class="mt-6 flex gap-3">
-      <UButton @click="syncAll">
+      <UButton :loading="isSyncing" :disabled="isSyncing" @click="syncAll">
         <UIcon name="i-lucide-cloud-upload" class="h-4 w-4" />
         Sync All
       </UButton>
       <UButton
         variant="ghost"
         color="error"
+        :loading="isClearing"
+        :disabled="isClearing"
         @click="clearAll"
       >
         <UIcon name="i-lucide-trash-2" class="h-4 w-4" />
