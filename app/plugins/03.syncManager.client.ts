@@ -4,7 +4,7 @@ import type { CalendarEvent } from "~/types/calendar";
 import type { ShoppingListWithItemsAndCount, TodoWithUser } from "~/types/database";
 import type { EventSourceStatus, IntegrationSyncData, SyncConnectionStatus, SyncEvent } from "~/types/sync";
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin((): any => {
   // @ts-ignore - Capacitor is added via script tag in Capacitor builds
   const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 

@@ -115,7 +115,7 @@ const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
                 {{ item.mealData.name }}
               </h3>
               <UBadge
-                :color="item.status === 'error' ? 'red' : item.status === 'syncing' ? 'blue' : 'yellow'"
+                :color="item.status === 'error' ? 'error' : item.status === 'syncing' ? 'primary' : 'warning'"
                 size="xs"
               >
                 {{ item.status }}
@@ -151,7 +151,7 @@ const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
             <UButton
               size="xs"
               variant="ghost"
-              color="red"
+              color="error"
               icon="i-lucide-trash-2"
               @click="deleteFromQueue(item.id)"
             >
@@ -169,7 +169,7 @@ const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
       </UButton>
       <UButton
         variant="ghost"
-        color="red"
+        color="error"
         @click="clearAll"
       >
         <UIcon name="i-lucide-trash-2" class="h-4 w-4" />
