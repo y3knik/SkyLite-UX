@@ -7,6 +7,7 @@ const serverUrl = ref("");
 const networkType = ref<string | null>(null);
 const saveSuccess = ref(false);
 const saveError = ref<string | null>(null);
+const isTesting = ref(false);
 
 // @ts-ignore - Capacitor is added via script tag in Capacitor builds
 const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
@@ -49,6 +50,7 @@ onUnmounted(async () => {
 async function saveSettings() {
   saveSuccess.value = false;
   saveError.value = null;
+  isTesting.value = true;
 
   try {
     // Validate URL is not empty
@@ -70,6 +72,40 @@ async function saveSettings() {
     }
     catch {
       throw new Error("Invalid URL format. Example: http://192.168.1.100:3000");
+    }
+
+    // Test connection to the server
+    console.log("[Mobile Settings] Testing connection to server...");
+
+    try {
+      const testResponse = await fetch(`${trimmedUrl}/api/app-settings`, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+        signal: AbortSignal.timeout(5000), // 5 second timeout
+      });
+
+      if (!testResponse.ok) {
+        throw new Error(`Server responded with status ${testResponse.status}`);
+      }
+
+      console.log("[Mobile Settings] Server connection test successful");
+    }
+    catch (error) {
+      console.error("[Mobile Settings] Connection test failed:", error);
+      if (error instanceof Error) {
+        if (error.name === "AbortError" || error.name === "TimeoutError") {
+          throw new Error("Connection timeout - cannot reach server. Check the IP address and ensure the server is running.");
+        }
+        else if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+          throw new Error("Cannot connect to server. Check the IP address and ensure you're on the same network.");
+        }
+        else if (error.message.includes("status")) {
+          throw new Error(`Server error: ${error.message}`);
+        }
+      }
+      throw new Error("Failed to connect to server. Please verify the URL and try again.");
     }
 
     // Dynamically import Capacitor
@@ -104,6 +140,9 @@ async function saveSettings() {
   catch (error) {
     console.error("[Mobile Settings] Save failed:", error);
     saveError.value = error instanceof Error ? error.message : "Failed to save settings";
+  }
+  finally {
+    isTesting.value = false;
   }
 }
 
@@ -288,10 +327,13 @@ function formatLastSync(date: Date) {
           </div>
 
           <button
-            class="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 active:bg-primary/80 font-medium"
+            class="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 active:bg-primary/80 font-medium flex items-center justify-center gap-2"
+            :class="{ 'opacity-50 cursor-not-allowed': isTesting }"
+            :disabled="isTesting"
             @click="saveSettings"
           >
-            Save Settings
+            <UIcon v-if="isTesting" name="i-lucide-loader" class="h-4 w-4 animate-spin" />
+            {{ isTesting ? 'Testing Connection...' : 'Save Settings' }}
           </button>
 
           <!-- Success message -->
