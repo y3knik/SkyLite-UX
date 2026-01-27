@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 import { useOfflineSync } from "~/composables/useOfflineSync";
 
@@ -14,6 +14,9 @@ const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 // Get sync status from composable
 const { isOnline, isSyncing, pendingCount, lastSyncTime, syncError, triggerSync } = useOfflineSync();
 
+// Store network listener for cleanup
+let networkListener: any = null;
+
 onMounted(async () => {
   if (isCapacitor) {
     const { Preferences } = await import("@capacitor/preferences");
@@ -27,10 +30,17 @@ onMounted(async () => {
     const status = await Network.getStatus();
     networkType.value = status.connectionType || null;
 
-    // Listen for network changes
-    Network.addListener("networkStatusChange", (status) => {
+    // Listen for network changes and store handle
+    networkListener = await Network.addListener("networkStatusChange", (status) => {
       networkType.value = status.connectionType || null;
     });
+  }
+});
+
+// Cleanup network listener on unmount
+onUnmounted(async () => {
+  if (networkListener) {
+    await networkListener.remove();
   }
 });
 

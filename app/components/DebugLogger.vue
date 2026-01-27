@@ -5,11 +5,16 @@ const logs = ref<Array<{ time: string; type: string; message: string }>>([]);
 const isVisible = ref(true);
 const isExpanded = ref(false);
 
+// Store original console methods for cleanup
+let originalLog: typeof console.log;
+let originalError: typeof console.error;
+let originalWarn: typeof console.warn;
+
 onMounted(() => {
   // Intercept console methods
-  const originalLog = console.log;
-  const originalError = console.error;
-  const originalWarn = console.warn;
+  originalLog = console.log;
+  originalError = console.error;
+  originalWarn = console.warn;
 
   const addLog = (type: string, args: any[]) => {
     const message = args.map(arg =>
@@ -41,6 +46,16 @@ onMounted(() => {
   };
 
   console.log("[DebugLogger] Initialized");
+});
+
+onUnmounted(() => {
+  // Restore original console methods to prevent stacking interceptors
+  if (originalLog)
+    console.log = originalLog;
+  if (originalError)
+    console.error = originalError;
+  if (originalWarn)
+    console.warn = originalWarn;
 });
 
 function copyLogs() {

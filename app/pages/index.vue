@@ -65,20 +65,36 @@ async function performNavigation() {
   }
 }
 
-// Set a timeout fallback - if navigation hasn't happened after 2 seconds, force it
-const navigationTimeout = setTimeout(() => {
-  if (!hasNavigated) {
-    console.warn("[Index] Navigation timeout - forcing navigation to mealplanner");
-    hasNavigated = true;
-    window.location.href = isCapacitor ? "/mealplanner" : "/home";
-  }
-}, 2000);
+// Store timeout for cleanup
+let navigationTimeout: NodeJS.Timeout | null = null;
 
 // Perform navigation on mount
 onMounted(async () => {
   console.log("[Index] Component mounted");
+
+  // Set a timeout fallback - if navigation hasn't happened after 2 seconds, force it
+  navigationTimeout = setTimeout(() => {
+    if (!hasNavigated) {
+      console.warn("[Index] Navigation timeout - forcing navigation to mealplanner");
+      hasNavigated = true;
+      window.location.href = isCapacitor ? "/mealplanner" : "/home";
+    }
+  }, 2000);
+
   await performNavigation();
-  clearTimeout(navigationTimeout);
+
+  if (navigationTimeout) {
+    clearTimeout(navigationTimeout);
+    navigationTimeout = null;
+  }
+});
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (navigationTimeout) {
+    clearTimeout(navigationTimeout);
+    navigationTimeout = null;
+  }
 });
 </script>
 

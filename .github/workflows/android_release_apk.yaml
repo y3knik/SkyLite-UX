@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload release APK artifact (if exists)
         uses: actions/upload-artifact@v4
-        if: hashFiles('skylite-${{ steps.version.outputs.version }}-release-unsigned.apk') != ''
+        if: ${{ hashFiles(format('skylite-{0}-release-unsigned.apk', steps.version.outputs.version)) != '' }}
         with:
           name: skylite-${{ steps.version.outputs.version }}-release-apk
           path: skylite-${{ steps.version.outputs.version }}-release-unsigned.apk

@@ -1,4 +1,3 @@
-import { Network } from "@capacitor/network";
 import { onMounted, onUnmounted, readonly, ref } from "vue";
 
 import {
@@ -15,6 +14,7 @@ export function useOfflineSync() {
   const syncError = ref<string | null>(null);
 
   let syncInterval: NodeJS.Timeout | null = null;
+  let networkListener: any = null; // Store Capacitor Network listener subscription
   // @ts-ignore - Capacitor is added via script tag in Capacitor builds
   const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 
@@ -94,12 +94,14 @@ export function useOfflineSync() {
   // Initialize on client
   onMounted(async () => {
     if (isCapacitor) {
-      // Use Capacitor Network API
+      // Dynamically import Capacitor Network API
+      const { Network } = await import("@capacitor/network");
+
       const status = await Network.getStatus();
       isOnline.value = status.connected;
 
-      // Add event listener for network changes
-      Network.addListener("networkStatusChange", onNetworkChange);
+      // Add event listener for network changes and store subscription
+      networkListener = await Network.addListener("networkStatusChange", onNetworkChange);
     }
     else {
       // Use browser API
@@ -123,11 +125,11 @@ export function useOfflineSync() {
 
   // Cleanup on unmount
   onUnmounted(async () => {
-    if (isCapacitor) {
-      // Remove Capacitor Network listeners
-      await Network.removeAllListeners();
+    if (isCapacitor && networkListener) {
+      // Remove only this component's Network listener
+      await networkListener.remove();
     }
-    else {
+    else if (!isCapacitor) {
       // Remove browser event listeners
       window.removeEventListener("online", onOnlineHandler);
       window.removeEventListener("offline", onOfflineHandler);
