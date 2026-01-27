@@ -312,11 +312,26 @@ async function fetchTodaysTasks() {
     // Fetch local todos and Google Tasks in parallel
     const [todosResult, googleTasksResult] = await Promise.allSettled([
       $fetch<any[]>("/api/todos"),
-      $fetch<{ tasks: any[] }>("/api/integrations/google_tasks/all-tasks"),
+      $fetch<{ tasks: any[]; error?: string }>("/api/integrations/google_tasks/all-tasks"),
     ]);
 
     const todos = todosResult.status === "fulfilled" ? todosResult.value : [];
-    const googleTasks = googleTasksResult.status === "fulfilled" ? (googleTasksResult.value.tasks || []) : [];
+
+    let googleTasks: any[] = [];
+    if (googleTasksResult.status === "fulfilled") {
+      googleTasks = googleTasksResult.value.tasks || [];
+      if (googleTasksResult.value.error) {
+        consola.warn("[Home] Google Tasks returned with error:", googleTasksResult.value.error);
+      }
+      consola.info(`[Home] Fetched ${googleTasks.length} Google Tasks`);
+    }
+    else {
+      consola.error("[Home] Failed to fetch Google Tasks:", googleTasksResult.reason);
+      // Check if it's an auth error
+      if (googleTasksResult.reason?.statusCode === 401 || googleTasksResult.reason?.statusCode === 403) {
+        consola.error("[Home] Google Tasks authorization expired. User needs to re-authorize.");
+      }
+    }
 
     // Merge local todos and Google Tasks
     const allTodos = [
