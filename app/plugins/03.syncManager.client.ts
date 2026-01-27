@@ -12,10 +12,17 @@ export default defineNuxtPlugin((): any => {
     console.log("[Sync Manager] Capacitor detected, skipping sync manager initialization");
     return {
       provide: {
-        // Return stub functions so code that depends on this plugin doesn't break
-        syncData: {},
-        connectionStatus: "disabled",
-        lastHeartbeat: null,
+        // Return stub functions matching the real API so code doesn't break
+        getSyncData: () => undefined,
+        getAllSyncData: () => ({}),
+        getSyncConnectionStatus: () => "disabled" as SyncConnectionStatus,
+        getLastHeartbeat: () => null,
+        isSyncConnected: () => false,
+        getCachedIntegrationData: () => undefined,
+        checkIntegrationCache: () => false,
+        purgeIntegrationCache: () => {},
+        triggerImmediateSync: async () => Promise.resolve(),
+        reconnectSync: () => {},
       },
     };
   }

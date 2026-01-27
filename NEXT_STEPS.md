@@ -48,7 +48,8 @@ You should see: `openjdk version "17.0.x"`
 ## Step 2: Build the APK
 
 ```bash
-cd "C:\Users\nikhi\OneDrive\Documents\Skylight"
+# Navigate to your project directory
+cd /path/to/your/SkyLite-UX
 npm run android:build
 ```
 

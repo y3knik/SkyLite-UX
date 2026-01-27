@@ -21,7 +21,7 @@ Two GitHub Actions workflows have been configured to automatically build Android
 
 1. Checks out code
 2. Installs Node.js and npm dependencies
-3. Installs JDK 17 and Android SDK
+3. Installs JDK 21 and Android SDK
 4. Builds Nuxt static site (`npm run generate`)
 5. Syncs to Capacitor (`npx cap sync android`)
 6. Builds debug APK (`./gradlew assembleDebug`)
