@@ -23,7 +23,9 @@ onMounted(async () => {
     const { Network } = await import("@capacitor/network");
 
     // Load server URL
+    console.log("[Mobile Settings] Loading server URL from Preferences...");
     const { value } = await Preferences.get({ key: "serverUrl" });
+    console.log("[Mobile Settings] Loaded from Preferences:", value || "(empty)");
     serverUrl.value = value || "";
 
     // Get network type
@@ -51,6 +53,8 @@ async function saveSettings() {
   try {
     // Validate URL is not empty
     const trimmedUrl = serverUrl.value?.trim();
+    console.log("[Mobile Settings] Attempting to save URL:", trimmedUrl);
+
     if (!trimmedUrl) {
       throw new Error("Server URL cannot be empty");
     }
@@ -72,20 +76,33 @@ async function saveSettings() {
     const { Preferences } = await import("@capacitor/preferences");
 
     // Save to preferences
+    console.log("[Mobile Settings] Saving to Preferences...");
     await Preferences.set({ key: "serverUrl", value: trimmedUrl });
+    console.log("[Mobile Settings] Saved to Preferences successfully");
+
+    // Verify it was saved by reading it back
+    const { value: savedValue } = await Preferences.get({ key: "serverUrl" });
+    console.log("[Mobile Settings] Verification read back:", savedValue);
+
+    if (savedValue !== trimmedUrl) {
+      throw new Error("Failed to verify saved URL - preferences may not be persisting");
+    }
 
     // Update global server URL for immediate effect (no restart needed)
     // @ts-ignore
     if (typeof window !== "undefined") {
       window.__CAPACITOR_SERVER_URL__ = trimmedUrl;
+      console.log("[Mobile Settings] Updated window.__CAPACITOR_SERVER_URL__");
     }
 
     // Update the local value to the trimmed version
     serverUrl.value = trimmedUrl;
 
     saveSuccess.value = true;
+    console.log("[Mobile Settings] Save completed successfully");
   }
   catch (error) {
+    console.error("[Mobile Settings] Save failed:", error);
     saveError.value = error instanceof Error ? error.message : "Failed to save settings";
   }
 }
