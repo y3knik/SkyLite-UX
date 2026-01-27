@@ -3,12 +3,14 @@
 ## ✅ Completed Steps
 
 ### Phase 1: Capacitor Installation
+
 - ✅ Installed `@capacitor/core` and `@capacitor/cli`
 - ✅ Initialized Capacitor with app ID: `com.skylite.app`
 - ✅ Installed `@capacitor/android`, `@capacitor/network`, `@capacitor/preferences`
 - ✅ Added Android platform (android/ directory created)
 
 ### Phase 2: HTTP Configuration
+
 - ✅ Created `capacitor.config.ts` with HTTP support settings:
   - androidScheme: 'http' (allows HTTP without SSL)
   - cleartext: true (bypasses cleartext security)
@@ -21,6 +23,7 @@
   - Added usesCleartextTraffic="true"
 
 ### Phase 3: Offline Sync Adaptation
+
 - ✅ Updated `app/composables/useOfflineSync.ts`:
   - Added Capacitor Network API support
   - Falls back to browser API when not in Capacitor
@@ -33,6 +36,7 @@
   - Default server URL: http://192.168.1.100:3000 (user configurable)
 
 ### Phase 4: UI and Configuration
+
 - ✅ Created `app/pages/mobile-settings.vue`:
   - Settings page for configuring server URL
   - Shows network status (online/offline)
@@ -47,6 +51,7 @@
   - `npm run android:run` - Run on connected device
 
 ### Phase 5: Nuxt Configuration
+
 - ✅ Updated `nuxt.config.ts`:
   - Set `ssr: false` for client-only mode (required for Capacitor)
   - Configured for static generation
@@ -60,11 +65,14 @@
 To build the Android APK, you need:
 
 #### 1. Install Java Development Kit (JDK)
+
 **Download JDK 17 or 11:**
+
 - JDK 17: https://adoptium.net/temurin/releases/
 - Or JDK 11: https://adoptium.net/temurin/archive/
 
 **Installation:**
+
 1. Download Windows x64 MSI installer
 2. Run installer (default options are fine)
 3. Set JAVA_HOME environment variable:
@@ -77,6 +85,7 @@ To build the Android APK, you need:
    ```
 
 **Verify installation:**
+
 ```bash
 java -version
 ```
@@ -84,6 +93,7 @@ java -version
 #### 2. Install Android SDK (Optional but Recommended)
 
 **Option A: Install Android Studio (Full IDE)**
+
 - Download: https://developer.android.com/studio
 - Install Android Studio
 - Open Android SDK Manager (Tools → SDK Manager)
@@ -97,6 +107,7 @@ java -version
   ```
 
 **Option B: Command-line tools only**
+
 - Download: https://developer.android.com/studio#command-tools
 - Extract to a folder (e.g., C:\Android\cmdline-tools)
 - Set ANDROID_HOME and update PATH
@@ -104,6 +115,7 @@ java -version
 #### 3. Configure Android SDK Location
 
 Create `android/local.properties` file:
+
 ```properties
 sdk.dir=C:\\Users\\nikhi\\AppData\\Local\\Android\\Sdk
 ```
@@ -115,6 +127,7 @@ sdk.dir=C:\\Users\\nikhi\\AppData\\Local\\Android\\Sdk
 Once Java and Android SDK are installed:
 
 #### Debug APK (for testing/sideloading):
+
 ```bash
 cd "C:\Users\nikhi\OneDrive\Documents\Skylight"
 npm run android:build
@@ -125,6 +138,7 @@ npm run android:build
 #### Release APK (for production):
 
 1. Generate keystore (one-time):
+
 ```bash
 keytool -genkey -v -keystore skylite-release.keystore -alias skylite -keyalg RSA -keysize 2048 -validity 10000
 ```
@@ -132,6 +146,7 @@ keytool -genkey -v -keystore skylite-release.keystore -alias skylite -keyalg RSA
 2. Update `android/app/build.gradle` to add signing config (see plan for details)
 
 3. Build release:
+
 ```bash
 npm run android:release
 ```
@@ -166,12 +181,14 @@ npm run android:release
 ## 🔍 Testing the App
 
 ### Test Offline Mode:
+
 1. Turn off WiFi on phone
 2. Navigate to Meal Planner
 3. Create meals - verify they show yellow "pending" indicators
 4. Check Offline Queue page - verify meals are queued
 
 ### Test Sync:
+
 1. Connect to home WiFi
 2. Open SkyLite app
 3. Wait 30 seconds or tap "Sync Now" in Mobile Settings
@@ -179,6 +196,7 @@ npm run android:release
 5. Check web version on computer - verify meals appear
 
 ### Test HTTP Communication:
+
 1. Connect Android phone to computer via USB
 2. Enable USB debugging on phone
 3. Run: `adb logcat | grep -E "Capacitor|SkyLite"`
@@ -216,29 +234,35 @@ Skylight/
 ### Build Issues:
 
 **Error: JAVA_HOME is not set**
+
 - Install JDK and set JAVA_HOME environment variable (see above)
 
 **Error: SDK location not found**
+
 - Create `android/local.properties` with sdk.dir path
 
 **Error: Gradle build failed**
+
 - Check `android/app/build/outputs/logs/` for details
 - Try: `cd android && ./gradlew clean`
 
 ### Runtime Issues:
 
 **Error: CLEARTEXT_NOT_PERMITTED**
+
 - Verify `network_security_config.xml` exists
 - Check AndroidManifest.xml has networkSecurityConfig attribute
 - Rebuild APK after fixing
 
 **Error: Cannot connect to server**
+
 - Verify phone and server on same WiFi
 - Check server IP is correct in Mobile Settings
 - Verify server is running on port 3000
 - Test server accessibility: Open browser on phone → http://192.168.1.X:3000
 
 **Sync not working**
+
 - Check Mobile Settings → Network Status shows "Online"
 - Check Offline Queue page for error messages
 - Check server logs for incoming requests
@@ -246,11 +270,13 @@ Skylight/
 ### Debugging Tools:
 
 **View Android logs:**
+
 ```bash
 adb logcat | grep -E "Capacitor|Chromium"
 ```
 
 **Inspect WebView (Chrome DevTools):**
+
 1. Connect phone via USB
 2. Open Chrome on computer
 3. Navigate to: chrome://inspect

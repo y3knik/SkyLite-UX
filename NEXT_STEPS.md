@@ -7,6 +7,7 @@ All code is written and configured. You just need to install Java to build the A
 ## Step 1: Install Java (Required)
 
 ### Download JDK 17:
+
 https://adoptium.net/temurin/releases/
 
 1. Click "Windows x64" MSI installer
@@ -16,6 +17,7 @@ https://adoptium.net/temurin/releases/
 ### Set Environment Variables:
 
 **Option A: GUI (Easier)**
+
 1. Open Start Menu → type "environment"
 2. Click "Edit the system environment variables"
 3. Click "Environment Variables" button
@@ -27,13 +29,16 @@ https://adoptium.net/temurin/releases/
 7. **Close and reopen Git Bash**
 
 **Option B: Command Line**
+
 ```bash
 setx JAVA_HOME "C:\Program Files\Eclipse Adoptium\jdk-17.0.13.11-hotspot"
 setx PATH "%PATH%;%JAVA_HOME%\bin"
 ```
 
 ### Verify Installation:
+
 Close and reopen Git Bash, then run:
+
 ```bash
 java -version
 ```
@@ -50,6 +55,7 @@ npm run android:build
 This takes 2-5 minutes on first build (downloads dependencies).
 
 **Output APK:**
+
 ```
 android/app/build/outputs/apk/debug/app-debug.apk
 ```
@@ -73,9 +79,11 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ## Step 4: Configure Server
 
 1. **Find Server IP:**
+
    ```bash
    ipconfig
    ```
+
    Look for "IPv4 Address" (e.g., 192.168.1.100)
 
 2. **In SkyLite App:**
@@ -108,6 +116,7 @@ Your wife can now plan meals offline at work and sync when home.
 ## If Java Installation Fails
 
 Alternative: Use Android Studio (includes Java):
+
 1. Download Android Studio: https://developer.android.com/studio
 2. Install (accept all defaults)
 3. Skip the build and use: `npm run android:run` (opens in emulator)
@@ -115,6 +124,7 @@ Alternative: Use Android Studio (includes Java):
 ## Rebuilding After Code Changes
 
 Whenever you update the code:
+
 ```bash
 npm run build:mobile  # Rebuild
 npm run android:build # Create new APK
@@ -124,12 +134,12 @@ Then reinstall APK on phone.
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Build mobile web app | `npm run build:mobile` |
-| Build debug APK | `npm run android:build` |
-| Build release APK | `npm run android:release` |
-| Run on connected device | `npm run android:run` |
+| Task                    | Command                   |
+| ----------------------- | ------------------------- |
+| Build mobile web app    | `npm run build:mobile`    |
+| Build debug APK         | `npm run android:build`   |
+| Build release APK       | `npm run android:release` |
+| Run on connected device | `npm run android:run`     |
 
 APK Location: `android/app/build/outputs/apk/debug/app-debug.apk`
 

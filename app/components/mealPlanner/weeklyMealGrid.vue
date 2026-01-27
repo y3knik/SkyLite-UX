@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { format } from "date-fns";
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import type { Meal, MealType } from "~/types/database";
-import MealFormInline from "./mealFormInline.vue";
+
 import { useStableDate } from "~/composables/useStableDate";
+
+import MealFormInline from "./mealFormInline.vue";
 
 type MealWithPending = Meal & { _isPending?: boolean };
 
@@ -30,7 +32,7 @@ const mealTypeLabels: Record<MealType, string> = {
 
 // Mobile detection - use Capacitor detection for reliability on high DPI devices
 // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-const isMobile = typeof window !== 'undefined' && 'Capacitor' in window;
+const isMobile = typeof window !== "undefined" && "Capacitor" in window;
 const movingMeal = ref<MealWithPending | null>(null);
 
 // Accordion state
@@ -46,13 +48,12 @@ const inlineFormState = ref<{
 
 // Helper to check if form is active for specific slot
 function isFormActive(dayOfWeek: number, mealType: MealType): boolean {
-  return inlineFormState.value?.isOpen === true &&
-         inlineFormState.value?.dayOfWeek === dayOfWeek &&
-         inlineFormState.value?.mealType === mealType;
+  return inlineFormState.value?.isOpen === true
+    && inlineFormState.value?.dayOfWeek === dayOfWeek
+    && inlineFormState.value?.mealType === mealType;
 }
 
 onMounted(() => {
-
   // Set default expanded day
   const { getStableDate } = useStableDate();
   const today = getStableDate();
@@ -62,7 +63,8 @@ onMounted(() => {
   if (today >= props.weekStart && today <= weekEnd) {
     // Current week - expand today
     expandedDay.value = (today.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
-  } else {
+  }
+  else {
     // Other weeks - expand Monday
     expandedDay.value = 0;
   }
@@ -78,7 +80,8 @@ watch(() => props.weekStart, () => {
 
   if (today >= props.weekStart && today <= weekEnd) {
     expandedDay.value = (today.getDay() + 6) % 7;
-  } else {
+  }
+  else {
     expandedDay.value = 0;
   }
 
@@ -121,12 +124,13 @@ function cancelMoveMode() {
 }
 
 function moveMealToSlot(dayOfWeek: number, mealType: MealType) {
-  if (!movingMeal.value) return;
+  if (!movingMeal.value)
+    return;
 
-  emit('moveMeal', {
+  emit("moveMeal", {
     mealId: movingMeal.value.id,
     newDayOfWeek: dayOfWeek,
-    newMealType: mealType
+    newMealType: mealType,
   });
 
   cancelMoveMode();
@@ -136,7 +140,8 @@ function moveMealToSlot(dayOfWeek: number, mealType: MealType) {
 function toggleDay(dayOfWeek: number) {
   if (expandedDay.value === dayOfWeek) {
     expandedDay.value = null;
-  } else {
+  }
+  else {
     expandedDay.value = dayOfWeek;
   }
 }
@@ -149,13 +154,13 @@ function openInlineForm(dayOfWeek: number, mealType: MealType, meal?: any) {
   }
 
   // Close previous form if different slot
-  if (inlineFormState.value?.dayOfWeek !== dayOfWeek ||
-      inlineFormState.value?.mealType !== mealType) {
+  if (inlineFormState.value?.dayOfWeek !== dayOfWeek
+    || inlineFormState.value?.mealType !== mealType) {
     inlineFormState.value = {
       isOpen: true,
       dayOfWeek,
       mealType,
-      editingMeal: meal || null
+      editingMeal: meal || null,
     };
   }
 }
@@ -167,19 +172,21 @@ function closeInlineForm() {
 
 // Handle form save
 function handleInlineFormSave(data: { name: string; description: string; daysInAdvance: number }) {
-  if (!inlineFormState.value) return;
+  if (!inlineFormState.value)
+    return;
 
   const { dayOfWeek, mealType, editingMeal } = inlineFormState.value;
 
   if (editingMeal) {
     // Emit edit event to parent
-    emit('editMeal', {
+    emit("editMeal", {
       ...editingMeal,
-      ...data
+      ...data,
     });
-  } else {
+  }
+  else {
     // Emit add event to parent with data
-    emit('addMeal', dayOfWeek, mealType, data);
+    emit("addMeal", dayOfWeek, mealType, data);
   }
 
   closeInlineForm();
@@ -187,23 +194,24 @@ function handleInlineFormSave(data: { name: string; description: string; daysInA
 
 // Handle form delete
 function handleInlineFormDelete() {
-  if (!inlineFormState.value?.editingMeal) return;
+  if (!inlineFormState.value?.editingMeal)
+    return;
 
-  emit('deleteMeal', inlineFormState.value.editingMeal);
+  emit("deleteMeal", inlineFormState.value.editingMeal);
   closeInlineForm();
 }
 
 // Accordion animation hooks
 function onAccordionEnter(el: Element) {
   const element = el as HTMLElement;
-  element.style.height = '0';
-  element.style.opacity = '0';
+  element.style.height = "0";
+  element.style.opacity = "0";
 }
 
 function onAccordionAfterEnter(el: Element) {
   const element = el as HTMLElement;
-  element.style.height = '';
-  element.style.opacity = '';
+  element.style.height = "";
+  element.style.opacity = "";
 }
 
 function onAccordionLeave(el: Element) {
@@ -214,8 +222,8 @@ function onAccordionLeave(el: Element) {
   // Force reflow
   getComputedStyle(element).height;
 
-  element.style.height = '0';
-  element.style.opacity = '0';
+  element.style.height = "0";
+  element.style.opacity = "0";
 }
 </script>
 
@@ -229,16 +237,20 @@ function onAccordionLeave(el: Element) {
       <!-- Header -->
       <div class="bg-default rounded-lg p-4 mb-4 sticky top-0 z-10 shadow-lg">
         <div class="flex items-center justify-between mb-2">
-          <h3 class="font-semibold text-lg">Move "{{ movingMeal.name }}"</h3>
+          <h3 class="font-semibold text-lg">
+            Move "{{ movingMeal.name }}"
+          </h3>
           <UButton
             icon="i-lucide-x"
             variant="ghost"
             size="lg"
-            @click="cancelMoveMode"
             aria-label="Cancel move"
+            @click="cancelMoveMode"
           />
         </div>
-        <p class="text-sm text-muted">Tap a destination slot below</p>
+        <p class="text-sm text-muted">
+          Tap a destination slot below
+        </p>
       </div>
 
       <!-- Destination picker (scrollable list of days) -->
@@ -258,14 +270,14 @@ function onAccordionLeave(el: Element) {
             <button
               v-for="mealType in mealTypes"
               :key="mealType"
-              @click="moveMealToSlot(dayOfWeek - 1, mealType)"
               :disabled="dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType"
               class="w-full p-3 border-2 rounded-lg text-left active:bg-primary/5 transition-colors"
               :class="[
                 dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType
                   ? 'border-default bg-muted/10 text-muted cursor-not-allowed'
-                  : 'border-primary/30 hover:bg-primary/5 hover:border-primary'
+                  : 'border-primary/30 hover:bg-primary/5 hover:border-primary',
               ]"
+              @click="moveMealToSlot(dayOfWeek - 1, mealType)"
             >
               <span class="text-sm font-medium">{{ mealTypeLabels[mealType] }}</span>
               <span
@@ -289,13 +301,17 @@ function onAccordionLeave(el: Element) {
       >
         <!-- Clickable day header -->
         <button
-          @click="toggleDay(dayOfWeek - 1)"
           class="w-full p-3 bg-muted/5 flex items-center justify-between active:bg-muted/10 transition-colors"
           :aria-expanded="expandedDay === dayOfWeek - 1"
+          @click="toggleDay(dayOfWeek - 1)"
         >
           <div class="text-left">
-            <h3 class="font-semibold text-base">{{ dayNames[dayOfWeek - 1] }}</h3>
-            <p class="text-xs text-muted">{{ getDayDate(dayOfWeek - 1) }}</p>
+            <h3 class="font-semibold text-base">
+              {{ dayNames[dayOfWeek - 1] }}
+            </h3>
+            <p class="text-xs text-muted">
+              {{ getDayDate(dayOfWeek - 1) }}
+            </p>
           </div>
           <UIcon
             :name="expandedDay === dayOfWeek - 1 ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
@@ -327,7 +343,7 @@ function onAccordionLeave(el: Element) {
                 <!-- Existing meals -->
                 <div v-if="mealGrid[dayOfWeek - 1]?.[mealType]?.length" class="space-y-2 mb-2">
                   <div
-                    v-for="meal in mealGrid[dayOfWeek - 1][mealType]"
+                    v-for="meal in (mealGrid[dayOfWeek - 1]?.[mealType] || [])"
                     :key="meal.id"
                     class="meal-card p-3 rounded-lg border border-default bg-muted/5 active:bg-muted/10 transition-colors"
                     @click="openInlineForm(dayOfWeek - 1, mealType, meal)"
@@ -335,7 +351,9 @@ function onAccordionLeave(el: Element) {
                     <!-- Existing meal display -->
                     <div class="flex items-start justify-between gap-2">
                       <div class="flex-1 min-w-0">
-                        <div class="font-medium text-sm">{{ meal.name }}</div>
+                        <div class="font-medium text-sm">
+                          {{ meal.name }}
+                        </div>
                         <div v-if="meal.description" class="text-xs text-muted mt-1">
                           {{ meal.description }}
                         </div>
@@ -346,9 +364,9 @@ function onAccordionLeave(el: Element) {
                       <!-- Quick actions (move) -->
                       <div class="flex items-center gap-2 flex-shrink-0">
                         <button
-                          @click.stop="startMoveMode(meal)"
                           class="p-2 rounded hover:bg-muted/10 active:bg-muted/20"
                           aria-label="Move meal"
+                          @click.stop="startMoveMode(meal)"
                         >
                           <UIcon name="i-lucide-move" class="h-4 w-4" />
                         </button>
@@ -366,8 +384,8 @@ function onAccordionLeave(el: Element) {
                 <!-- Add meal button (hide when form is open) -->
                 <button
                   v-if="!isFormActive(dayOfWeek - 1, mealType)"
-                  @click="openInlineForm(dayOfWeek - 1, mealType)"
                   class="w-full p-2 border border-dashed border-default rounded-lg text-xs text-muted hover:bg-muted/5 active:bg-muted/10 transition-colors"
+                  @click="openInlineForm(dayOfWeek - 1, mealType)"
                 >
                   + Add meal
                 </button>
@@ -472,7 +490,9 @@ function onAccordionLeave(el: Element) {
 /* Accordion transitions */
 .accordion-enter-active,
 .accordion-leave-active {
-  transition: height 0.3s ease, opacity 0.3s ease;
+  transition:
+    height 0.3s ease,
+    opacity 0.3s ease;
   overflow: hidden;
 }
 

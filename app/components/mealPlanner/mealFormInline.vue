@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { MealType } from '~/types/database';
+import type { MealType } from "~/types/database";
 
-interface Props {
+type Props = {
   dayOfWeek: number;
   mealType: MealType;
   editingMeal?: any | null;
-}
+};
 
 const props = withDefaults(defineProps<Props>(), {
-  editingMeal: null
+  editingMeal: null,
 });
 
 const emit = defineEmits<{
@@ -18,37 +18,38 @@ const emit = defineEmits<{
 }>();
 
 // Form state
-const name = ref('');
-const description = ref('');
+const name = ref("");
+const description = ref("");
 const daysInAdvance = ref(0);
 const error = ref<string | null>(null);
 
 // Day names (Monday=0 to Sunday=6)
-const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const dayName = computed(() => dayNames[props.dayOfWeek]);
 
 // Meal type labels
 const mealTypeLabels: Record<MealType, string> = {
-  BREAKFAST: 'Breakfast',
-  LUNCH: 'Lunch',
-  DINNER: 'Dinner'
+  BREAKFAST: "Breakfast",
+  LUNCH: "Lunch",
+  DINNER: "Dinner",
 };
 const mealTypeLabel = computed(() => mealTypeLabels[props.mealType]);
 
 // Initialize form when editing
 watch(() => props.editingMeal, (meal) => {
   if (meal) {
-    name.value = meal.name || '';
-    description.value = meal.description || '';
+    name.value = meal.name || "";
+    description.value = meal.description || "";
     daysInAdvance.value = meal.daysInAdvance || 0;
-  } else {
+  }
+  else {
     resetForm();
   }
 }, { immediate: true });
 
 function resetForm() {
-  name.value = '';
-  description.value = '';
+  name.value = "";
+  description.value = "";
   daysInAdvance.value = 0;
   error.value = null;
 }
@@ -56,24 +57,24 @@ function resetForm() {
 function handleSave() {
   // Validation
   if (!name.value.trim()) {
-    error.value = 'Meal name is required';
+    error.value = "Meal name is required";
     return;
   }
 
   error.value = null;
 
-  emit('save', {
+  emit("save", {
     name: name.value.trim(),
     description: description.value.trim(),
-    daysInAdvance: daysInAdvance.value
+    daysInAdvance: daysInAdvance.value,
   });
 
   resetForm();
 }
 
 function handleDelete() {
-  if (confirm('Are you sure you want to delete this meal?')) {
-    emit('delete');
+  if (confirm("Are you sure you want to delete this meal?")) {
+    emit("delete");
   }
 }
 </script>
@@ -123,15 +124,28 @@ function handleDelete() {
         :max="7"
         size="lg"
       />
-      <p class="text-xs text-muted">Days before to start prep</p>
+      <p class="text-xs text-muted">
+        Days before to start prep
+      </p>
     </div>
 
     <!-- Action buttons -->
     <div class="flex gap-2 pt-1">
-      <UButton color="neutral" variant="outline" size="md" class="flex-1" @click="emit('close')">
+      <UButton
+        color="neutral"
+        variant="outline"
+        size="md"
+        class="flex-1"
+        @click="emit('close')"
+      >
         Cancel
       </UButton>
-      <UButton color="primary" size="md" class="flex-1" @click="handleSave">
+      <UButton
+        color="primary"
+        size="md"
+        class="flex-1"
+        @click="handleSave"
+      >
         {{ editingMeal ? 'Update' : 'Add' }}
       </UButton>
     </div>

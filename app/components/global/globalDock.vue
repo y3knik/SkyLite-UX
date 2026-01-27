@@ -2,33 +2,33 @@
 const route = useRoute();
 
 // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
+const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 
-interface NavItem {
+type NavItem = {
   to: string;
   icon: string;
   label: string;
-}
+};
 
 const navigationItems = computed(() => {
   const allItems: NavItem[] = [
-    { to: '/calendar', icon: 'i-lucide-calendar-days', label: 'Calendar' },
-    { to: '/todolists', icon: 'i-lucide-list-todo', label: 'Todo Lists' },
-    { to: '/shoppinglists', icon: 'i-lucide-shopping-cart', label: 'Shopping Lists' },
-    { to: '/mealplanner', icon: 'i-lucide-utensils', label: 'Meal Planner' },
-    { to: '/settings', icon: 'i-lucide-settings', label: 'Settings' },
-    { to: '/mobile-settings', icon: 'i-lucide-settings', label: 'Settings' },
+    { to: "/calendar", icon: "i-lucide-calendar-days", label: "Calendar" },
+    { to: "/todolists", icon: "i-lucide-list-todo", label: "Todo Lists" },
+    { to: "/shoppinglists", icon: "i-lucide-shopping-cart", label: "Shopping Lists" },
+    { to: "/mealplanner", icon: "i-lucide-utensils", label: "Meal Planner" },
+    { to: "/settings", icon: "i-lucide-settings", label: "Settings" },
+    { to: "/mobile-settings", icon: "i-lucide-settings", label: "Settings" },
   ];
 
   // In Capacitor, only show meal planner and mobile settings
   if (isCapacitor) {
     return allItems.filter(item =>
-      item.to === '/mealplanner' || item.to === '/mobile-settings'
+      item.to === "/mealplanner" || item.to === "/mobile-settings",
     );
   }
 
   // On web, show all except mobile-settings
-  return allItems.filter(item => item.to !== '/mobile-settings');
+  return allItems.filter(item => item.to !== "/mobile-settings");
 });
 
 function isActivePath(path: string) {

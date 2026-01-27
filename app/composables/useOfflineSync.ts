@@ -1,10 +1,11 @@
-import { ref, readonly, onMounted, onUnmounted } from 'vue';
-import { Network } from '@capacitor/network';
+import { Network } from "@capacitor/network";
+import { onMounted, onUnmounted, readonly, ref } from "vue";
+
 import {
   getPendingMeals,
   removePendingMeal,
   updatePendingMealStatus,
-} from '~/utils/offlineDb';
+} from "~/utils/offlineDb";
 
 export function useOfflineSync() {
   const isOnline = ref(false);
@@ -15,7 +16,7 @@ export function useOfflineSync() {
 
   let syncInterval: NodeJS.Timeout | null = null;
   // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-  const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
+  const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 
   // Load pending count
   async function updatePendingCount() {
@@ -25,7 +26,8 @@ export function useOfflineSync() {
 
   // Sync pending meals to server
   async function syncPendingMeals() {
-    if (!isOnline.value || isSyncing.value) return;
+    if (!isOnline.value || isSyncing.value)
+      return;
 
     isSyncing.value = true;
     syncError.value = null;
@@ -35,29 +37,32 @@ export function useOfflineSync() {
 
       for (const item of pending) {
         try {
-          await updatePendingMealStatus(item.id, 'syncing');
+          await updatePendingMealStatus(item.id, "syncing");
 
           await $fetch(`/api/meal-plans/${item.mealPlanId}/meals`, {
-            method: 'POST',
+            method: "POST",
             body: item.mealData,
           });
 
           await removePendingMeal(item.id);
-        } catch (error) {
+        }
+        catch (error) {
           await updatePendingMealStatus(
             item.id,
-            'error',
-            error instanceof Error ? error.message : 'Sync failed'
+            "error",
+            error instanceof Error ? error.message : "Sync failed",
           );
         }
       }
 
       lastSyncTime.value = new Date();
       await updatePendingCount();
-      await refreshNuxtData('meal-plans');
-    } catch (error) {
-      syncError.value = error instanceof Error ? error.message : 'Sync failed';
-    } finally {
+      await refreshNuxtData("meal-plans");
+    }
+    catch (error) {
+      syncError.value = error instanceof Error ? error.message : "Sync failed";
+    }
+    finally {
       isSyncing.value = false;
     }
   }
@@ -94,14 +99,15 @@ export function useOfflineSync() {
       isOnline.value = status.connected;
 
       // Add event listener for network changes
-      Network.addListener('networkStatusChange', onNetworkChange);
-    } else {
+      Network.addListener("networkStatusChange", onNetworkChange);
+    }
+    else {
       // Use browser API
       isOnline.value = navigator.onLine;
 
       // Add event listeners
-      window.addEventListener('online', onOnlineHandler);
-      window.addEventListener('offline', onOfflineHandler);
+      window.addEventListener("online", onOnlineHandler);
+      window.addEventListener("offline", onOfflineHandler);
     }
 
     // Load pending count
@@ -120,10 +126,11 @@ export function useOfflineSync() {
     if (isCapacitor) {
       // Remove Capacitor Network listeners
       await Network.removeAllListeners();
-    } else {
+    }
+    else {
       // Remove browser event listeners
-      window.removeEventListener('online', onOnlineHandler);
-      window.removeEventListener('offline', onOfflineHandler);
+      window.removeEventListener("online", onOnlineHandler);
+      window.removeEventListener("offline", onOfflineHandler);
     }
 
     if (syncInterval) {

@@ -6,17 +6,17 @@ import type { EventSourceStatus, IntegrationSyncData, SyncConnectionStatus, Sync
 
 export default defineNuxtPlugin(() => {
   // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-  const isCapacitor = typeof window !== 'undefined' && 'Capacitor' in window;
+  const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 
   if (isCapacitor) {
-    console.log('[Sync Manager] Capacitor detected, skipping sync manager initialization');
+    console.log("[Sync Manager] Capacitor detected, skipping sync manager initialization");
     return {
       provide: {
         // Return stub functions so code that depends on this plugin doesn't break
         syncData: {},
-        connectionStatus: 'disabled',
+        connectionStatus: "disabled",
         lastHeartbeat: null,
-      }
+      },
     };
   }
 

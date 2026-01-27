@@ -12,11 +12,13 @@ Two GitHub Actions workflows have been configured to automatically build Android
 **File:** `.github/workflows/android_debug_apk.yaml`
 
 ### Triggers:
+
 - ✅ Push to **any branch**
 - ✅ Changes to app code, server, Android config, or workflows
 - ✅ Manual trigger via "Run workflow" button
 
 ### What it does:
+
 1. Checks out code
 2. Installs Node.js and npm dependencies
 3. Installs JDK 17 and Android SDK
@@ -27,22 +29,26 @@ Two GitHub Actions workflows have been configured to automatically build Android
 8. Uploads APK as artifact (retained for 30 days)
 
 ### APK Naming:
+
 ```
 skylite-{branch-name}-{commit-sha}-debug.apk
 ```
 
 Examples:
+
 - `skylite-main-a1b2c3d4-debug.apk`
 - `skylite-develop-e5f6g7h8-debug.apk`
 - `skylite-feature-meal-sync-12345678-debug.apk`
 
 ### Download Location:
+
 1. Go to GitHub repository → **Actions** tab
 2. Click on the workflow run
 3. Scroll to bottom → **Artifacts** section
 4. Download the APK zip file
 
 ### Use Cases:
+
 - ✅ Testing changes on every commit
 - ✅ Quick testing on feature branches
 - ✅ Sideloading for immediate testing
@@ -53,10 +59,12 @@ Examples:
 **File:** `.github/workflows/android_release_apk.yaml`
 
 ### Triggers:
+
 - ✅ Publishing a GitHub **Release**
 - ✅ Manual trigger with version input
 
 ### What it does:
+
 1. All steps from debug workflow
 2. Builds **both** debug and release APKs
 3. Renames APKs with version tag
@@ -65,16 +73,19 @@ Examples:
 6. Generates detailed release notes
 
 ### APK Naming:
+
 ```
 skylite-{version}-debug.apk
 skylite-{version}-release-unsigned.apk
 ```
 
 Examples:
+
 - `skylite-v1.0.0-debug.apk`
 - `skylite-v1.0.0-release-unsigned.apk`
 
 ### Download Locations:
+
 1. **GitHub Release page** (recommended)
    - Go to repository → **Releases**
    - Click on the release
@@ -84,6 +95,7 @@ Examples:
    - Same as debug workflow above
 
 ### Use Cases:
+
 - ✅ Official releases
 - ✅ Version-tagged APKs
 - ✅ Long-term storage (365 days)
@@ -92,12 +104,14 @@ Examples:
 ## 📥 How to Download APKs
 
 ### From Release (Recommended):
+
 1. Go to: https://github.com/{your-username}/Skylight/releases
 2. Click on latest release
 3. Scroll to **Assets** at bottom
 4. Download `skylite-vX.X.X-debug.apk`
 
 ### From Actions Artifacts:
+
 1. Go to: https://github.com/{your-username}/Skylight/actions
 2. Click on a workflow run (green checkmark = success)
 3. Scroll to **Artifacts** section at bottom
@@ -107,6 +121,7 @@ Examples:
 ## 🚀 Creating a Release (To Trigger Release Workflow)
 
 ### Via GitHub Web UI:
+
 1. Go to repository → **Releases** tab
 2. Click **Draft a new release**
 3. Click **Choose a tag** → Type version (e.g., `v1.0.0`) → **Create new tag**
@@ -116,12 +131,14 @@ Examples:
 7. Workflow automatically starts building APK
 
 ### Via GitHub CLI:
+
 ```bash
 # Create and publish release
 gh release create v1.0.0 --title "SkyLite v1.0.0" --notes "Release notes here"
 ```
 
 ### Via Git Tags:
+
 ```bash
 # Create tag
 git tag -a v1.0.0 -m "Version 1.0.0"
@@ -147,6 +164,7 @@ You can manually trigger workflows without pushing code:
 ## 📊 Build Status
 
 ### Check Build Status:
+
 - Repository main page shows workflow badges (if configured)
 - Actions tab shows all workflow runs
 - Green checkmark = Success ✅
@@ -154,6 +172,7 @@ You can manually trigger workflows without pushing code:
 - Yellow circle = Running 🟡
 
 ### Build Logs:
+
 1. Click on workflow run
 2. Click on job name (e.g., "Build Debug APK")
 3. Expand steps to see detailed logs
@@ -162,13 +181,16 @@ You can manually trigger workflows without pushing code:
 ## 🔧 Workflow Features
 
 ### Automatic Optimizations:
+
 - ✅ **Caching**: npm packages and Gradle dependencies cached
 - ✅ **Parallel builds**: Can run multiple workflows simultaneously
 - ✅ **Smart triggers**: Only runs when relevant files change
 - ✅ **Build summaries**: Generates markdown summary with APK size
 
 ### Build Information:
+
 Each workflow generates a summary showing:
+
 - Branch and commit SHA
 - APK size
 - Download instructions
@@ -178,11 +200,13 @@ Each workflow generates a summary showing:
 ## 📱 Installing APKs on Android
 
 ### One-Time Setup:
+
 1. Open **Settings** → **Security**
 2. Enable **Unknown Sources** or **Install from Unknown Apps**
 3. Allow your file manager/browser to install apps
 
 ### Installation Steps:
+
 1. Download APK from GitHub
 2. Transfer to Android device:
    - Email to yourself
@@ -198,22 +222,27 @@ Each workflow generates a summary showing:
 ## 🛠️ Troubleshooting GitHub Actions
 
 ### Build Fails:
+
 **Check logs:**
+
 1. Actions tab → Click failed run
 2. Look for red X steps
 3. Expand step to see error
 
 **Common issues:**
+
 - ❌ Syntax error in code → Fix and push
 - ❌ Missing dependency → Update package.json
 - ❌ Gradle build failed → Check android/ config
 
 ### APK Not Attached to Release:
+
 - Ensure workflow completed successfully (green checkmark)
 - Refresh release page (may take 1-2 minutes)
 - Check Actions artifacts as backup
 
 ### Workflow Not Triggering:
+
 - Verify file paths in `on.push.paths` match changed files
 - Check branch name matches trigger conditions
 - Manual trigger always works (Run workflow button)
@@ -221,11 +250,13 @@ Each workflow generates a summary showing:
 ## 📈 Workflow Retention
 
 ### Artifact Retention:
+
 - **Debug APKs**: 30 days
 - **Release APKs**: 90 days (artifacts), 365 days (release assets)
 - Can be extended in workflow YAML (`retention-days`)
 
 ### Storage Limits:
+
 - GitHub Free: 500 MB storage, 2000 minutes/month
 - GitHub Pro: 1 GB storage, 3000 minutes/month
 - APKs are ~5-10 MB each
@@ -234,17 +265,21 @@ Each workflow generates a summary showing:
 ## 🎯 Best Practices
 
 ### Versioning:
+
 - Use semantic versioning: `vMAJOR.MINOR.PATCH`
 - Examples: `v1.0.0`, `v1.0.1`, `v2.0.0`
 - Tag major releases, minor updates, and patches
 
 ### Testing:
+
 - Test debug APK from continuous builds before release
 - Create pre-releases for beta testing
 - Use descriptive commit messages (appear in build names)
 
 ### Release Notes:
+
 Include in releases:
+
 - New features
 - Bug fixes
 - Breaking changes
@@ -254,11 +289,13 @@ Include in releases:
 ## 🔄 Updating Workflows
 
 ### Edit Workflows:
+
 1. Edit `.github/workflows/*.yaml` files
 2. Commit and push changes
 3. Workflow automatically uses new version on next run
 
 ### Test Workflow Changes:
+
 - Use `workflow_dispatch` trigger to test manually
 - Check workflow run logs for errors
 - Iterate and fix if needed
@@ -266,6 +303,7 @@ Include in releases:
 ## 🎊 Summary
 
 With these workflows, you get:
+
 - ✅ Automatic APK builds on every commit
 - ✅ Release APKs attached to GitHub releases
 - ✅ No local Java/Android SDK setup needed

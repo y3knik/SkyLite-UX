@@ -22,7 +22,7 @@ const integrationServices = new Map<string, ServerTypedIntegrationService>();
 
 export default defineNitroPlugin(async (nitroApp) => {
   // Skip initialization during static generation (prevents hanging during 'nuxt generate')
-  if (process.env.CAPACITOR_BUILD === 'true' || process.env.prerender) {
+  if (process.env.CAPACITOR_BUILD === "true" || process.env.prerender) {
     consola.info("Sync Manager: Skipping initialization (static generation mode)");
     return;
   }

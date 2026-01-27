@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from "vue";
 
 const logs = ref<Array<{ time: string; type: string; message: string }>>([]);
 const isVisible = ref(true);
@@ -13,8 +13,8 @@ onMounted(() => {
 
   const addLog = (type: string, args: any[]) => {
     const message = args.map(arg =>
-      typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-    ).join(' ');
+      typeof arg === "object" ? JSON.stringify(arg) : String(arg),
+    ).join(" ");
 
     const time = new Date().toLocaleTimeString();
     logs.value.push({ time, type, message });
@@ -25,33 +25,33 @@ onMounted(() => {
     }
   };
 
-  console.log = function(...args) {
-    addLog('log', args);
+  console.log = function (...args) {
+    addLog("log", args);
     originalLog.apply(console, args);
   };
 
-  console.error = function(...args) {
-    addLog('error', args);
+  console.error = function (...args) {
+    addLog("error", args);
     originalError.apply(console, args);
   };
 
-  console.warn = function(...args) {
-    addLog('warn', args);
+  console.warn = function (...args) {
+    addLog("warn", args);
     originalWarn.apply(console, args);
   };
 
-  console.log('[DebugLogger] Initialized');
+  console.log("[DebugLogger] Initialized");
 });
 
 function copyLogs() {
-  const text = logs.value.map(log => `[${log.time}] ${log.type.toUpperCase()}: ${log.message}`).join('\n');
+  const text = logs.value.map(log => `[${log.time}] ${log.type.toUpperCase()}: ${log.message}`).join("\n");
   navigator.clipboard.writeText(text);
-  alert('Logs copied to clipboard!');
+  alert("Logs copied to clipboard!");
 }
 
 function clearLogs() {
   logs.value = [];
-  console.log('[DebugLogger] Logs cleared');
+  console.log("[DebugLogger] Logs cleared");
 }
 </script>
 
@@ -60,27 +60,27 @@ function clearLogs() {
     <div class="flex items-center justify-between p-2 bg-gray-900 border-t-2 border-yellow-500">
       <div class="flex items-center gap-2">
         <button
-          @click="isExpanded = !isExpanded"
           class="px-2 py-1 bg-gray-700 rounded hover:bg-gray-600"
+          @click="isExpanded = !isExpanded"
         >
           {{ isExpanded ? '▼' : '▲' }} Debug Logger ({{ logs.length }})
         </button>
         <button
-          @click="copyLogs"
           class="px-2 py-1 bg-blue-600 rounded hover:bg-blue-500"
+          @click="copyLogs"
         >
           Copy
         </button>
         <button
-          @click="clearLogs"
           class="px-2 py-1 bg-red-600 rounded hover:bg-red-500"
+          @click="clearLogs"
         >
           Clear
         </button>
       </div>
       <button
-        @click="isVisible = false"
         class="px-2 py-1 bg-gray-700 rounded hover:bg-gray-600"
+        @click="isVisible = false"
       >
         ✕
       </button>
@@ -97,7 +97,7 @@ function clearLogs() {
         :class="{
           'text-red-400': log.type === 'error',
           'text-yellow-400': log.type === 'warn',
-          'text-green-400': log.type === 'log'
+          'text-green-400': log.type === 'log',
         }"
       >
         <span class="text-gray-500">[{{ log.time }}]</span>

@@ -110,7 +110,8 @@ function openAddMeal(dayOfWeek: number, mealType: MealType, data?: { name: strin
   if (data) {
     // Called from inline form with data - create meal directly
     handleMealSaveFromInline(dayOfWeek, mealType, data);
-  } else {
+  }
+  else {
     // Called from desktop - open dialog
     selectedDayOfWeek.value = dayOfWeek;
     selectedMealType.value = mealType;
@@ -138,7 +139,7 @@ async function handleMealSaveFromInline(dayOfWeek: number, mealType: MealType, d
       description: data.description,
       daysInAdvance: data.daysInAdvance,
       dayOfWeek,
-      mealType
+      mealType,
     });
     showSuccess("Meal Added", "Meal has been added successfully.");
 
@@ -205,7 +206,8 @@ async function handleMealDelete() {
 }
 
 async function handleMealDeleteFromInline(meal: Meal) {
-  if (!meal?.id) return;
+  if (!meal?.id)
+    return;
 
   try {
     await deleteMeal(meal.id);
@@ -256,7 +258,7 @@ async function handleMoveMeal(event: { mealId: string; newDayOfWeek: number; new
     // Update meal with new day and meal type
     await updateMeal(event.mealId, {
       dayOfWeek: event.newDayOfWeek,
-      mealType: event.newMealType
+      mealType: event.newMealType,
     });
 
     showSuccess("Meal Moved", "Meal has been moved successfully.");

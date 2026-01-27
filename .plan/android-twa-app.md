@@ -3,6 +3,7 @@
 ## Overview
 
 Create a native Android APK wrapper for Skylite UX that:
+
 - ✅ Allows configurable server URL (http://192.168.1.187:3000, http://skylite.local:3000, etc.)
 - ✅ Works on HTTP (internal network, no HTTPS required)
 - ✅ Full offline support via service workers
@@ -14,6 +15,7 @@ Create a native Android APK wrapper for Skylite UX that:
 ## Approach: Custom WebView App with TWA Features
 
 We'll create a **custom Android WebView application** (not pure TWA) because:
+
 - **Standard TWA limitation**: URL is hardcoded in manifest, can't be changed without rebuilding
 - **Custom WebView allows**: In-app settings screen to configure server URL
 - **Best of both worlds**: Native app shell + web app content + full offline support
@@ -60,6 +62,7 @@ Skylight/
 ## Current State Analysis
 
 **Existing PWA Configuration** (from `nuxt.config.ts`):
+
 - Manifest: `SkyLite UX` (name), `SkyLite` (short_name)
 - Theme color: `#0ea5e9` (sky blue)
 - Icons: `skylite-192.png`, `skylite-512.png`
@@ -67,6 +70,7 @@ Skylight/
 - Offline support: Already configured for meal plans API
 
 **This means**:
+
 - Android app will reuse existing service worker
 - No web app code changes needed
 - Icon assets already available
@@ -78,6 +82,7 @@ Skylight/
 Create basic Gradle project with Kotlin DSL:
 
 **`android/settings.gradle.kts`**:
+
 ```kotlin
 pluginManagement {
     repositories {
@@ -97,6 +102,7 @@ include(":app")
 ```
 
 **`android/build.gradle.kts`**:
+
 ```kotlin
 plugins {
     id("com.android.application") version "8.2.0" apply false
@@ -105,6 +111,7 @@ plugins {
 ```
 
 **`android/gradle.properties`**:
+
 ```properties
 android.useAndroidX=true
 android.enableJetifier=false
@@ -112,6 +119,7 @@ kotlin.code.style=official
 ```
 
 **`android/app/build.gradle.kts`**:
+
 ```kotlin
 plugins {
     id("com.android.application")
@@ -243,6 +251,7 @@ class MainActivity : AppCompatActivity() {
 ```
 
 **`android/app/src/main/res/layout/activity_main.xml`**:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -314,6 +323,7 @@ class SettingsActivity : AppCompatActivity() {
 ```
 
 **`android/app/src/main/res/layout/activity_settings.xml`**:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -452,6 +462,7 @@ class WebViewClientCustom : WebViewClient() {
 ### 7. Resources (Strings, Colors, Themes)
 
 **`android/app/src/main/res/values/strings.xml`**:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -462,6 +473,7 @@ class WebViewClientCustom : WebViewClient() {
 ```
 
 **`android/app/src/main/res/values/colors.xml`**:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -472,6 +484,7 @@ class WebViewClientCustom : WebViewClient() {
 ```
 
 **`android/app/src/main/res/values/themes.xml`**:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -482,6 +495,7 @@ class WebViewClientCustom : WebViewClient() {
 ```
 
 **`android/app/src/main/res/menu/main_menu.xml`**:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
@@ -502,20 +516,20 @@ class WebViewClientCustom : WebViewClient() {
 **`scripts/generate-android-icons.js`**:
 
 ```javascript
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
+const fs = require("node:fs");
+const path = require("node:path");
+const sharp = require("sharp");
 
 const sizes = [
-  { folder: 'mipmap-mdpi', size: 48 },
-  { folder: 'mipmap-hdpi', size: 72 },
-  { folder: 'mipmap-xhdpi', size: 96 },
-  { folder: 'mipmap-xxhdpi', size: 144 },
-  { folder: 'mipmap-xxxhdpi', size: 192 }
+  { folder: "mipmap-mdpi", size: 48 },
+  { folder: "mipmap-hdpi", size: 72 },
+  { folder: "mipmap-xhdpi", size: 96 },
+  { folder: "mipmap-xxhdpi", size: 144 },
+  { folder: "mipmap-xxxhdpi", size: 192 }
 ];
 
-const sourceIcon = path.join(__dirname, '..', 'public', 'skylite-512.png');
-const androidRes = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'res');
+const sourceIcon = path.join(__dirname, "..", "public", "skylite-512.png");
+const androidRes = path.join(__dirname, "..", "android", "app", "src", "main", "res");
 
 async function generateIcons() {
   for (const { folder, size } of sizes) {
@@ -524,7 +538,7 @@ async function generateIcons() {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    const outputPath = path.join(outputDir, 'ic_launcher.png');
+    const outputPath = path.join(outputDir, "ic_launcher.png");
     await sharp(sourceIcon)
       .resize(size, size)
       .toFile(outputPath);
@@ -541,18 +555,19 @@ generateIcons().catch(console.error);
 **`scripts/sync-android-version.js`**:
 
 ```javascript
-const fs = require('fs');
-const path = require('path');
+const fs = require("node:fs");
+const path = require("node:path");
 
-const packageJson = require('../package.json');
+const packageJson = require("../package.json");
+
 const version = packageJson.version; // "2026.1.0"
 
 // Convert "2026.1.0" to versionCode 20260100
-const parts = version.split('.').map(Number);
+const parts = version.split(".").map(Number);
 const versionCode = parts[0] * 10000 + parts[1] * 100 + parts[2];
 
-const gradlePath = path.join(__dirname, '..', 'android', 'app', 'build.gradle.kts');
-let gradleContent = fs.readFileSync(gradlePath, 'utf8');
+const gradlePath = path.join(__dirname, "..", "android", "app", "build.gradle.kts");
+let gradleContent = fs.readFileSync(gradlePath, "utf8");
 
 // Update versionCode
 gradleContent = gradleContent.replace(
@@ -596,8 +611,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: "17"
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
@@ -624,8 +639,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: "17"
 
       - name: Decode keystore
         run: |
@@ -658,6 +673,7 @@ jobs:
 ### 11. Update package.json
 
 **Add scripts**:
+
 ```json
 {
   "scripts": {
@@ -677,6 +693,7 @@ jobs:
 ### 12. Update .gitignore
 
 **Add**:
+
 ```
 # Android
 android/local.properties
@@ -694,18 +711,21 @@ android/*.iml
 ### 13. Documentation
 
 **Create `docs/features/androidApp.md`** covering:
+
 - Installation instructions (sideloading)
 - Server URL configuration
 - Troubleshooting
 - Development guide
 
 **Update `README.md`**:
+
 - Add "📱 Android App" section
 - Link to releases for APK downloads
 
 ## Distribution Workflow
 
 ### Development Builds (Every Commit to Main)
+
 1. Push to `main` branch
 2. GitHub Actions builds `app-debug.apk`
 3. APK available as **artifact** in Actions tab
@@ -713,6 +733,7 @@ android/*.iml
 5. Valid for 90 days
 
 ### Release Builds (Manual Tags)
+
 1. Create git tag: `git tag v2026.1.0 && git push --tags`
 2. GitHub Actions builds signed `app-release.apk`
 3. Creates GitHub Release with APK attached
@@ -735,6 +756,7 @@ android/*.iml
 ## File Changes Summary
 
 ### New Files
+
 - `android/` - Complete Android project (~30 files)
 - `scripts/generate-android-icons.js`
 - `scripts/sync-android-version.js`
@@ -742,6 +764,7 @@ android/*.iml
 - `docs/features/androidApp.md`
 
 ### Modified Files
+
 - `package.json` - Add Android scripts + sharp dependency
 - `.gitignore` - Add Android ignores
 - `README.md` - Add Android app section
@@ -750,12 +773,14 @@ android/*.iml
 ## Dependencies
 
 **Development machine**:
+
 - JDK 17+ (for local builds)
 - Android SDK (optional - only if using Android Studio)
 - Node.js + npm (already have)
 - sharp npm package (for icon generation)
 
 **CI/CD**:
+
 - JDK 17 (provided by GitHub Actions)
 
 ## Success Criteria

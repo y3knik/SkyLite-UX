@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { getPendingMeals, removePendingMeal, type PendingMeal } from '~/utils/offlineDb';
-import { useOfflineSync } from '~/composables/useOfflineSync';
-import { useAlertToast } from '~/composables/useAlertToast';
+import { onMounted, ref } from "vue";
+
+import type { PendingMeal } from "~/utils/offlineDb";
+
+import { useAlertToast } from "~/composables/useAlertToast";
+import { useOfflineSync } from "~/composables/useOfflineSync";
+import { getPendingMeals, removePendingMeal } from "~/utils/offlineDb";
 
 const pendingMeals = ref<PendingMeal[]>([]);
 const { triggerSync, updatePendingCount } = useOfflineSync();
@@ -20,9 +23,10 @@ async function retrySync(id: string) {
   try {
     await triggerSync();
     await loadPendingMeals();
-    showSuccess('Sync Triggered', 'Attempting to sync pending meals');
-  } catch (error) {
-    showError('Sync Failed', 'Failed to trigger sync');
+    showSuccess("Sync Triggered", "Attempting to sync pending meals");
+  }
+  catch (error) {
+    showError("Sync Failed", "Failed to trigger sync");
   }
 }
 
@@ -31,9 +35,10 @@ async function deleteFromQueue(id: string) {
     await removePendingMeal(id);
     await updatePendingCount();
     await loadPendingMeals();
-    showSuccess('Deleted', 'Meal removed from queue');
-  } catch (error) {
-    showError('Delete Failed', 'Failed to remove meal from queue');
+    showSuccess("Deleted", "Meal removed from queue");
+  }
+  catch (error) {
+    showError("Delete Failed", "Failed to remove meal from queue");
   }
 }
 
@@ -41,9 +46,10 @@ async function syncAll() {
   try {
     await triggerSync();
     await loadPendingMeals();
-    showSuccess('Sync Started', 'Syncing all pending meals');
-  } catch (error) {
-    showError('Sync Failed', 'Failed to sync meals');
+    showSuccess("Sync Started", "Syncing all pending meals");
+  }
+  catch (error) {
+    showError("Sync Failed", "Failed to sync meals");
   }
 }
 
@@ -54,25 +60,28 @@ async function clearAll() {
     }
     await updatePendingCount();
     await loadPendingMeals();
-    showSuccess('Cleared', 'All pending meals removed');
-  } catch (error) {
-    showError('Clear Failed', 'Failed to clear queue');
+    showSuccess("Cleared", "All pending meals removed");
+  }
+  catch (error) {
+    showError("Clear Failed", "Failed to clear queue");
   }
 }
 
 const mealTypeLabels: Record<string, string> = {
-  BREAKFAST: 'Breakfast',
-  LUNCH: 'Lunch',
-  DINNER: 'Dinner',
+  BREAKFAST: "Breakfast",
+  LUNCH: "Lunch",
+  DINNER: "Dinner",
 };
 
-const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 </script>
 
 <template>
   <div class="p-6 max-w-4xl mx-auto">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold">Offline Queue</h1>
+      <h1 class="text-2xl font-bold">
+        Offline Queue
+      </h1>
       <p class="text-sm text-muted mt-1">
         Manage meals waiting to sync to the server
       </p>
@@ -80,8 +89,12 @@ const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satu
 
     <div v-if="pendingMeals.length === 0" class="text-center py-12 border border-default rounded-lg bg-muted/5">
       <UIcon name="i-lucide-check-circle" class="h-12 w-12 mx-auto text-green-500 mb-2" />
-      <p class="text-muted font-medium">No pending changes</p>
-      <p class="text-sm text-muted mt-1">All meals are synced with the server</p>
+      <p class="text-muted font-medium">
+        No pending changes
+      </p>
+      <p class="text-sm text-muted mt-1">
+        All meals are synced with the server
+      </p>
     </div>
 
     <div v-else class="space-y-3">
@@ -92,13 +105,15 @@ const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satu
         :class="{
           'border-yellow-300 bg-yellow-50': item.status === 'pending',
           'border-blue-300 bg-blue-50': item.status === 'syncing',
-          'border-red-300 bg-red-50': item.status === 'error'
+          'border-red-300 bg-red-50': item.status === 'error',
         }"
       >
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
-              <h3 class="font-medium">{{ item.mealData.name }}</h3>
+              <h3 class="font-medium">
+                {{ item.mealData.name }}
+              </h3>
               <UBadge
                 :color="item.status === 'error' ? 'red' : item.status === 'syncing' ? 'blue' : 'yellow'"
                 size="xs"
@@ -152,7 +167,11 @@ const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satu
         <UIcon name="i-lucide-cloud-upload" class="h-4 w-4" />
         Sync All
       </UButton>
-      <UButton variant="ghost" color="red" @click="clearAll">
+      <UButton
+        variant="ghost"
+        color="red"
+        @click="clearAll"
+      >
         <UIcon name="i-lucide-trash-2" class="h-4 w-4" />
         Clear All
       </UButton>

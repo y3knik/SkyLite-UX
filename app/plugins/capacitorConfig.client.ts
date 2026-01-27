@@ -1,41 +1,41 @@
 export default defineNuxtPlugin(async () => {
   // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-  if (typeof window !== 'undefined' && 'Capacitor' in window) {
+  if (typeof window !== "undefined" && "Capacitor" in window) {
     try {
       // Dynamically import Capacitor plugins to avoid SSR issues
-      const { Preferences } = await import('@capacitor/preferences');
+      const { Preferences } = await import("@capacitor/preferences");
 
       // Get server URL from preferences (no default - user must configure)
-      const { value } = await Preferences.get({ key: 'serverUrl' });
+      const { value } = await Preferences.get({ key: "serverUrl" });
       const serverUrl = value || null;
 
-    // Store serverUrl in window for access by other components
-    // @ts-ignore
-    window.__CAPACITOR_SERVER_URL__ = serverUrl;
-
-    // Override $fetch to use server URL for API calls
-    const originalFetch = globalThis.$fetch;
-    // @ts-ignore
-    globalThis.$fetch = (url: string, options?: any) => {
-      // Get current server URL (may have been updated in mobile-settings)
+      // Store serverUrl in window for access by other components
       // @ts-ignore
-      const currentServerUrl = window.__CAPACITOR_SERVER_URL__;
+      window.__CAPACITOR_SERVER_URL__ = serverUrl;
 
-      // If no server URL configured, reject API calls
-      if (!currentServerUrl && typeof url === 'string' && url.startsWith('/api/')) {
-        console.warn('[Capacitor] No server URL configured. Please set it in Mobile Settings.');
-        return Promise.reject(new Error('Server URL not configured'));
-      }
+      // Override $fetch to use server URL for API calls
+      const originalFetch = globalThis.$fetch;
+      // @ts-expect-error - Override $fetch for Capacitor
+      globalThis.$fetch = (url: string, options?: any): any => {
+        // Get current server URL (may have been updated in mobile-settings)
+        const currentServerUrl = window.__CAPACITOR_SERVER_URL__;
 
-      // Prepend server URL if relative path (API calls start with /)
-      if (currentServerUrl && typeof url === 'string' && url.startsWith('/')) {
-        url = currentServerUrl + url;
-      }
+        // If no server URL configured, reject API calls
+        if (!currentServerUrl && typeof url === "string" && url.startsWith("/api/")) {
+          console.warn("[Capacitor] No server URL configured. Please set it in Mobile Settings.");
+          return Promise.reject(new Error("Server URL not configured"));
+        }
 
-      return originalFetch(url, options);
-    };
-    } catch (error) {
-      console.error('[Capacitor] Failed to initialize:', error);
+        // Prepend server URL if relative path (API calls start with /)
+        if (currentServerUrl && typeof url === "string" && url.startsWith("/")) {
+          url = currentServerUrl + url;
+        }
+
+        return originalFetch(url, options);
+      };
+    }
+    catch (error) {
+      console.error("[Capacitor] Failed to initialize:", error);
       // Continue anyway - let the app load
     }
   }

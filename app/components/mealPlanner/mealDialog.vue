@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, watch } from "vue";
+
 import type { CreateMealInput, Meal, MealType } from "~/types/database";
 
 const props = defineProps<{
@@ -22,7 +23,7 @@ const error = ref<string | null>(null);
 
 // Mobile detection - use Capacitor detection for reliability
 // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-const isMobile = typeof window !== 'undefined' && 'Capacitor' in window;
+const isMobile = typeof window !== "undefined" && "Capacitor" in window;
 
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const mealTypeLabels: Record<MealType, string> = {
@@ -40,10 +41,11 @@ watch(() => [props.isOpen, props.meal], ([isOpen, meal]) => {
       daysInAdvance.value = meal.daysInAdvance || 0;
     }
     // Prevent body scroll when dialog is open
-    document.body.style.overflow = 'hidden';
-  } else {
+    document.body.style.overflow = "hidden";
+  }
+  else {
     // Restore body scroll when dialog is closed
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   }
 }, { immediate: true });
 
