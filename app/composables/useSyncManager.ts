@@ -49,9 +49,7 @@ export function useSyncManager() {
   };
 
   const reconnect = () => {
-    // @ts-expect-error - Type inference issue with plugin
     if (nuxtApp.$reconnectSync && typeof nuxtApp.$reconnectSync === "function") {
-      // @ts-expect-error - Type inference issue with plugin
       nuxtApp.$reconnectSync();
     }
   };
