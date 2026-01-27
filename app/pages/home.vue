@@ -27,6 +27,9 @@ const todaysMenu = ref<Array<{ id: string; name: string; mealType: string; dayLa
 const intervals = ref<NodeJS.Timeout[]>([]);
 
 const currentPhoto = computed(() => photos.value[currentPhotoIndex.value]);
+const imageLoadError = ref(false);
+const imageErrorCount = ref(0);
+const lastRefreshAttempt = ref<Date | null>(null);
 
 const kenBurnsStyle = computed(() => {
   if (!homeSettings.value?.kenBurnsIntensity)
@@ -146,6 +149,41 @@ onMounted(async () => {
 onUnmounted(() => {
   intervals.value.forEach(interval => clearInterval(interval));
 });
+
+// Handle image load errors - attempt refresh if multiple images fail
+async function handleImageError() {
+  consola.error("[Home] Photo failed to load:", currentPhoto.value?.url);
+  imageLoadError.value = true;
+  imageErrorCount.value++;
+
+  // If multiple consecutive errors and we haven't refreshed recently
+  const timeSinceLastRefresh = lastRefreshAttempt.value
+    ? Date.now() - lastRefreshAttempt.value.getTime()
+    : Infinity;
+
+  if (imageErrorCount.value >= 3 && timeSinceLastRefresh > 60000) {
+    consola.warn("[Home] Multiple photo load failures, attempting to refresh album URLs...");
+    lastRefreshAttempt.value = new Date();
+    imageErrorCount.value = 0; // Reset counter
+
+    try {
+      await refreshAlbums();
+      consola.success("[Home] Album URLs refreshed after image errors");
+    }
+    catch (e) {
+      consola.error("[Home] Failed to refresh albums after image errors:", e);
+    }
+  }
+}
+
+// Reset error count on successful image load
+function handleImageLoad() {
+  if (imageLoadError.value) {
+    consola.info("[Home] Photo loaded successfully after previous errors");
+    imageLoadError.value = false;
+  }
+  imageErrorCount.value = 0; // Reset error counter on successful load
+}
 
 function startSlideshow() {
   if (!homeSettings.value?.photosEnabled || photos.value.length === 0) {
@@ -448,6 +486,8 @@ function formatEventTime(dateString: string | Date) {
         class="w-full h-full object-cover transition-all duration-1000"
         :class="{ 'ken-burns': homeSettings?.kenBurnsIntensity && homeSettings.kenBurnsIntensity > 0 }"
         :style="kenBurnsStyle"
+        @load="handleImageLoad"
+        @error="handleImageError"
       >
     </div>
 
