@@ -78,13 +78,19 @@ async function saveSettings() {
     console.log("[Mobile Settings] Testing connection to server...");
 
     try {
-      const testResponse = await fetch(`${trimmedUrl}/api/app-settings`, {
+      const testUrl = `${trimmedUrl}/api/app-settings`;
+      console.log("[Mobile Settings] Test URL:", testUrl);
+
+      const testResponse = await fetch(testUrl, {
         method: "GET",
         headers: {
           "Accept": "application/json",
         },
         signal: AbortSignal.timeout(5000), // 5 second timeout
       });
+
+      console.log("[Mobile Settings] Response status:", testResponse.status);
+      console.log("[Mobile Settings] Response ok:", testResponse.ok);
 
       if (!testResponse.ok) {
         throw new Error(`Server responded with status ${testResponse.status}`);
@@ -93,8 +99,17 @@ async function saveSettings() {
       console.log("[Mobile Settings] Server connection test successful");
     }
     catch (error) {
-      console.error("[Mobile Settings] Connection test failed:", error);
+      // Log full error details
+      console.error("[Mobile Settings] Connection test failed");
+      console.error("[Mobile Settings] Error name:", error?.name);
+      console.error("[Mobile Settings] Error message:", error?.message);
+      console.error("[Mobile Settings] Error type:", typeof error);
+      console.error("[Mobile Settings] Error keys:", error ? Object.keys(error) : "null");
+
       if (error instanceof Error) {
+        console.error("[Mobile Settings] Error is instance of Error");
+        console.error("[Mobile Settings] Error stack:", error.stack);
+
         if (error.name === "AbortError" || error.name === "TimeoutError") {
           throw new Error("Connection timeout - cannot reach server. Check the IP address and ensure the server is running.");
         }
@@ -104,6 +119,7 @@ async function saveSettings() {
         else if (error.message.includes("status")) {
           throw new Error(`Server error: ${error.message}`);
         }
+        throw new Error(`Connection failed: ${error.name} - ${error.message}`);
       }
       throw new Error("Failed to connect to server. Please verify the URL and try again.");
     }
@@ -138,8 +154,21 @@ async function saveSettings() {
     console.log("[Mobile Settings] Save completed successfully");
   }
   catch (error) {
-    console.error("[Mobile Settings] Save failed:", error);
-    saveError.value = error instanceof Error ? error.message : "Failed to save settings";
+    console.error("[Mobile Settings] Save failed");
+    console.error("[Mobile Settings] Error name:", error?.name);
+    console.error("[Mobile Settings] Error message:", error?.message);
+    console.error("[Mobile Settings] Error type:", typeof error);
+    console.error("[Mobile Settings] Full error:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+
+    if (error instanceof Error) {
+      saveError.value = error.message;
+    }
+    else if (typeof error === "string") {
+      saveError.value = error;
+    }
+    else {
+      saveError.value = "Failed to save settings - unknown error";
+    }
   }
   finally {
     isTesting.value = false;
