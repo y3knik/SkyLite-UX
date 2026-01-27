@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { consola } from "consola";
+
 import type { CalendarEvent } from "~/types/calendar";
 
 const { photos, fetchPhotos, getPhotoUrl, refreshAlbums } = usePhotos();

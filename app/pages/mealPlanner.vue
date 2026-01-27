@@ -77,7 +77,7 @@ async function loadWeekMealPlan() {
       consola.info("[Meal Planner] Set current plan, meals count:", plan.meals?.length || 0);
     }
   }
-  catch (error) {
+  catch (error: any) {
     consola.error("[Meal Planner] Failed to load meal plan");
     consola.error("[Meal Planner] Error:", error);
     consola.error("[Meal Planner] Error name:", error?.name);
@@ -97,7 +97,7 @@ async function loadUpcomingPrepMeals() {
     consola.info("[Meal Planner] Received upcoming prep meals:", meals);
     upcomingPrepMeals.value = meals;
   }
-  catch (error) {
+  catch (error: any) {
     consola.error("[Meal Planner] Failed to load preparation reminders");
     consola.error("[Meal Planner] Error:", error);
     consola.error("[Meal Planner] Error name:", error?.name);

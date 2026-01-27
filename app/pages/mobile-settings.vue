@@ -98,7 +98,7 @@ async function saveSettings() {
 
       console.log("[Mobile Settings] Server connection test successful");
     }
-    catch (error) {
+    catch (error: any) {
       // Log full error details
       console.error("[Mobile Settings] Connection test failed");
       console.error("[Mobile Settings] Error name:", error?.name);
@@ -153,7 +153,7 @@ async function saveSettings() {
     saveSuccess.value = true;
     console.log("[Mobile Settings] Save completed successfully");
   }
-  catch (error) {
+  catch (error: any) {
     console.error("[Mobile Settings] Save failed");
     console.error("[Mobile Settings] Error name:", error?.name);
     console.error("[Mobile Settings] Error message:", error?.message);
