@@ -2,7 +2,9 @@
 import pkg from "./package.json";
 
 export default defineNuxtConfig({
-  ssr: false, // Client-only mode for Capacitor
+  // Disable SSR only for Capacitor builds, enable for web
+  // eslint-disable-next-line node/no-process-env
+  ssr: process.env.CAPACITOR_BUILD !== "true",
 
   devtools: {
     enabled: true,

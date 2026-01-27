@@ -57,10 +57,18 @@ function isFormActive(dayOfWeek: number, mealType: MealType): boolean {
 function getDefaultExpandedDay(): number {
   const { getStableDate } = useStableDate();
   const today = getStableDate();
-  const weekEnd = new Date(props.weekStart);
+
+  // Normalize weekStart to Date object (may be serialized string)
+  const weekStart = new Date(props.weekStart);
+  if (Number.isNaN(weekStart.getTime())) {
+    // Invalid date, fallback to Monday
+    return 0;
+  }
+
+  const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
 
-  if (today >= props.weekStart && today <= weekEnd) {
+  if (today >= weekStart && today <= weekEnd) {
     // Current week - expand today
     return (today.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
   }

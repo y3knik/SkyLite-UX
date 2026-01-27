@@ -1,3 +1,5 @@
+import { consola } from "consola";
+
 export default defineNuxtPlugin(async () => {
   if (typeof window !== "undefined" && "Capacitor" in window) {
     try {
@@ -20,7 +22,7 @@ export default defineNuxtPlugin(async () => {
 
         // If no server URL configured, reject API calls
         if (!currentServerUrl && typeof url === "string" && url.startsWith("/api/")) {
-          console.warn("[Capacitor] No server URL configured. Please set it in Mobile Settings.");
+          consola.warn("[Capacitor] No server URL configured. Please set it in Mobile Settings.");
           return Promise.reject(new Error("Server URL not configured"));
         }
 
@@ -33,7 +35,7 @@ export default defineNuxtPlugin(async () => {
       };
     }
     catch (error) {
-      console.error("[Capacitor] Failed to initialize:", error);
+      consola.error("[Capacitor] Failed to initialize:", error);
       // Continue anyway - let the app load
     }
   }
