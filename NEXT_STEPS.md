@@ -6,17 +6,17 @@ All code is written and configured. You just need to install Java to build the A
 
 ## Step 1: Install Java (Required)
 
-### Download JDK 17:
+### Download JDK 17
 
-https://adoptium.net/temurin/releases/
+<https://adoptium.net/temurin/releases/>
 
 1. Click "Windows x64" MSI installer
 2. Run the installer (accept all defaults)
 3. Complete installation
 
-### Set Environment Variables:
+### Set Environment Variables
 
-**Option A: GUI (Easier)**
+#### Option A: GUI (Easier)
 
 1. Open Start Menu → type "environment"
 2. Click "Edit the system environment variables"
@@ -28,14 +28,14 @@ https://adoptium.net/temurin/releases/
 6. Click OK on all dialogs
 7. **Close and reopen Git Bash**
 
-**Option B: Command Line**
+#### Option B: Command Line
 
 ```bash
 setx JAVA_HOME "C:\Program Files\Eclipse Adoptium\jdk-17.0.13.11-hotspot"
 setx PATH "%PATH%;%JAVA_HOME%\bin"
 ```
 
-### Verify Installation:
+### Verify Installation
 
 Close and reopen Git Bash, then run:
 
@@ -55,44 +55,48 @@ npm run android:build
 
 This takes 2-5 minutes on first build (downloads dependencies).
 
-**Output APK:**
+### Output APK
 
-```
+```text
 android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ## Step 3: Install on Phone
 
-1. **Enable Unknown Sources:**
-   - Settings → Security → Unknown sources (ON)
-   - Or: Settings → Apps → Special access → Install unknown apps
+### Enable Unknown Sources
 
-2. **Transfer APK:**
-   - Email it to yourself
-   - Or USB: Connect phone → Copy APK to Downloads folder
+- Settings → Security → Unknown sources (ON)
+- Or: Settings → Apps → Special access → Install unknown apps
 
-3. **Install:**
-   - Open Files app on phone
-   - Navigate to Downloads
-   - Tap `app-debug.apk`
-   - Tap "Install"
+### Transfer APK
+
+- Email it to yourself
+- Or USB: Connect phone → Copy APK to Downloads folder
+
+### Install
+
+- Open Files app on phone
+- Navigate to Downloads
+- Tap `app-debug.apk`
+- Tap "Install"
 
 ## Step 4: Configure Server
 
-1. **Find Server IP:**
+### Find Server IP
 
-   ```bash
-   ipconfig
-   ```
+```bash
+ipconfig
+```
 
-   Look for "IPv4 Address" (e.g., 192.168.1.100)
+Look for "IPv4 Address" (e.g., 192.168.1.100)
 
-2. **In SkyLite App:**
-   - Open app
-   - Navigate to "Mobile Settings" (or tap gear icon)
-   - Enter: `http://192.168.1.100:3000` (use your IP)
-   - Tap "Save Settings"
-   - Restart app
+### In SkyLite App
+
+- Open app
+- Navigate to "Mobile Settings" (or tap gear icon)
+- Enter: `http://192.168.1.100:3000` (use your IP)
+- Tap "Save Settings"
+- Restart app
 
 ## Step 5: Test Offline Mode
 

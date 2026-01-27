@@ -16,7 +16,7 @@ export default defineNuxtConfig({
 
   // Route rules to prevent preloading errors in Capacitor
   routeRules: {
-    "/mealplanner": { prerender: false },
+    "/mealPlanner": { prerender: false },
     "/mobile-settings": { prerender: false },
     "/home": { prerender: false },
   },

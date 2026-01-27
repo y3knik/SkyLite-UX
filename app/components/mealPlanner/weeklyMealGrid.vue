@@ -149,9 +149,12 @@ function openInlineForm(dayOfWeek: number, mealType: MealType, meal?: any) {
     expandedDay.value = dayOfWeek;
   }
 
-  // Close previous form if different slot
-  if (inlineFormState.value?.dayOfWeek !== dayOfWeek
-    || inlineFormState.value?.mealType !== mealType) {
+  // Update form state if slot is different OR meal is different
+  const isDifferentSlot = inlineFormState.value?.dayOfWeek !== dayOfWeek
+    || inlineFormState.value?.mealType !== mealType;
+  const isDifferentMeal = inlineFormState.value?.editingMeal?.id !== meal?.id;
+
+  if (isDifferentSlot || isDifferentMeal || !inlineFormState.value?.isOpen) {
     inlineFormState.value = {
       isOpen: true,
       dayOfWeek,
@@ -200,12 +203,22 @@ function handleInlineFormDelete() {
 // Accordion animation hooks
 function onAccordionEnter(el: Element) {
   const element = el as HTMLElement;
+  // Start with height 0 and opacity 0
   element.style.height = "0";
   element.style.opacity = "0";
+
+  // Force reflow to ensure initial state is applied
+  void element.offsetHeight;
+
+  // Measure the full height and animate to it
+  const targetHeight = element.scrollHeight;
+  element.style.height = `${targetHeight}px`;
+  element.style.opacity = "1";
 }
 
 function onAccordionAfterEnter(el: Element) {
   const element = el as HTMLElement;
+  // Clear inline styles to use auto height
   element.style.height = "";
   element.style.opacity = "";
 }

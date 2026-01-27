@@ -5,11 +5,11 @@ import type { ShoppingListWithItemsAndCount, TodoWithUser } from "~/types/databa
 import type { EventSourceStatus, IntegrationSyncData, SyncConnectionStatus, SyncEvent } from "~/types/sync";
 
 export default defineNuxtPlugin((): any => {
-  // @ts-ignore - Capacitor is added via script tag in Capacitor builds
+  // @ts-expect-error - Capacitor is added via script tag in Capacitor builds
   const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 
   if (isCapacitor) {
-    console.log("[Sync Manager] Capacitor detected, skipping sync manager initialization");
+    consola.info("[Sync Manager] Capacitor detected, skipping sync manager initialization");
     return {
       provide: {
         // Return stub functions matching the real API so code doesn't break
