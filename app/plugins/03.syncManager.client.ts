@@ -5,7 +5,6 @@ import type { ShoppingListWithItemsAndCount, TodoWithUser } from "~/types/databa
 import type { EventSourceStatus, IntegrationSyncData, SyncConnectionStatus, SyncEvent } from "~/types/sync";
 
 export default defineNuxtPlugin((): any => {
-  // @ts-expect-error - Capacitor is added via script tag in Capacitor builds
   const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
 
   if (isCapacitor) {
