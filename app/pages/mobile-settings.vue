@@ -77,6 +77,10 @@ async function saveSettings() {
     // Test connection to the server
     console.log("[Mobile Settings] Testing connection to server...");
 
+    // Use AbortController for better WebView compatibility (Android 7-11)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     try {
       const testUrl = `${trimmedUrl}/api/app-settings`;
       console.log("[Mobile Settings] Test URL:", testUrl);
@@ -86,7 +90,7 @@ async function saveSettings() {
         headers: {
           "Accept": "application/json",
         },
-        signal: AbortSignal.timeout(5000), // 5 second timeout
+        signal: controller.signal,
       });
 
       console.log("[Mobile Settings] Response status:", testResponse.status);
@@ -97,6 +101,9 @@ async function saveSettings() {
       }
 
       console.log("[Mobile Settings] Server connection test successful");
+    }
+    finally {
+      clearTimeout(timeoutId);
     }
     catch (error: any) {
       // Log full error details

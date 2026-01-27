@@ -258,7 +258,7 @@ async function fetchWeather() {
     };
   }
   catch (error) {
-    console.error("Failed to fetch weather:", error);
+    consola.error("Failed to fetch weather:", error);
   }
 }
 
@@ -280,7 +280,7 @@ async function fetchUpcomingEvents() {
       $fetch<{ events: CalendarEvent[] }>(
         `/api/integrations/google_calendar/events?integrationId=${integration.id}`,
       ).catch((error) => {
-        console.error(`Failed to fetch events from integration ${integration.id}:`, error);
+        consola.error(`Failed to fetch events from integration ${integration.id}:`, error);
         return { events: [] };
       }),
     );
@@ -299,7 +299,7 @@ async function fetchUpcomingEvents() {
     upcomingEvents.value = upcoming;
   }
   catch (error) {
-    console.error("Failed to fetch events:", error);
+    consola.error("Failed to fetch events:", error);
     upcomingEvents.value = [];
   }
 }
@@ -371,7 +371,7 @@ async function fetchTodaysTasks() {
     todaysTasks.value = filtered;
   }
   catch (error) {
-    console.error("Failed to fetch tasks:", error);
+    consola.error("Failed to fetch tasks:", error);
   }
 }
 
@@ -427,7 +427,7 @@ async function fetchTodaysMenu() {
     ];
   }
   catch (error) {
-    console.error("Failed to fetch today's menu:", error);
+    consola.error("Failed to fetch today's menu:", error);
   }
 }
 
