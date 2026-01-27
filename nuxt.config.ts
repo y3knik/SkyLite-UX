@@ -171,6 +171,7 @@ export default defineNuxtConfig({
   nitro: {
     // Disable server plugins during static generation to prevent hanging
     // setInterval in syncManager keeps process alive during 'nuxt generate'
+    // eslint-disable-next-line node/no-process-env
     plugins: process.env.CAPACITOR_BUILD === "true"
       ? []
       : [

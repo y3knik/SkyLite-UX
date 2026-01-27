@@ -73,6 +73,7 @@ function handleSave() {
 }
 
 function handleDelete() {
+  // eslint-disable-next-line no-alert
   if (confirm("Are you sure you want to delete this meal?")) {
     emit("delete");
   }

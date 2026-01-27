@@ -19,13 +19,13 @@ async function loadPendingMeals() {
   pendingMeals.value = await getPendingMeals();
 }
 
-async function retrySync(id: string) {
+async function retrySync() {
   try {
     await triggerSync();
     await loadPendingMeals();
     showSuccess("Sync Triggered", "Attempting to sync pending meals");
   }
-  catch (error) {
+  catch {
     showError("Sync Failed", "Failed to trigger sync");
   }
 }
@@ -37,7 +37,7 @@ async function deleteFromQueue(id: string) {
     await loadPendingMeals();
     showSuccess("Deleted", "Meal removed from queue");
   }
-  catch (error) {
+  catch {
     showError("Delete Failed", "Failed to remove meal from queue");
   }
 }
@@ -48,7 +48,7 @@ async function syncAll() {
     await loadPendingMeals();
     showSuccess("Sync Started", "Syncing all pending meals");
   }
-  catch (error) {
+  catch {
     showError("Sync Failed", "Failed to sync meals");
   }
 }
@@ -62,7 +62,7 @@ async function clearAll() {
     await loadPendingMeals();
     showSuccess("Cleared", "All pending meals removed");
   }
-  catch (error) {
+  catch {
     showError("Clear Failed", "Failed to clear queue");
   }
 }

@@ -31,7 +31,7 @@ const mealTypeLabels: Record<MealType, string> = {
 };
 
 // Mobile detection - use Capacitor detection for reliability on high DPI devices
-// @ts-ignore - Capacitor is added via script tag in Capacitor builds
+// @ts-expect-error - Capacitor is added via script tag in Capacitor builds
 const isMobile = typeof window !== "undefined" && "Capacitor" in window;
 const movingMeal = ref<MealWithPending | null>(null);
 
@@ -220,7 +220,7 @@ function onAccordionLeave(el: Element) {
   element.style.height = height;
 
   // Force reflow
-  getComputedStyle(element).height;
+  void getComputedStyle(element).height;
 
   element.style.height = "0";
   element.style.opacity = "0";

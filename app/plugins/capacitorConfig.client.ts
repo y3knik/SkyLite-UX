@@ -1,5 +1,5 @@
 export default defineNuxtPlugin(async () => {
-  // @ts-ignore - Capacitor is added via script tag in Capacitor builds
+  // @ts-expect-error - Capacitor is added via script tag in Capacitor builds
   if (typeof window !== "undefined" && "Capacitor" in window) {
     try {
       // Dynamically import Capacitor plugins to avoid SSR issues
@@ -10,7 +10,7 @@ export default defineNuxtPlugin(async () => {
       const serverUrl = value || null;
 
       // Store serverUrl in window for access by other components
-      // @ts-ignore
+      // @ts-expect-error - Extended Window type
       window.__CAPACITOR_SERVER_URL__ = serverUrl;
 
       // Override $fetch to use server URL for API calls
