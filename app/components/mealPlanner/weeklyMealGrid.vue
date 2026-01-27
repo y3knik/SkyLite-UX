@@ -31,7 +31,6 @@ const mealTypeLabels: Record<MealType, string> = {
 };
 
 // Mobile detection - use Capacitor detection for reliability on high DPI devices
-// @ts-expect-error - Capacitor is added via script tag in Capacitor builds
 const isMobile = typeof window !== "undefined" && "Capacitor" in window;
 const movingMeal = ref<MealWithPending | null>(null);
 

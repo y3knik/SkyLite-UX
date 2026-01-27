@@ -144,7 +144,7 @@ const dayLabels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
               size="xs"
               variant="ghost"
               icon="i-lucide-refresh-cw"
-              @click="retrySync(item.id)"
+              @click="retrySync()"
             >
               Retry
             </UButton>
