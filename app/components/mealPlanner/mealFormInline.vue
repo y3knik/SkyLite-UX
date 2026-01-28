@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import type { MealType } from "~/types/database";
 
 type Props = {
@@ -23,6 +24,10 @@ const description = ref("");
 const daysInAdvance = ref(0);
 const error = ref<string | null>(null);
 
+// Refs for input elements
+const nameInputRef = ref<any>(null);
+const daysInputRef = ref<any>(null);
+
 // Day names (Monday=0 to Sunday=6)
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const dayName = computed(() => dayNames[props.dayOfWeek]);
@@ -46,6 +51,31 @@ watch(() => props.editingMeal, (meal) => {
     resetForm();
   }
 }, { immediate: true });
+
+// Add Enter key listener to native inputs after mount
+onMounted(() => {
+  // Find the actual native input elements inside UInput components
+  const attachEnterListener = (ref: any) => {
+    if (!ref)
+      return;
+
+    // UInput wraps the native input - find it
+    const nativeInput = ref.$el?.querySelector("input") || ref.$el;
+
+    if (nativeInput && nativeInput.addEventListener) {
+      nativeInput.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleSave();
+        }
+      });
+    }
+  };
+
+  // Attach to both input refs
+  attachEnterListener(nameInputRef.value);
+  attachEnterListener(daysInputRef.value);
+});
 
 function resetForm() {
   name.value = "";
@@ -111,6 +141,7 @@ function handleDelete() {
     <div class="space-y-1">
       <label class="block text-xs font-medium text-highlighted">Meal Name</label>
       <UInput
+        ref="nameInputRef"
         v-model="name"
         placeholder="e.g., Grilled Chicken Salad"
         size="lg"
@@ -133,6 +164,7 @@ function handleDelete() {
     <div class="space-y-1">
       <label class="block text-xs font-medium text-highlighted">Prep Days in Advance</label>
       <UInput
+        ref="daysInputRef"
         v-model.number="daysInAdvance"
         type="number"
         :min="0"
