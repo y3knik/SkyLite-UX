@@ -168,7 +168,6 @@ function handleDelete() {
         v-model="name"
         placeholder="e.g., Grilled Chicken Salad"
         size="lg"
-        :ui="{ input: 'enterkeyhint-done' }"
       />
     </div>
 
