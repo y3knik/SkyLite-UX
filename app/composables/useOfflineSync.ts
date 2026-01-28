@@ -17,6 +17,7 @@ let _pendingCount = ref(0);
 let _lastSyncTime = ref<Date | null>(null);
 let _syncError = ref<string | null>(null);
 let _initialized = false;
+let _refCount = 0; // Track number of active components
 let _syncInterval: NodeJS.Timeout | null = null;
 let _healthCheckInterval: NodeJS.Timeout | null = null;
 let _networkListener: any = null;
@@ -165,6 +166,8 @@ export function useOfflineSync() {
 
   // Initialize on client (only once for singleton)
   onMounted(async () => {
+    _refCount++;
+
     if (_initialized) {
       return;
     }
@@ -217,9 +220,37 @@ export function useOfflineSync() {
   });
 
   // Cleanup on unmount - Note: Singleton state persists across all components
-  // Only cleanup when last component unmounts (not implemented for simplicity)
+  // Only cleanup when last component unmounts
   onUnmounted(async () => {
-    // Skip cleanup for singleton - state should persist across components
+    _refCount--;
+
+    // Only cleanup when last component unmounts
+    if (_refCount === 0) {
+      // Clear intervals
+      if (_syncInterval) {
+        clearInterval(_syncInterval);
+        _syncInterval = null;
+      }
+
+      if (_healthCheckInterval) {
+        clearInterval(_healthCheckInterval);
+        _healthCheckInterval = null;
+      }
+
+      // Remove network listener
+      if (isCapacitor && _networkListener) {
+        await _networkListener.remove();
+        _networkListener = null;
+      }
+      else if (!isCapacitor) {
+        // Remove browser event listeners
+        window.removeEventListener("online", onOnlineHandler);
+        window.removeEventListener("offline", onOfflineHandler);
+      }
+
+      // Reset initialized flag so future mounts reinitialize
+      _initialized = false;
+    }
   });
 
   return {

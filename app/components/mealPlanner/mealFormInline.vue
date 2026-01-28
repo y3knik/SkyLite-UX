@@ -28,6 +28,9 @@ const error = ref<string | null>(null);
 const nameInputRef = ref<any>(null);
 const daysInputRef = ref<any>(null);
 
+// Store event listener cleanup data
+const eventListenerCleanup: Array<{ el: HTMLElement; handler: (e: KeyboardEvent) => void }> = [];
+
 // Day names (Monday=0 to Sunday=6)
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const dayName = computed(() => dayNames[props.dayOfWeek]);
@@ -66,20 +69,34 @@ onMounted(() => {
       // Set enterkeyhint to tell Android keyboard what action to show
       nativeInput.setAttribute("enterkeyhint", "done");
 
-      // Use keyup instead of keydown - fires AFTER composition (keyCode 229) is done
-      nativeInput.addEventListener("keyup", (e: KeyboardEvent) => {
+      // Create handler function
+      const handler = (e: KeyboardEvent) => {
         // Android keyboards: keyCode 229 during composition, then actual key on keyup
         if (e.key === "Enter" || e.keyCode === 13) {
           e.preventDefault();
           handleSave();
         }
-      });
+      };
+
+      // Use keyup instead of keydown - fires AFTER composition (keyCode 229) is done
+      nativeInput.addEventListener("keyup", handler);
+
+      // Store for cleanup
+      eventListenerCleanup.push({ el: nativeInput, handler });
     }
   };
 
   // Attach to both input refs
   attachEnterListener(nameInputRef.value);
   attachEnterListener(daysInputRef.value);
+});
+
+// Cleanup event listeners on unmount
+onBeforeUnmount(() => {
+  eventListenerCleanup.forEach(({ el, handler }) => {
+    el.removeEventListener("keyup", handler);
+  });
+  eventListenerCleanup.length = 0;
 });
 
 function resetForm() {
