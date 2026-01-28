@@ -63,6 +63,11 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
+function handleFormSubmit(event: Event) {
+  event.preventDefault();
+  handleSave();
+}
+
 function handleSave() {
   // Validation
   if (!name.value.trim()) {
@@ -90,7 +95,7 @@ function handleDelete() {
 </script>
 
 <template>
-  <div class="inline-form border border-default rounded-lg p-3 bg-default space-y-2.5">
+  <form class="inline-form border border-default rounded-lg p-3 bg-default space-y-2.5" @submit="handleFormSubmit">
     <!-- Error message display -->
     <div v-if="error" class="bg-error/10 text-error rounded-md px-3 py-2 text-sm">
       {{ error }}
@@ -109,8 +114,6 @@ function handleDelete() {
         v-model="name"
         placeholder="e.g., Grilled Chicken Salad"
         size="lg"
-        @keydown="handleKeyDown"
-        @keydown.enter.prevent="handleSave"
       />
     </div>
 
@@ -135,8 +138,6 @@ function handleDelete() {
         :min="0"
         :max="7"
         size="lg"
-        @keydown="handleKeyDown"
-        @keydown.enter.prevent="handleSave"
       />
       <p class="text-xs text-muted">
         Days before to start prep
@@ -146,6 +147,7 @@ function handleDelete() {
     <!-- Action buttons -->
     <div class="flex gap-2 pt-1">
       <UButton
+        type="button"
         color="neutral"
         variant="outline"
         size="md"
@@ -155,10 +157,10 @@ function handleDelete() {
         Cancel
       </UButton>
       <UButton
+        type="submit"
         color="primary"
         size="md"
         class="flex-1"
-        @click="handleSave"
       >
         {{ editingMeal ? 'Update' : 'Add' }}
       </UButton>
@@ -172,9 +174,10 @@ function handleDelete() {
       icon="i-lucide-trash"
       size="md"
       class="w-full"
+      type="button"
       @click="handleDelete"
     >
       Delete Meal
     </UButton>
-  </div>
+  </form>
 </template>
