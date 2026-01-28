@@ -75,8 +75,9 @@ onMounted(() => {
     if (nativeInput && nativeInput.addEventListener) {
       console.log(`[MealFormInline] Attaching listener to ${fieldName}`);
       nativeInput.addEventListener("keydown", (e: KeyboardEvent) => {
-        console.log(`[MealFormInline] ${fieldName} keydown:`, e.key);
-        if (e.key === "Enter") {
+        console.log(`[MealFormInline] ${fieldName} keydown:`, e.key, "keyCode:", e.keyCode);
+        // Android keyboards often send "Unidentified" for Enter, check keyCode instead
+        if (e.key === "Enter" || e.keyCode === 13) {
           console.log(`[MealFormInline] Enter pressed in ${fieldName} - calling handleSave`);
           e.preventDefault();
           handleSave();
@@ -102,9 +103,10 @@ function resetForm() {
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-  console.log("[MealFormInline] handleKeyDown:", event.key, "shiftKey:", event.shiftKey);
+  console.log("[MealFormInline] handleKeyDown:", event.key, "keyCode:", event.keyCode, "shiftKey:", event.shiftKey);
   // Check if Enter key is pressed (without Shift for textarea)
-  if (event.key === "Enter" && !event.shiftKey) {
+  // Android keyboards send "Unidentified" for Enter, check keyCode 13 instead
+  if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey) {
     console.log("[MealFormInline] handleKeyDown - Enter detected, calling handleSave");
     event.preventDefault();
     event.stopPropagation();
