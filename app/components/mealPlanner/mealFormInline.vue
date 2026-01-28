@@ -54,7 +54,12 @@ function resetForm() {
   error.value = null;
 }
 
-function handleSave() {
+function handleSave(event?: Event) {
+  // Prevent default form behavior (navigation to next field)
+  if (event) {
+    event.preventDefault();
+  }
+
   // Validation
   if (!name.value.trim()) {
     error.value = "Meal name is required";
@@ -100,7 +105,7 @@ function handleDelete() {
         v-model="name"
         placeholder="e.g., Grilled Chicken Salad"
         size="lg"
-        @keydown.enter="handleSave"
+        @keydown.enter.prevent="handleSave"
       />
     </div>
 
@@ -112,6 +117,7 @@ function handleDelete() {
         placeholder="Notes..."
         :rows="2"
         class="text-base resize-none"
+        @keydown.enter.prevent="handleSave"
       />
     </div>
 
@@ -124,6 +130,7 @@ function handleDelete() {
         :min="0"
         :max="7"
         size="lg"
+        @keydown.enter.prevent="handleSave"
       />
       <p class="text-xs text-muted">
         Days before to start prep
