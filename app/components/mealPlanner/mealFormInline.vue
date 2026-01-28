@@ -54,50 +54,32 @@ watch(() => props.editingMeal, (meal) => {
 
 // Add Enter key listener to native inputs after mount
 onMounted(() => {
-  console.log("[MealFormInline] onMounted - Setting up Enter listeners");
-  console.log("[MealFormInline] nameInputRef:", nameInputRef.value);
-  console.log("[MealFormInline] daysInputRef:", daysInputRef.value);
-
   // Find the actual native input elements inside UInput components
-  const attachEnterListener = (ref: any, fieldName: string) => {
-    console.log(`[MealFormInline] attachEnterListener for ${fieldName}`, ref);
-
-    if (!ref) {
-      console.warn(`[MealFormInline] ${fieldName} ref is null`);
+  const attachEnterListener = (ref: any) => {
+    if (!ref)
       return;
-    }
 
     // UInput wraps the native input - find it
     const nativeInput = ref.$el?.querySelector("input") || ref.$el;
-    console.log(`[MealFormInline] ${fieldName} native input:`, nativeInput);
-    console.log(`[MealFormInline] ${fieldName} native input type:`, nativeInput?.tagName);
 
     if (nativeInput && nativeInput.addEventListener) {
-      console.log(`[MealFormInline] Attaching listener to ${fieldName}`);
-
       // Set enterkeyhint to tell Android keyboard what action to show
       nativeInput.setAttribute("enterkeyhint", "done");
 
       // Use keyup instead of keydown - fires AFTER composition (keyCode 229) is done
       nativeInput.addEventListener("keyup", (e: KeyboardEvent) => {
-        console.log(`[MealFormInline] ${fieldName} keyup:`, e.key, "keyCode:", e.keyCode);
         // Android keyboards: keyCode 229 during composition, then actual key on keyup
         if (e.key === "Enter" || e.keyCode === 13) {
-          console.log(`[MealFormInline] Enter pressed in ${fieldName} - calling handleSave`);
           e.preventDefault();
           handleSave();
         }
       });
-      console.log(`[MealFormInline] Listener attached to ${fieldName} successfully`);
-    }
-    else {
-      console.warn(`[MealFormInline] Could not attach listener to ${fieldName}`);
     }
   };
 
   // Attach to both input refs
-  attachEnterListener(nameInputRef.value, "name");
-  attachEnterListener(daysInputRef.value, "days");
+  attachEnterListener(nameInputRef.value);
+  attachEnterListener(daysInputRef.value);
 });
 
 function resetForm() {
@@ -108,11 +90,9 @@ function resetForm() {
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-  console.log("[MealFormInline] handleKeyDown:", event.key, "keyCode:", event.keyCode, "shiftKey:", event.shiftKey);
   // Check if Enter key is pressed (without Shift for textarea)
   // Android keyboards send "Unidentified" for Enter, check keyCode 13 instead
   if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey) {
-    console.log("[MealFormInline] handleKeyDown - Enter detected, calling handleSave");
     event.preventDefault();
     event.stopPropagation();
     handleSave();
@@ -120,35 +100,25 @@ function handleKeyDown(event: KeyboardEvent) {
 }
 
 function handleFormSubmit(event: Event) {
-  console.log("[MealFormInline] handleFormSubmit called");
   event.preventDefault();
   handleSave();
 }
 
 function handleSave() {
-  console.log("[MealFormInline] handleSave called", {
-    name: name.value,
-    description: description.value,
-    daysInAdvance: daysInAdvance.value,
-  });
-
   // Validation
   if (!name.value.trim()) {
-    console.warn("[MealFormInline] Validation failed - name is empty");
     error.value = "Meal name is required";
     return;
   }
 
   error.value = null;
 
-  console.log("[MealFormInline] Emitting save event");
   emit("save", {
     name: name.value.trim(),
     description: description.value.trim(),
     daysInAdvance: daysInAdvance.value,
   });
 
-  console.log("[MealFormInline] Resetting form");
   resetForm();
 }
 
