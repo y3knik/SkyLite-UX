@@ -54,12 +54,16 @@ function resetForm() {
   error.value = null;
 }
 
-function handleSave(event?: Event) {
-  // Prevent default form behavior (navigation to next field)
-  if (event) {
+function handleKeyDown(event: KeyboardEvent) {
+  // Check if Enter key is pressed (without Shift for textarea)
+  if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
+    event.stopPropagation();
+    handleSave();
   }
+}
 
+function handleSave() {
   // Validation
   if (!name.value.trim()) {
     error.value = "Meal name is required";
@@ -105,6 +109,7 @@ function handleDelete() {
         v-model="name"
         placeholder="e.g., Grilled Chicken Salad"
         size="lg"
+        @keydown="handleKeyDown"
         @keydown.enter.prevent="handleSave"
       />
     </div>
@@ -117,7 +122,7 @@ function handleDelete() {
         placeholder="Notes..."
         :rows="2"
         class="text-base resize-none"
-        @keydown.enter.prevent="handleSave"
+        @keydown="handleKeyDown"
       />
     </div>
 
@@ -130,6 +135,7 @@ function handleDelete() {
         :min="0"
         :max="7"
         size="lg"
+        @keydown="handleKeyDown"
         @keydown.enter.prevent="handleSave"
       />
       <p class="text-xs text-muted">
