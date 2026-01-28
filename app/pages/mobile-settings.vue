@@ -102,9 +102,6 @@ async function saveSettings() {
 
       console.log("[Mobile Settings] Server connection test successful");
     }
-    finally {
-      clearTimeout(timeoutId);
-    }
     catch (error: any) {
       // Log full error details
       console.error("[Mobile Settings] Connection test failed");
@@ -129,6 +126,9 @@ async function saveSettings() {
         throw new Error(`Connection failed: ${error.name} - ${error.message}`);
       }
       throw new Error("Failed to connect to server. Please verify the URL and try again.");
+    }
+    finally {
+      clearTimeout(timeoutId);
     }
 
     // Dynamically import Capacitor
