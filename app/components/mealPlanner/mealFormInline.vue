@@ -74,9 +74,14 @@ onMounted(() => {
 
     if (nativeInput && nativeInput.addEventListener) {
       console.log(`[MealFormInline] Attaching listener to ${fieldName}`);
-      nativeInput.addEventListener("keydown", (e: KeyboardEvent) => {
-        console.log(`[MealFormInline] ${fieldName} keydown:`, e.key, "keyCode:", e.keyCode);
-        // Android keyboards often send "Unidentified" for Enter, check keyCode instead
+
+      // Set enterkeyhint to tell Android keyboard what action to show
+      nativeInput.setAttribute("enterkeyhint", "done");
+
+      // Use keyup instead of keydown - fires AFTER composition (keyCode 229) is done
+      nativeInput.addEventListener("keyup", (e: KeyboardEvent) => {
+        console.log(`[MealFormInline] ${fieldName} keyup:`, e.key, "keyCode:", e.keyCode);
+        // Android keyboards: keyCode 229 during composition, then actual key on keyup
         if (e.key === "Enter" || e.keyCode === 13) {
           console.log(`[MealFormInline] Enter pressed in ${fieldName} - calling handleSave`);
           e.preventDefault();
@@ -176,6 +181,7 @@ function handleDelete() {
         v-model="name"
         placeholder="e.g., Grilled Chicken Salad"
         size="lg"
+        :ui="{ input: 'enterkeyhint-done' }"
       />
     </div>
 
