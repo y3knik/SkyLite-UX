@@ -48,13 +48,16 @@ export function useOfflineSync() {
 
       consola.info("[Offline Sync] Checking server reachability:", serverUrl);
 
-      // Lightweight health check - use HEAD request to avoid downloading data
+      // Use GET request (HEAD not supported by server)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
 
       try {
         const response = await fetch(`${serverUrl}/api/app-settings`, {
-          method: "HEAD",
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+          },
           signal: controller.signal,
         });
 
