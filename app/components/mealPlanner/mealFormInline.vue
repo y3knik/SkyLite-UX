@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
+
 import type { MealType } from "~/types/database";
 
 type Props = {

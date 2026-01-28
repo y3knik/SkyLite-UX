@@ -72,7 +72,7 @@ async function loadWeekMealPlan() {
       currentPlan.value = plan;
     }
   }
-  catch (error: any) {
+  catch {
     showError("Load Failed", "Failed to load meal plan. Please try again.");
   }
   finally {
