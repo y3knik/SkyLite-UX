@@ -46,8 +46,6 @@ export function useOfflineSync() {
         return true;
       }
 
-      consola.info("[Offline Sync] Checking server reachability:", serverUrl);
-
       // Use GET request (HEAD not supported by server)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
@@ -64,12 +62,10 @@ export function useOfflineSync() {
         clearTimeout(timeoutId);
 
         const reachable = response.ok;
-        consola.info("[Offline Sync] Server reachable:", reachable);
         return reachable;
       }
       catch (fetchError: any) {
         clearTimeout(timeoutId);
-        consola.warn("[Offline Sync] Server not reachable:", fetchError.message);
         return false;
       }
     }
@@ -85,15 +81,8 @@ export function useOfflineSync() {
     const wasOnline = _isOnline.value;
     _isOnline.value = reachable;
 
-    consola.info("[Offline Sync] Online status updated:", {
-      wasOnline,
-      isOnline: _isOnline.value,
-      changed: wasOnline !== _isOnline.value,
-    });
-
     // Trigger sync if we just came online
     if (!wasOnline && _isOnline.value) {
-      consola.info("[Offline Sync] Server became reachable, triggering sync");
       triggerSync();
     }
   }
@@ -155,22 +144,15 @@ export function useOfflineSync() {
 
   // Event handlers for cleanup (web only)
   const onOnlineHandler = async () => {
-    consola.info("[Offline Sync] Browser reported online event");
     await updateOnlineStatus();
   };
 
   const onOfflineHandler = () => {
-    consola.info("[Offline Sync] Browser reported offline event");
     _isOnline.value = false;
   };
 
   // Capacitor Network listener - check server reachability, not just device connectivity
   const onNetworkChange = async (status: any) => {
-    consola.info("[Offline Sync] Network status changed:", {
-      connected: status.connected,
-      connectionType: status.connectionType,
-    });
-
     if (status.connected) {
       // Device has network, but can we reach the server?
       await updateOnlineStatus();
@@ -184,22 +166,16 @@ export function useOfflineSync() {
   // Initialize on client (only once for singleton)
   onMounted(async () => {
     if (_initialized) {
-      consola.info("[Offline Sync] Already initialized, skipping");
       return;
     }
 
     _initialized = true;
-    consola.info("[Offline Sync] Initializing offline sync (singleton)...");
 
     if (isCapacitor) {
       // Dynamically import Capacitor Network API
       const { Network } = await import("@capacitor/network");
 
       const status = await Network.getStatus();
-      consola.info("[Offline Sync] Initial network status:", {
-        connected: status.connected,
-        connectionType: status.connectionType,
-      });
 
       // Check actual server reachability, not just device connectivity
       if (status.connected) {
@@ -227,7 +203,6 @@ export function useOfflineSync() {
     // Auto-sync periodically when online
     _syncInterval = setInterval(() => {
       if (_isOnline.value && _pendingCount.value > 0) {
-        consola.info("[Offline Sync] Periodic sync check: triggering sync");
         triggerSync();
       }
     }, 30000);
@@ -236,7 +211,6 @@ export function useOfflineSync() {
     // This catches cases where network type changes (wifi->5G) without triggering network event
     if (isCapacitor) {
       _healthCheckInterval = setInterval(async () => {
-        consola.info("[Offline Sync] Periodic health check");
         await updateOnlineStatus();
       }, 10000);
     }
@@ -246,7 +220,6 @@ export function useOfflineSync() {
   // Only cleanup when last component unmounts (not implemented for simplicity)
   onUnmounted(async () => {
     // Skip cleanup for singleton - state should persist across components
-    consola.info("[Offline Sync] Component unmounted (singleton state persists)");
   });
 
   return {
