@@ -1,53 +1,44 @@
 <template>
-  <div
+  <NuxtLink
     v-if="countdown"
-    class="countdown-widget relative overflow-hidden rounded-2xl p-8 shadow-2xl cursor-pointer transition-transform hover:scale-105"
-    @click="navigateToTodos"
+    to="/toDoLists"
+    class="text-white text-right bg-black/30 backdrop-blur-sm hover:bg-black/40 rounded-lg p-4 transition-colors cursor-pointer block"
   >
-    <!-- Gradient Background -->
-    <div class="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 opacity-90" />
+    <h2 class="text-2xl font-semibold mb-4">
+      Countdown
+    </h2>
 
-    <!-- Content -->
-    <div class="relative z-10 text-white">
-      <!-- Event Name -->
-      <h2 class="text-4xl font-bold mb-4 text-center drop-shadow-lg">
+    <div class="space-y-3">
+      <!-- Event Title -->
+      <div class="text-xl font-medium">
         {{ countdown.title }}
-      </h2>
+      </div>
 
       <!-- Days Remaining -->
-      <div class="text-center mb-6">
-        <div class="text-8xl font-extrabold drop-shadow-lg">
+      <div class="flex items-baseline justify-end gap-2">
+        <div class="text-5xl font-bold">
           {{ daysRemainingDisplay }}
         </div>
-        <div class="text-2xl font-medium opacity-90">
+        <div v-if="daysRemainingLabel" class="text-lg opacity-80">
           {{ daysRemainingLabel }}
         </div>
       </div>
 
       <!-- AI-Generated Message -->
-      <div v-if="displayMessage" class="text-center">
-        <p class="text-xl italic opacity-95 drop-shadow">
-          "{{ displayMessage }}"
-        </p>
+      <div v-if="displayMessage" class="text-sm italic opacity-80 border-t border-white/20 pt-3">
+        "{{ displayMessage }}"
       </div>
 
       <!-- Loading State -->
-      <div v-else-if="loadingMessage" class="text-center">
-        <UIcon name="i-heroicons-sparkles" class="w-6 h-6 animate-spin inline-block" />
-        <span class="ml-2">Generating message...</span>
+      <div v-else-if="loadingMessage" class="text-sm opacity-70 flex items-center justify-end gap-2">
+        <UIcon name="i-heroicons-sparkles" class="w-4 h-4 animate-spin" />
+        <span>Generating message...</span>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 
-  <!-- Loading Skeleton -->
-  <div
-    v-else-if="loading"
-    class="countdown-widget-skeleton rounded-2xl p-8 shadow-2xl"
-  >
-    <USkeleton class="h-12 w-3/4 mx-auto mb-4" />
-    <USkeleton class="h-24 w-32 mx-auto mb-6" />
-    <USkeleton class="h-8 w-2/3 mx-auto" />
-  </div>
+  <!-- Empty state when no countdown -->
+  <div v-else-if="!loading" class="hidden" />
 </template>
 
 <script setup lang="ts">
@@ -71,8 +62,8 @@ const daysRemainingDisplay = computed(() => {
 
 const daysRemainingLabel = computed(() => {
   if (daysRemaining.value === 0) return "";
-  if (daysRemaining.value === 1) return "day to go";
-  return "days to go";
+  if (daysRemaining.value === 1) return "day";
+  return "days";
 });
 
 const loadCountdown = async () => {
@@ -107,10 +98,6 @@ const loadCountdown = async () => {
   }
 };
 
-const navigateToTodos = () => {
-  navigateTo("/toDoLists");
-};
-
 let intervalId: NodeJS.Timeout | null = null;
 
 onMounted(async () => {
@@ -135,14 +122,3 @@ onUnmounted(() => {
   }
 });
 </script>
-
-<style scoped>
-.countdown-widget {
-  min-height: 300px;
-}
-
-.countdown-widget-skeleton {
-  min-height: 300px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-}
-</style>

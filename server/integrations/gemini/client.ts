@@ -113,11 +113,11 @@ export class GeminiClient {
 
   private buildCountdownPrompt(eventName: string, daysRemaining: number): string {
     if (daysRemaining === 0) {
-      return `Generate a short, whimsical, and exciting message (max 15 words) for an event happening TODAY called "${eventName}". Make it feel special and urgent. Family-friendly only.`;
+      return `Create a super fun, playful, and exciting message (max 12 words) for an event happening TODAY called "${eventName}". Use emojis! Make it feel like a celebration. Be creative and whimsical. Family-friendly.`;
     } else if (daysRemaining === 1) {
-      return `Generate a short, whimsical, and exciting message (max 15 words) for an event happening TOMORROW called "${eventName}". Make it feel anticipatory. Family-friendly only.`;
+      return `Create a super fun, playful, and exciting message (max 12 words) for an event happening TOMORROW called "${eventName}". Use emojis! Make it feel anticipatory and magical. Be creative and whimsical. Family-friendly.`;
     } else {
-      return `Generate a short, whimsical, and exciting message (max 15 words) for an event "${eventName}" happening in ${daysRemaining} days. Make it fun and creative. Family-friendly only.`;
+      return `Create a super fun, playful, and exciting message (max 12 words) for an event "${eventName}" happening in ${daysRemaining} days. Use emojis! Be creative, whimsical, and make it sound magical. Family-friendly.`;
     }
   }
 
