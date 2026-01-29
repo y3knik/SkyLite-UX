@@ -166,6 +166,9 @@ export type TodoListItem = BaseListItem & {
   dueDate: Date | null;
   todoColumnId: string;
   shoppingListId: string;
+  isCountdown?: boolean;
+  countdownMessage?: string | null;
+  messageGeneratedAt?: Date | null;
 };
 
 export type TodoWithOrder = TodoWithUser & { order: number };
