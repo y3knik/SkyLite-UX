@@ -121,6 +121,27 @@ export class GooglePhotosServerService {
   }
 
   /**
+   * Gets the current access token and expiry, refreshing if necessary
+   */
+  async getAccessTokenWithExpiry(): Promise<{ accessToken: string; expiry: number }> {
+    await this.ensureValidToken();
+
+    const credentials = this.oauth2Client.credentials;
+    const accessToken = credentials.access_token;
+    const expiry = credentials.expiry_date;
+
+    if (!accessToken) {
+      throw new Error("No access token available after refresh");
+    }
+
+    if (!expiry) {
+      throw new Error("No expiry date available after refresh");
+    }
+
+    return { accessToken, expiry };
+  }
+
+  /**
    * Creates a Google Photos Picker session
    */
   async createPickerSession(): Promise<{ sessionId: string; pickerUri: string }> {

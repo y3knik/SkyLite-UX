@@ -109,8 +109,8 @@ export default defineEventHandler(async (event) => {
       },
     );
 
-    // Get access token (will refresh if needed)
-    const accessToken = await service.getAccessToken();
+    // Get access token and expiry (will refresh if needed)
+    const { accessToken, expiry } = await service.getAccessTokenWithExpiry();
 
     consola.success("Access token retrieved successfully", {
       integrationId: integration.id,
@@ -119,7 +119,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       accessToken,
-      expiryDate: settings.tokenExpiry,
+      expiryDate: expiry,
     };
   }
   catch (error) {
