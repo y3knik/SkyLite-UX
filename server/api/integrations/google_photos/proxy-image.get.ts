@@ -1,5 +1,4 @@
 import { consola } from "consola";
-import { Buffer } from "node:buffer";
 import { readFile, stat } from "node:fs/promises";
 
 import prisma from "~/lib/prisma";

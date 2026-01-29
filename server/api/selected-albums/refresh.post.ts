@@ -2,9 +2,6 @@ import { consola } from "consola";
 
 import prisma from "~/lib/prisma";
 
-import { GooglePhotosServerService } from "../../../server/integrations/google_photos";
-import { getGoogleOAuthConfig } from "../../../server/utils/googleOAuthConfig";
-
 /**
  * NOTE: As of March 31, 2025, Google Photos Library API no longer allows
  * access to user's existing albums. Photos are now downloaded and stored

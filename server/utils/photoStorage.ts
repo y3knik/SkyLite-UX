@@ -6,8 +6,12 @@ import { pipeline } from "node:stream/promises";
 
 /**
  * Storage configuration for photos
+ * Using a function to avoid direct process.env access at module level
  */
-const STORAGE_DIR = process.env.PHOTOS_STORAGE_PATH || join(process.cwd(), "storage", "photos");
+function getStorageDirectory(): string {
+  return join(process.cwd(), "storage", "photos");
+}
+
 const DEFAULT_IMAGE_WIDTH = 1920;
 const DEFAULT_IMAGE_HEIGHT = 1080;
 
@@ -16,7 +20,8 @@ const DEFAULT_IMAGE_HEIGHT = 1080;
  */
 async function ensureStorageDir(): Promise<void> {
   try {
-    await mkdir(STORAGE_DIR, { recursive: true });
+    const storageDir = getStorageDirectory();
+    await mkdir(storageDir, { recursive: true });
   }
   catch (error) {
     consola.error("Failed to create storage directory:", error);
@@ -44,7 +49,8 @@ export async function downloadAndSavePhoto(
 
   // Add size parameters to get optimized image
   const imageUrl = `${baseUrl}=w${width}-h${height}`;
-  const filepath = join(STORAGE_DIR, filename);
+  const storageDir = getStorageDirectory();
+  const filepath = join(storageDir, filename);
 
   consola.info(`Downloading photo to: ${filepath}`);
 
@@ -82,7 +88,8 @@ export async function downloadAndSavePhoto(
  * Gets the full filesystem path for a stored photo
  */
 export function getPhotoPath(filename: string): string {
-  return join(STORAGE_DIR, filename);
+  const storageDir = getStorageDirectory();
+  return join(storageDir, filename);
 }
 
 /**
@@ -104,5 +111,5 @@ export async function deletePhoto(filename: string): Promise<void> {
  * Gets the storage directory path
  */
 export function getStorageDir(): string {
-  return STORAGE_DIR;
+  return getStorageDirectory();
 }
