@@ -1,10 +1,12 @@
 import { consola } from "consola";
 import { Buffer } from "node:buffer";
+import { readFile, stat } from "node:fs/promises";
 
 import prisma from "~/lib/prisma";
 
 import { GooglePhotosServerService } from "../../../integrations/google_photos";
 import { getGoogleOAuthConfig } from "../../../utils/googleOAuthConfig";
+import { downloadAndSavePhoto, getPhotoPath } from "../../../utils/photoStorage";
 
 // Allowed Google Photos domains for SSRF protection
 const ALLOWED_DOMAINS = [
@@ -141,15 +143,62 @@ export default defineEventHandler(async (event) => {
       },
     );
 
-    // Fetch image (handles token refresh automatically)
+    // Check if we have a local copy first
+    if (photo.localImagePath) {
+      try {
+        const localPath = getPhotoPath(photo.localImagePath);
+
+        // Check if file exists
+        await stat(localPath);
+
+        // Serve from local storage
+        const buffer = await readFile(localPath);
+
+        setHeader(event, "Content-Type", "image/jpeg");
+        setHeader(event, "Cache-Control", "public, max-age=31536000"); // Cache for 1 year (local file won't change)
+
+        consola.info(`Serving photo from local storage: ${photo.localImagePath}`);
+        return buffer;
+      }
+      catch (fileError) {
+        consola.warn(`Local file not found, will download: ${photo.localImagePath}`, fileError);
+        // Fall through to download
+      }
+    }
+
+    // No local copy or file missing - download and save it
     try {
-      const { buffer, contentType } = await service.fetchImage(imageUrl);
+      consola.info(`Downloading and saving photo: ${photoId}`);
 
-      // Set response headers
-      setHeader(event, "Content-Type", contentType);
-      setHeader(event, "Cache-Control", "public, max-age=86400"); // Cache for 1 day
+      // Get access token
+      const accessToken = await service.getAccessToken();
 
-      return Buffer.from(buffer);
+      // Download and save
+      const filename = `album-${photoId}.jpg`;
+      const localPath = await downloadAndSavePhoto(
+        photo.coverPhotoUrl!,
+        accessToken,
+        filename,
+        width,
+        height,
+      );
+
+      // Update database
+      await prisma.selectedAlbum.update({
+        where: { id: photo.id },
+        data: {
+          localImagePath: localPath,
+          downloadedAt: new Date(),
+        },
+      });
+
+      // Serve the newly downloaded file
+      const buffer = await readFile(getPhotoPath(localPath));
+
+      setHeader(event, "Content-Type", "image/jpeg");
+      setHeader(event, "Cache-Control", "public, max-age=31536000"); // Cache for 1 year
+
+      return buffer;
     }
     catch (fetchError: any) {
       // Check if it's a token/auth error
