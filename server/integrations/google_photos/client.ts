@@ -22,7 +22,7 @@ export class GooglePhotosServerService {
     clientSecret: string,
     refreshToken: string,
     accessToken?: string,
-    expiry?: number,
+    tokenExpiry?: number,
     integrationId?: string,
     onTokenRefresh?: (
       integrationId: string,
@@ -38,7 +38,7 @@ export class GooglePhotosServerService {
     this.oauth2Client.setCredentials({
       refresh_token: refreshToken,
       access_token: accessToken,
-      expiry_date: expiry,
+      expiry_date: tokenExpiry,
     });
   }
 
