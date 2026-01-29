@@ -1,4 +1,4 @@
-import { geminiClient } from "~/server/integrations/gemini/client";
+import { geminiClient } from "../../integrations/gemini/client";
 import prisma from "~/lib/prisma";
 import consola from "consola";
 

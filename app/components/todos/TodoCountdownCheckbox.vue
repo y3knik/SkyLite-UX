@@ -2,7 +2,7 @@
   <div class="flex items-center gap-2">
     <UCheckbox
       :model-value="modelValue"
-      @update:model-value="$emit('update:modelValue', $event)"
+      @update:model-value="handleUpdate"
     />
     <label class="text-sm font-medium cursor-pointer" @click="toggleCheckbox">
       Mark as Countdown Event
@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   modelValue: boolean;
 }>();
 
@@ -19,7 +19,11 @@ const emit = defineEmits<{
   "update:modelValue": [value: boolean];
 }>();
 
+const handleUpdate = (value: boolean | string) => {
+  emit("update:modelValue", Boolean(value));
+};
+
 const toggleCheckbox = () => {
-  emit("update:modelValue", !defineProps<{ modelValue: boolean }>().modelValue);
+  emit("update:modelValue", !props.modelValue);
 };
 </script>

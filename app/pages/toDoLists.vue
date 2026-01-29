@@ -249,6 +249,9 @@ async function handleTodoSave(todoData: TodoListItem) {
         todoColumnId: todoData.todoColumnId,
         createdAt: new Date(),
         updatedAt: new Date(),
+        isCountdown: false,
+        countdownMessage: null,
+        messageGeneratedAt: null,
       };
 
       if (cachedTodos.value && Array.isArray(cachedTodos.value)) {
@@ -265,6 +268,9 @@ async function handleTodoSave(todoData: TodoListItem) {
           completed: todoData.checked,
           order: todoData.order,
           todoColumnId: todoData.todoColumnId,
+          isCountdown: false,
+          countdownMessage: null,
+          messageGeneratedAt: null,
         });
         consola.debug("Todo Lists: Todo created successfully");
 

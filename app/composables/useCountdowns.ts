@@ -35,7 +35,8 @@ export const useCountdowns = () => {
     if (countdowns.value.length === 0) return null;
 
     // Countdowns are already sorted by due date (earliest first) from the API
-    return countdowns.value[0];
+    const earliest = countdowns.value[0];
+    return earliest || null;
   };
 
   /**
