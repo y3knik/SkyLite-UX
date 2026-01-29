@@ -124,9 +124,6 @@ export default defineEventHandler(async (event) => {
     },
   );
 
-  // Get access token for downloads
-  const accessToken = await service.getAccessToken();
-
   // Use transaction to ensure atomicity (all or nothing)
   const created = await prisma.$transaction(async (tx) => {
     if (!append) {
@@ -169,7 +166,7 @@ export default defineEventHandler(async (event) => {
 
   // Download cover photos in the background (don't block response)
   // This runs after the transaction completes
-  downloadCoverPhotosInBackground(created, accessToken);
+  downloadCoverPhotosInBackground(created, service);
 
   return { albums: created };
 });
@@ -179,7 +176,7 @@ export default defineEventHandler(async (event) => {
  */
 async function downloadCoverPhotosInBackground(
   albums: any[],
-  accessToken: string,
+  service: any,
 ): Promise<void> {
   // Run in background - don't await
   Promise.resolve().then(async () => {
@@ -204,6 +201,16 @@ async function downloadCoverPhotosInBackground(
         if (!allowedHosts.some(host => url.hostname === host || url.hostname.endsWith(`.${host}`))) {
           consola.warn(`Skipping download for album ${album.albumId}: invalid host ${url.hostname}`);
           continue;
+        }
+
+        // Get fresh access token for this album (handles expiration)
+        let accessToken: string;
+        try {
+          accessToken = await service.getAccessToken();
+        }
+        catch (tokenError) {
+          consola.error(`Failed to get access token for album ${album.albumId}:`, tokenError);
+          continue; // Skip this album and move to next
         }
 
         const filename = `album-${album.albumId}.jpg`;

@@ -33,12 +33,23 @@ function isValidGooglePhotosUrl(url: string): boolean {
   }
 }
 
+/**
+ * Clamps a dimension to safe bounds
+ */
+function clampDimension(value: number, min: number = 1, max: number = 4096): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event);
     const photoId = query.photoId as string;
-    const width = Number(query.width) || 1920;
-    const height = Number(query.height) || 1080;
+
+    // Parse and clamp dimensions to safe bounds (1-4096)
+    const requestedWidth = Number(query.width) || 1920;
+    const requestedHeight = Number(query.height) || 1080;
+    const width = clampDimension(requestedWidth);
+    const height = clampDimension(requestedHeight);
 
     if (!photoId) {
       throw createError({

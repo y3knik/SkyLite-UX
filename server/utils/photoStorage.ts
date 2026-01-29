@@ -6,9 +6,17 @@ import { pipeline } from "node:stream/promises";
 
 /**
  * Storage configuration for photos
- * Using a function to avoid direct process.env access at module level
+ * Configurable via PHOTOS_STORAGE_PATH environment variable
  */
 function getStorageDirectory(): string {
+  // Check for custom storage path in environment
+  // eslint-disable-next-line node/no-process-env
+  const customPath = process.env.PHOTOS_STORAGE_PATH;
+  if (customPath) {
+    return join(customPath);
+  }
+
+  // Default to storage/photos in project directory
   return join(process.cwd(), "storage", "photos");
 }
 
