@@ -562,8 +562,8 @@ function formatEventTime(dateString: string | Date) {
         </NuxtLink>
       </div>
 
-      <!-- Middle: Menu Widget (left side) -->
-      <div class="flex-1 flex items-center">
+      <!-- Middle: Menu Widget (left side) and Countdown Widget (center) -->
+      <div class="flex-1 flex items-center gap-8">
         <!-- Menu Widget (shows today's and tomorrow's meals) -->
         <NuxtLink
           v-if="homeSettings?.mealsEnabled && todaysMenu.length > 0"
@@ -637,6 +637,11 @@ function formatEventTime(dateString: string | Date) {
             No meals planned for today
           </p>
         </NuxtLink>
+
+        <!-- Countdown Widget (center) -->
+        <div v-if="homeSettings?.countdownEnabled" class="flex-1 flex items-center justify-center">
+          <HomeCountdownWidget />
+        </div>
       </div>
 
       <!-- Bottom Row: Upcoming Events & Todos -->
