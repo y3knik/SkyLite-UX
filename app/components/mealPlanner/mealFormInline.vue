@@ -32,6 +32,9 @@ const daysInputRef = ref<any>(null);
 // Store event listener cleanup data
 const eventListenerCleanup: Array<{ el: HTMLElement; handler: (e: KeyboardEvent) => void }> = [];
 
+// Guard against double-save
+let isSaving = false;
+
 // Day names (Monday=0 to Sunday=6)
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const dayName = computed(() => dayNames[props.dayOfWeek]);
@@ -75,7 +78,7 @@ onMounted(() => {
         // Android keyboards: keyCode 229 during composition, then actual key on keyup
         if (e.key === "Enter" || e.keyCode === 13) {
           e.preventDefault();
-          handleSave();
+          guardedSave();
         }
       };
 
@@ -107,19 +110,38 @@ function resetForm() {
   error.value = null;
 }
 
-function handleKeyDown(event: KeyboardEvent) {
+function handleKeyUp(event: KeyboardEvent) {
   // Check if Enter key is pressed (without Shift for textarea)
-  // Android keyboards send "Unidentified" for Enter, check keyCode 13 instead
+  // Use keyup instead of keydown - fires AFTER composition (keyCode 229) is done
   if ((event.key === "Enter" || event.keyCode === 13) && !event.shiftKey) {
     event.preventDefault();
     event.stopPropagation();
-    handleSave();
+    guardedSave();
   }
 }
 
 function handleFormSubmit(event: Event) {
   event.preventDefault();
-  handleSave();
+  guardedSave();
+}
+
+function guardedSave() {
+  // Guard against duplicate calls while save is in progress
+  if (isSaving) {
+    return;
+  }
+
+  isSaving = true;
+
+  try {
+    handleSave();
+  }
+  finally {
+    // Reset flag after a short delay to prevent rapid duplicate submissions
+    setTimeout(() => {
+      isSaving = false;
+    }, 100);
+  }
 }
 
 function handleSave() {
@@ -180,7 +202,7 @@ function handleDelete() {
         placeholder="Notes..."
         :rows="2"
         class="text-base resize-none"
-        @keydown="handleKeyDown"
+        @keyup="handleKeyUp"
       />
     </div>
 
