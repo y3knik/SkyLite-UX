@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import { z } from "zod";
 
 import prisma from "~/lib/prisma";
@@ -72,7 +73,15 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const settings = integration.settings as {
+  // Validate settings exist
+  if (!integration.settings) {
+    throw createError({
+      statusCode: 401,
+      message: "Integration settings are missing. Please re-authorize the integration.",
+    });
+  }
+
+  const settings = (integration.settings ?? {}) as {
     accessToken?: string;
     tokenExpiry?: number;
   };
@@ -181,6 +190,22 @@ async function downloadCoverPhotosInBackground(
       }
 
       try {
+        // Validate URL before downloading
+        const url = new URL(album.coverPhotoUrl);
+        const allowedHosts = [
+          "lh3.googleusercontent.com",
+          "lh4.googleusercontent.com",
+          "lh5.googleusercontent.com",
+          "lh6.googleusercontent.com",
+          "photos.google.com",
+          "photospicker.googleapis.com",
+        ];
+
+        if (!allowedHosts.some(host => url.hostname === host || url.hostname.endsWith(`.${host}`))) {
+          consola.warn(`Skipping download for album ${album.albumId}: invalid host ${url.hostname}`);
+          continue;
+        }
+
         const filename = `album-${album.albumId}.jpg`;
         const localPath = await downloadAndSavePhoto(
           album.coverPhotoUrl,
@@ -193,12 +218,14 @@ async function downloadCoverPhotosInBackground(
           where: { id: album.id },
           data: {
             localImagePath: localPath,
+            cachedWidth: 1920,
+            cachedHeight: 1080,
             downloadedAt: new Date(),
           },
         });
       }
       catch (error) {
-        console.error(`Failed to download cover photo for album ${album.albumId}:`, error);
+        consola.error(`Failed to download cover photo for album ${album.albumId}:`, error);
         // Continue with next album even if one fails
       }
     }

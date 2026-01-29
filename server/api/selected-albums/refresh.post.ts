@@ -7,8 +7,8 @@ import prisma from "~/lib/prisma";
  * access to user's existing albums. Photos are now downloaded and stored
  * locally when selected via the Picker API, so there's no need to refresh URLs.
  *
- * This endpoint is kept for backward compatibility but now just verifies
- * that local copies exist and re-downloads any missing ones.
+ * This endpoint verifies that local copies exist and reports their status.
+ * Missing photos are downloaded on-demand when first requested (not by this endpoint).
  */
 export default defineEventHandler(async () => {
   try {
@@ -16,7 +16,12 @@ export default defineEventHandler(async () => {
     const selectedAlbums = await prisma.selectedAlbum.findMany();
 
     if (selectedAlbums.length === 0) {
-      return { success: true, refreshed: 0, message: "No albums to refresh" };
+      return {
+        success: true,
+        refreshed: 0,
+        message: "No albums to refresh",
+        note: "No albums selected. Use the photo picker to add albums.",
+      };
     }
 
     // Count how many have local copies

@@ -142,26 +142,34 @@ export default defineEventHandler(async (event) => {
       },
     );
 
-    // Check if we have a local copy first
-    if (photo.localImagePath) {
-      try {
-        const localPath = getPhotoPath(photo.localImagePath);
+    // Check if we have a local copy that matches the requested size
+    if (photo.localImagePath && photo.cachedWidth && photo.cachedHeight) {
+      // Only serve cached file if size matches (or no specific size requested)
+      const sizeMatches = (photo.cachedWidth === width && photo.cachedHeight === height);
 
-        // Check if file exists
-        await stat(localPath);
+      if (sizeMatches) {
+        try {
+          const localPath = getPhotoPath(photo.localImagePath);
 
-        // Serve from local storage
-        const buffer = await readFile(localPath);
+          // Check if file exists
+          await stat(localPath);
 
-        setHeader(event, "Content-Type", "image/jpeg");
-        setHeader(event, "Cache-Control", "public, max-age=31536000"); // Cache for 1 year (local file won't change)
+          // Serve from local storage
+          const buffer = await readFile(localPath);
 
-        consola.info(`Serving photo from local storage: ${photo.localImagePath}`);
-        return buffer;
+          setHeader(event, "Content-Type", "image/jpeg");
+          setHeader(event, "Cache-Control", "public, max-age=31536000"); // Cache for 1 year (local file won't change)
+
+          consola.info(`Serving photo from local storage: ${photo.localImagePath} (${width}x${height})`);
+          return buffer;
+        }
+        catch (fileError) {
+          consola.warn(`Local file not found, will download: ${photo.localImagePath}`, fileError);
+          // Fall through to download
+        }
       }
-      catch (fileError) {
-        consola.warn(`Local file not found, will download: ${photo.localImagePath}`, fileError);
-        // Fall through to download
+      else {
+        consola.info(`Cached size (${photo.cachedWidth}x${photo.cachedHeight}) doesn't match requested (${width}x${height}), downloading fresh`);
       }
     }
 
@@ -182,11 +190,13 @@ export default defineEventHandler(async (event) => {
         height,
       );
 
-      // Update database
+      // Update database with size metadata
       await prisma.selectedAlbum.update({
         where: { id: photo.id },
         data: {
           localImagePath: localPath,
+          cachedWidth: width,
+          cachedHeight: height,
           downloadedAt: new Date(),
         },
       });
