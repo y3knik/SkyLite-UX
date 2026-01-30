@@ -111,6 +111,11 @@ export class GeminiClient {
     }
 
     const message = candidate.content.parts[0].text;
+    if (!message || message.trim() === "") {
+      consola.error("Empty text in Gemini response:", candidate);
+      throw new Error("Empty text in Gemini response");
+    }
+
     return message.trim();
   }
 

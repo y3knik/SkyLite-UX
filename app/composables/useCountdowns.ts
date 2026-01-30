@@ -117,7 +117,7 @@ export function useCountdowns() {
       const response = await $fetch<{
         message: string;
         cached: boolean;
-        generatedAt: Date;
+        generatedAt: string;
       }>("/api/ai/generate-countdown-message", {
         method: "POST",
         body: {

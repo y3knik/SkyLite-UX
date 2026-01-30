@@ -12,5 +12,5 @@ export type CountdownMessageRequest = {
 export type CountdownMessageResponse = {
   message: string;
   cached: boolean;
-  generatedAt: Date;
+  generatedAt: string;
 };
