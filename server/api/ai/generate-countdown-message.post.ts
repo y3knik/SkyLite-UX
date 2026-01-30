@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
     consola.error("Failed to generate countdown message:", error);
     throw createError({
       statusCode: 500,
-      message: `Failed to generate countdown message: ${error}`,
+      message: "Failed to generate countdown message",
     });
   }
 });

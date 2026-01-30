@@ -94,10 +94,10 @@ Countdown messages can be generated using **Google Gemini 1.5 Flash** (free tier
 
 ### Setup Gemini API (Optional)
 
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Create a free API key
 3. Add to your `.env` file:
-   ```
+   ```dotenv
    NUXT_GEMINI_API_KEY=your_api_key_here
    ```
 4. Restart Skylite UX
@@ -172,7 +172,7 @@ If you have multiple countdown events:
 
 ### Birthday Countdown
 
-```
+```text
 Title: "Emma's 10th Birthday"
 Due Date: March 15, 2026
 isCountdown: ✓ Yes
@@ -191,7 +191,7 @@ Home Display:
 
 ### Vacation Countdown
 
-```
+```text
 Title: "Disney World Trip"
 Due Date: July 20, 2026
 isCountdown: ✓ Yes
@@ -210,7 +210,7 @@ Home Display (when tomorrow):
 
 ### Event Day
 
-```
+```text
 Title: "First Day of School"
 Due Date: Today
 isCountdown: ✓ Yes
@@ -269,7 +269,7 @@ Each todo has three countdown-specific fields:
 **Check:**
 
 1. Is `NUXT_GEMINI_API_KEY` set in your `.env` file?
-2. Is the API key valid? Test at [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Is the API key valid? Test at [Google AI Studio](https://aistudio.google.com/app/apikey)
 3. Check server logs for API errors
 
 **Fallback:**
