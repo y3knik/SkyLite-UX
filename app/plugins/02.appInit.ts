@@ -22,6 +22,13 @@ export default defineNuxtPlugin(async () => {
   const isCapacitorBuild = import.meta.env.CAPACITOR_BUILD === "true" || process.env.CAPACITOR_BUILD === "true";
   const fetchOnServer = !isCapacitorBuild;
 
+  consola.info("[AppInit] Environment:", {
+    isCapacitorBuild,
+    fetchOnServer,
+    isServer: import.meta.server,
+    isClient: import.meta.client,
+  });
+
   try {
     const apiUrl = `https://tz.add-to-calendar-technology.com/api/${encodeURIComponent(browserTimezone)}.ics`;
     const { data: vtimezoneBlock, error } = await useFetch(apiUrl, {
@@ -61,8 +68,15 @@ export default defineNuxtPlugin(async () => {
   consola.debug(`AppInit: Registered ${integrationConfigs.length} integrations`);
 
   try {
+    consola.info("[AppInit] Starting data fetch...");
+
     const [_usersResult, _currentUserResult, integrationsResult, _appSettingsResult] = await Promise.all([
-      useAsyncData("users", () => $fetch<User[]>("/api/users"), {
+      useAsyncData("users", async () => {
+        consola.debug("[AppInit] Fetching users...");
+        const data = await $fetch<User[]>("/api/users");
+        consola.debug("[AppInit] Users fetched:", data?.length || 0, "users");
+        return data;
+      }, {
         server: fetchOnServer,
         lazy: false,
         // For Capacitor, ignore any prerendered data - always fetch fresh on client
@@ -96,7 +110,18 @@ export default defineNuxtPlugin(async () => {
         getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
-      useAsyncData("todos", () => $fetch<TodoWithUser[]>("/api/todos"), {
+      useAsyncData("todos", async () => {
+        consola.info("[AppInit] Fetching todos from /api/todos...");
+        try {
+          const data = await $fetch<TodoWithUser[]>("/api/todos");
+          consola.info("[AppInit] Todos fetched successfully:", data?.length || 0, "todos");
+          return data;
+        }
+        catch (err) {
+          consola.error("[AppInit] Failed to fetch todos:", err);
+          throw err;
+        }
+      }, {
         server: fetchOnServer,
         lazy: false,
         getCachedData: isCapacitorBuild ? () => undefined : undefined,
@@ -108,7 +133,18 @@ export default defineNuxtPlugin(async () => {
         getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
-      useAsyncData("todo-columns", () => $fetch<TodoColumn[]>("/api/todo-columns"), {
+      useAsyncData("todo-columns", async () => {
+        consola.info("[AppInit] Fetching todo-columns from /api/todo-columns...");
+        try {
+          const data = await $fetch<TodoColumn[]>("/api/todo-columns");
+          consola.info("[AppInit] Todo-columns fetched successfully:", data?.length || 0, "columns");
+          return data;
+        }
+        catch (err) {
+          consola.error("[AppInit] Failed to fetch todo-columns:", err);
+          throw err;
+        }
+      }, {
         server: fetchOnServer,
         lazy: false,
         getCachedData: isCapacitorBuild ? () => undefined : undefined,
