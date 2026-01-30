@@ -17,10 +17,10 @@ export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig();
   const browserTimezone = config.public.tz;
 
-  // @ts-ignore - Capacitor is added via script tag in Capacitor builds
-  const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
-  // In Capacitor (static build), we need client-side data fetching
-  const fetchOnServer = !isCapacitor;
+  // In Capacitor builds (static), always use client-side data fetching
+  // Check build-time env var, not runtime Capacitor detection
+  const isCapacitorBuild = import.meta.env.CAPACITOR_BUILD === "true" || process.env.CAPACITOR_BUILD === "true";
+  const fetchOnServer = !isCapacitorBuild;
 
   try {
     const apiUrl = `https://tz.add-to-calendar-technology.com/api/${encodeURIComponent(browserTimezone)}.ics`;
@@ -59,6 +59,12 @@ export default defineNuxtPlugin(async () => {
     registerIntegration(config);
   });
   consola.debug(`AppInit: Registered ${integrationConfigs.length} integrations`);
+
+  // Skip data fetching entirely during prerendering for Capacitor builds
+  if (isCapacitorBuild && import.meta.server) {
+    consola.debug("AppInit: Skipping server-side data fetch for Capacitor build (will load on client)");
+    return;
+  }
 
   try {
     const [_usersResult, _currentUserResult, integrationsResult, _appSettingsResult] = await Promise.all([
