@@ -23,7 +23,8 @@ export default defineNuxtPlugin(async () => {
         // Get current server URL (may have been updated in mobile-settings)
         const currentServerUrl = window.__CAPACITOR_SERVER_URL__;
 
-        consola.debug("[Capacitor $fetch] Called with URL:", url, "Server URL:", currentServerUrl || "NOT SET");
+        consola.info(`[Capacitor $fetch] >>> FETCH CALLED: ${url}`);
+        consola.debug("[Capacitor $fetch] Options:", options, "Server URL:", currentServerUrl || "NOT SET");
 
         // If no server URL configured, reject API calls
         if (!currentServerUrl && typeof url === "string" && url.startsWith("/api/")) {
@@ -34,11 +35,18 @@ export default defineNuxtPlugin(async () => {
         // Prepend server URL if relative path (API calls start with /)
         if (currentServerUrl && typeof url === "string" && url.startsWith("/")) {
           const fullUrl = currentServerUrl + url;
-          consola.debug("[Capacitor $fetch] Rewriting URL from", url, "to", fullUrl);
+          consola.info(`[Capacitor $fetch] >>> Rewriting to: ${fullUrl}`);
           url = fullUrl;
         }
 
-        return originalFetch(url, options);
+        const promise = originalFetch(url, options);
+
+        promise.then(
+          (result) => consola.info(`[Capacitor $fetch] <<< SUCCESS: ${url}`),
+          (error) => consola.error(`[Capacitor $fetch] <<< FAILED: ${url}`, error)
+        );
+
+        return promise;
       };
 
       consola.info("[Capacitor Config] Successfully initialized with server URL:", serverUrl || "NOT SET");
