@@ -19,6 +19,15 @@ const { data: todos } = useNuxtData<Todo[]>("todos");
 const { updateTodo, createTodo, deleteTodo, toggleTodo, reorderTodo, clearCompleted, loading: todosLoading, fetchTodos } = useTodos();
 const { updateTodoColumn, createTodoColumn, deleteTodoColumn, reorderTodoColumns, loading: columnsLoading } = useTodoColumns();
 
+// Debug logging for data state
+watch(() => todoColumns.value, (newVal) => {
+  consola.info("[toDoLists] todo-columns data changed:", newVal?.length || 0, "columns");
+}, { immediate: true });
+
+watch(() => todos.value, (newVal) => {
+  consola.info("[toDoLists] todos data changed:", newVal?.length || 0, "todos");
+}, { immediate: true });
+
 // Google Tasks and Calendar Reminders
 const googleTasks = ref<any[]>([]);
 const calendarReminders = ref<any[]>([]);
@@ -68,8 +77,12 @@ const editingTodoTyped = computed<TodoListItem | undefined>(() =>
 );
 
 const todoLists = computed<TodoListWithIntegration[]>(() => {
-  if (!todoColumns.value || !todos.value)
+  consola.debug("[toDoLists] Computing todoLists. todoColumns:", todoColumns.value?.length || 0, "todos:", todos.value?.length || 0);
+
+  if (!todoColumns.value || !todos.value) {
+    consola.warn("[toDoLists] Missing data - todoColumns:", !!todoColumns.value, "todos:", !!todos.value);
     return [];
+  }
 
   const localColumns = todoColumns.value.map(column => ({
     id: column.id,
@@ -160,6 +173,7 @@ const todoLists = computed<TodoListWithIntegration[]>(() => {
     }
   }
 
+  consola.info("[toDoLists] Computed todoLists result:", allColumns.length, "lists with", allColumns.reduce((sum, col) => sum + (col.items?.length || 0), 0), "total items");
   return allColumns;
 });
 
