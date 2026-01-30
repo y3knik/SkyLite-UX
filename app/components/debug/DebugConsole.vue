@@ -94,6 +94,27 @@ function getLogColor(type: string) {
     default: return "text-gray-800 bg-white";
   }
 }
+
+async function copyAllLogs() {
+  const logText = logs.value.map(log =>
+    `[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}`
+  ).join("\n");
+
+  try {
+    await navigator.clipboard.writeText(logText);
+    alert("Logs copied to clipboard!");
+  }
+  catch (err) {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = logText;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+    alert("Logs copied to clipboard!");
+  }
+}
 </script>
 
 <template>
@@ -117,6 +138,12 @@ function getLogColor(type: string) {
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold">Debug Console</h3>
           <div class="flex gap-2">
+            <button
+              class="px-3 py-1 text-sm bg-blue-500 text-white rounded"
+              @click="copyAllLogs"
+            >
+              Copy
+            </button>
             <button
               class="px-3 py-1 text-sm bg-red-500 text-white rounded"
               @click="clearLogs"

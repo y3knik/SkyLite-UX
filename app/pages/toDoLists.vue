@@ -21,11 +21,16 @@ const { updateTodoColumn, createTodoColumn, deleteTodoColumn, reorderTodoColumns
 
 // Debug logging for data state
 watch(() => todoColumns.value, (newVal) => {
-  consola.info("[toDoLists] todo-columns data changed:", newVal?.length || 0, "columns");
+  consola.info(`[toDoLists] todo-columns data changed: ${newVal?.length || 0} columns`, newVal);
 }, { immediate: true });
 
 watch(() => todos.value, (newVal) => {
-  consola.info("[toDoLists] todos data changed:", newVal?.length || 0, "todos");
+  consola.info(`[toDoLists] todos data changed: ${newVal?.length || 0} todos`, newVal);
+}, { immediate: true });
+
+// Also watch the computed result
+watch(() => todoLists.value, (newVal) => {
+  consola.info(`[toDoLists] todoLists computed: ${newVal?.length || 0} lists`, newVal);
 }, { immediate: true });
 
 // Google Tasks and Calendar Reminders
