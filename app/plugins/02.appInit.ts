@@ -60,17 +60,13 @@ export default defineNuxtPlugin(async () => {
   });
   consola.debug(`AppInit: Registered ${integrationConfigs.length} integrations`);
 
-  // Skip data fetching entirely during prerendering for Capacitor builds
-  if (isCapacitorBuild && import.meta.server) {
-    consola.debug("AppInit: Skipping server-side data fetch for Capacitor build (will load on client)");
-    return;
-  }
-
   try {
     const [_usersResult, _currentUserResult, integrationsResult, _appSettingsResult] = await Promise.all([
       useAsyncData("users", () => $fetch<User[]>("/api/users"), {
         server: fetchOnServer,
         lazy: false,
+        // For Capacitor, ignore any prerendered data - always fetch fresh on client
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
       useAsyncData("current-user", () => Promise.resolve(null), {
@@ -81,11 +77,13 @@ export default defineNuxtPlugin(async () => {
       useAsyncData("integrations", () => $fetch<Integration[]>("/api/integrations"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
       useAsyncData("app-settings", () => $fetch<AppSettings>("/api/app-settings"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
     ]);
 
@@ -95,26 +93,31 @@ export default defineNuxtPlugin(async () => {
       useAsyncData("calendar-events", () => $fetch<CalendarEvent[]>("/api/calendar-events"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
       useAsyncData("todos", () => $fetch<TodoWithUser[]>("/api/todos"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
       useAsyncData("native-shopping-lists", () => $fetch<ShoppingListWithItemsAndCount[]>("/api/shopping-lists"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
       useAsyncData("todo-columns", () => $fetch<TodoColumn[]>("/api/todo-columns"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
 
       useAsyncData("meal-plans", () => $fetch<MealPlanWithMeals[]>("/api/meal-plans"), {
         server: fetchOnServer,
         lazy: false,
+        getCachedData: isCapacitorBuild ? () => undefined : undefined,
       }),
     ]);
 
