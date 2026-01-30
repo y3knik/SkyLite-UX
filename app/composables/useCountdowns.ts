@@ -129,7 +129,7 @@ export function useCountdowns() {
 
       // Update the local todo with the new message
       todo.countdownMessage = response.message;
-      todo.messageGeneratedAt = response.generatedAt;
+      todo.messageGeneratedAt = new Date(response.generatedAt);
 
       return response.message;
     }

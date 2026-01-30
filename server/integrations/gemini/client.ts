@@ -45,78 +45,90 @@ export class GeminiClient {
       throw new Error("Gemini API key not configured");
     }
 
-    const url = `${GEMINI_BASE_URL}/models/${GEMINI_MODEL}:generateContent?key=${this.apiKey}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: request.prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: request.temperature || 0.9,
-          maxOutputTokens: request.maxTokens || 100,
+    try {
+      const url = `${GEMINI_BASE_URL}/models/${GEMINI_MODEL}:generateContent?key=${this.apiKey}`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: request.prompt,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: request.temperature || 0.9,
+            maxOutputTokens: request.maxTokens || 100,
           },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      consola.error("Gemini API error:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText,
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+          ],
+        }),
       });
-      throw new Error(`Gemini API error: ${response.statusText}`);
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        consola.error("Gemini API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        });
+        throw new Error(`Gemini API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.candidates || data.candidates.length === 0) {
+        consola.error("No candidates in Gemini response:", data);
+        throw new Error("No response from Gemini API");
+      }
+
+      const candidate = data.candidates[0];
+      if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
+        consola.error("Invalid candidate structure:", candidate);
+        throw new Error("Invalid response structure from Gemini API");
+      }
+
+      const message = candidate.content.parts[0].text;
+      if (!message || message.trim() === "") {
+        consola.error("Empty text in Gemini response:", candidate);
+        throw new Error("Empty text in Gemini response");
+      }
+
+      return message.trim();
     }
-
-    const data = await response.json();
-
-    if (!data.candidates || data.candidates.length === 0) {
-      consola.error("No candidates in Gemini response:", data);
-      throw new Error("No response from Gemini API");
+    catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
     }
-
-    const candidate = data.candidates[0];
-    if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
-      consola.error("Invalid candidate structure:", candidate);
-      throw new Error("Invalid response structure from Gemini API");
-    }
-
-    const message = candidate.content.parts[0].text;
-    if (!message || message.trim() === "") {
-      consola.error("Empty text in Gemini response:", candidate);
-      throw new Error("Empty text in Gemini response");
-    }
-
-    return message.trim();
   }
 
   private buildCountdownPrompt(eventName: string, daysRemaining: number): string {
