@@ -4,16 +4,11 @@
     to="/toDoLists"
     class="text-white text-right bg-black/30 backdrop-blur-sm hover:bg-black/40 rounded-lg p-4 transition-colors cursor-pointer block"
   >
-    <h2 class="text-2xl font-semibold mb-4">
-      Countdown
+    <h2 class="text-2xl font-semibold mb-3">
+      {{ countdown.title }}
     </h2>
 
     <div class="space-y-3">
-      <!-- Event Title -->
-      <div class="text-xl font-medium">
-        {{ countdown.title }}
-      </div>
-
       <!-- Days Remaining -->
       <div class="flex items-baseline justify-end gap-2">
         <div class="text-5xl font-bold">
