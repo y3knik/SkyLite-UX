@@ -17,11 +17,16 @@ export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig();
   const browserTimezone = config.public.tz;
 
+  // @ts-ignore - Capacitor is added via script tag in Capacitor builds
+  const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
+  // In Capacitor (static build), we need client-side data fetching
+  const fetchOnServer = !isCapacitor;
+
   try {
     const apiUrl = `https://tz.add-to-calendar-technology.com/api/${encodeURIComponent(browserTimezone)}.ics`;
     const { data: vtimezoneBlock, error } = await useFetch(apiUrl, {
       key: `timezone-${browserTimezone}`,
-      server: true,
+      server: fetchOnServer,
       default: () => null,
     });
 
@@ -58,7 +63,7 @@ export default defineNuxtPlugin(async () => {
   try {
     const [_usersResult, _currentUserResult, integrationsResult, _appSettingsResult] = await Promise.all([
       useAsyncData("users", () => $fetch<User[]>("/api/users"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
 
@@ -68,12 +73,12 @@ export default defineNuxtPlugin(async () => {
       }),
 
       useAsyncData("integrations", () => $fetch<Integration[]>("/api/integrations"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
 
       useAsyncData("app-settings", () => $fetch<AppSettings>("/api/app-settings"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
     ]);
@@ -82,27 +87,27 @@ export default defineNuxtPlugin(async () => {
 
     const [_localCalendarResult, _localTodosResult, _localShoppingResult, _todoColumnsResult, _mealPlansResult] = await Promise.all([
       useAsyncData("calendar-events", () => $fetch<CalendarEvent[]>("/api/calendar-events"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
 
       useAsyncData("todos", () => $fetch<TodoWithUser[]>("/api/todos"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
 
       useAsyncData("native-shopping-lists", () => $fetch<ShoppingListWithItemsAndCount[]>("/api/shopping-lists"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
 
       useAsyncData("todo-columns", () => $fetch<TodoColumn[]>("/api/todo-columns"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
 
       useAsyncData("meal-plans", () => $fetch<MealPlanWithMeals[]>("/api/meal-plans"), {
-        server: true,
+        server: fetchOnServer,
         lazy: false,
       }),
     ]);
@@ -142,7 +147,7 @@ export default defineNuxtPlugin(async () => {
                   return [];
                 }
               }, {
-                server: true,
+                server: fetchOnServer,
                 lazy: false,
               }),
             );
@@ -159,7 +164,7 @@ export default defineNuxtPlugin(async () => {
                   return [];
                 }
               }, {
-                server: true,
+                server: fetchOnServer,
                 lazy: false,
               }),
             );
@@ -176,7 +181,7 @@ export default defineNuxtPlugin(async () => {
                   return [];
                 }
               }, {
-                server: true,
+                server: fetchOnServer,
                 lazy: false,
               }),
             );
