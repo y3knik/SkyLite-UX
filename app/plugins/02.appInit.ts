@@ -103,14 +103,23 @@ export default defineNuxtPlugin(async () => {
 
     consola.debug("AppInit: Core dependencies loaded successfully");
 
+    consola.info("[AppInit] Starting local data fetch. isCapacitorBuild:", isCapacitorBuild, "fetchOnServer:", fetchOnServer);
+
     const [_localCalendarResult, _localTodosResult, _localShoppingResult, _todoColumnsResult, _mealPlansResult] = await Promise.all([
-      useAsyncData("calendar-events", () => $fetch<CalendarEvent[]>("/api/calendar-events"), {
+      useAsyncData("calendar-events", () => {
+        consola.info("[AppInit] >>> Creating calendar-events useAsyncData");
+        return $fetch<CalendarEvent[]>("/api/calendar-events");
+      }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? () => undefined : undefined,
+        getCachedData: isCapacitorBuild ? (key) => {
+          consola.info("[AppInit] getCachedData called for calendar-events, returning undefined");
+          return undefined;
+        } : undefined,
       }),
 
       useAsyncData("todos", async () => {
+        consola.info("[AppInit] >>> Creating todos useAsyncData - FUNCTION EXECUTING");
         consola.info("[AppInit] Fetching todos from /api/todos...");
         try {
           const data = await $fetch<TodoWithUser[]>("/api/todos");
@@ -124,16 +133,26 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? () => undefined : undefined,
+        getCachedData: isCapacitorBuild ? (key) => {
+          consola.info("[AppInit] getCachedData called for todos, returning undefined");
+          return undefined;
+        } : undefined,
       }),
 
-      useAsyncData("native-shopping-lists", () => $fetch<ShoppingListWithItemsAndCount[]>("/api/shopping-lists"), {
+      useAsyncData("native-shopping-lists", () => {
+        consola.info("[AppInit] >>> Creating native-shopping-lists useAsyncData");
+        return $fetch<ShoppingListWithItemsAndCount[]>("/api/shopping-lists");
+      }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? () => undefined : undefined,
+        getCachedData: isCapacitorBuild ? (key) => {
+          consola.info("[AppInit] getCachedData called for native-shopping-lists, returning undefined");
+          return undefined;
+        } : undefined,
       }),
 
       useAsyncData("todo-columns", async () => {
+        consola.info("[AppInit] >>> Creating todo-columns useAsyncData - FUNCTION EXECUTING");
         consola.info("[AppInit] Fetching todo-columns from /api/todo-columns...");
         try {
           const data = await $fetch<TodoColumn[]>("/api/todo-columns");
@@ -147,16 +166,31 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? () => undefined : undefined,
+        getCachedData: isCapacitorBuild ? (key) => {
+          consola.info("[AppInit] getCachedData called for todo-columns, returning undefined");
+          return undefined;
+        } : undefined,
       }),
 
-      useAsyncData("meal-plans", () => $fetch<MealPlanWithMeals[]>("/api/meal-plans"), {
+      useAsyncData("meal-plans", () => {
+        consola.info("[AppInit] >>> Creating meal-plans useAsyncData");
+        return $fetch<MealPlanWithMeals[]>("/api/meal-plans");
+      }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? () => undefined : undefined,
+        getCachedData: isCapacitorBuild ? (key) => {
+          consola.info("[AppInit] getCachedData called for meal-plans, returning undefined");
+          return undefined;
+        } : undefined,
       }),
     ]);
 
+    consola.info("[AppInit] Promise.all completed. Checking results...");
+    consola.info("[AppInit] _localCalendarResult.data:", typeof _localCalendarResult.data.value, "length:", Array.isArray(_localCalendarResult.data.value) ? _localCalendarResult.data.value.length : "N/A");
+    consola.info("[AppInit] _localTodosResult.data:", typeof _localTodosResult.data.value, "length:", Array.isArray(_localTodosResult.data.value) ? _localTodosResult.data.value.length : "N/A");
+    consola.info("[AppInit] _localShoppingResult.data:", typeof _localShoppingResult.data.value, "length:", Array.isArray(_localShoppingResult.data.value) ? _localShoppingResult.data.value.length : "N/A");
+    consola.info("[AppInit] _todoColumnsResult.data:", typeof _todoColumnsResult.data.value, "length:", Array.isArray(_todoColumnsResult.data.value) ? _todoColumnsResult.data.value.length : "N/A");
+    consola.info("[AppInit] _mealPlansResult.data:", typeof _mealPlansResult.data.value, "length:", Array.isArray(_mealPlansResult.data.value) ? _mealPlansResult.data.value.length : "N/A");
     consola.debug("AppInit: Local data loaded successfully");
 
     const integrationDataPromises: ReturnType<typeof useAsyncData>[] = [];
