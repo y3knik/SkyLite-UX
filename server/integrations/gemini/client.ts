@@ -113,21 +113,21 @@ export class GeminiClient {
 
   private buildCountdownPrompt(eventName: string, daysRemaining: number): string {
     if (daysRemaining === 0) {
-      return `Create a super fun, playful, and exciting message (max 12 words) for an event happening TODAY called "${eventName}". Use emojis! Make it feel like a celebration. Be creative and whimsical. Family-friendly.`;
+      return `Write a short celebratory message about "${eventName}" happening TODAY. Max 10 words. Must include 2-3 relevant emojis. Make it exciting and fun, not just stating it's today. Focus on the joy and celebration of the event itself. Example style: "Time to party! 🎉🎂✨" Family-friendly.`;
     } else if (daysRemaining === 1) {
-      return `Create a super fun, playful, and exciting message (max 12 words) for an event happening TOMORROW called "${eventName}". Use emojis! Make it feel anticipatory and magical. Be creative and whimsical. Family-friendly.`;
+      return `Write a short anticipatory message about "${eventName}" happening TOMORROW. Max 10 words. Must include 2-3 relevant emojis. Make it magical and exciting, not just stating it's tomorrow. Focus on building excitement for the event. Example style: "Almost time to celebrate! 🎊✨🎈" Family-friendly.`;
     } else {
-      return `Create a super fun, playful, and exciting message (max 12 words) for an event "${eventName}" happening in ${daysRemaining} days. Use emojis! Be creative, whimsical, and make it sound magical. Family-friendly.`;
+      return `Write a short exciting message about "${eventName}" coming up soon. Max 10 words. Must include 2-3 relevant emojis. Be creative and fun - don't mention the number of days or "countdown". Focus on the excitement and anticipation of the event itself. Example style: "Get ready for an amazing celebration! 🎉🎊✨" Family-friendly.`;
     }
   }
 
   private getFallbackMessage(eventName: string, daysRemaining: number): string {
     if (daysRemaining === 0) {
-      return `Today is the day! ${eventName} is here!`;
+      return `Time to celebrate! 🎉🎂✨`;
     } else if (daysRemaining === 1) {
-      return `Only 1 day until ${eventName}!`;
+      return `Almost here! Get excited! 🎊✨`;
     } else {
-      return `Only ${daysRemaining} days until ${eventName}!`;
+      return `Something special is coming! 🎈✨`;
     }
   }
 }
