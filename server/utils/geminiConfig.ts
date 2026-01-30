@@ -4,9 +4,11 @@ export function getGeminiConfig(): { apiKey: string } | null {
 
   // Fallback to direct environment variable
   if (!apiKey) {
+    // eslint-disable-next-line node/no-process-env
     apiKey = process.env.GEMINI_API_KEY || "";
   }
 
-  if (!apiKey) return null;
+  if (!apiKey)
+    return null;
   return { apiKey };
 }

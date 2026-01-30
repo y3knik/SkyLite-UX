@@ -1,6 +1,8 @@
-import { geminiClient } from "../../integrations/gemini/client";
-import prisma from "~/lib/prisma";
 import consola from "consola";
+
+import prisma from "~/lib/prisma";
+
+import { geminiClient } from "../../integrations/gemini/client";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -17,7 +19,7 @@ export default defineEventHandler(async (event) => {
     // Generate the message using Gemini (with fallback)
     const message = await geminiClient.generateCountdownMessage(
       eventName,
-      daysRemaining
+      daysRemaining,
     );
 
     const generatedAt = new Date();

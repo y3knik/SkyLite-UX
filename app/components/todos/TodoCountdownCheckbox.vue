@@ -1,3 +1,21 @@
+<script setup lang="ts">
+const props = defineProps<{
+  modelValue: boolean;
+}>();
+
+const emit = defineEmits<{
+  "update:modelValue": [value: boolean];
+}>();
+
+function handleUpdate(value: boolean | string) {
+  emit("update:modelValue", Boolean(value));
+}
+
+function toggleCheckbox() {
+  emit("update:modelValue", !props.modelValue);
+}
+</script>
+
 <template>
   <div class="flex items-center gap-2">
     <UCheckbox
@@ -9,21 +27,3 @@
     </label>
   </div>
 </template>
-
-<script setup lang="ts">
-const props = defineProps<{
-  modelValue: boolean;
-}>();
-
-const emit = defineEmits<{
-  "update:modelValue": [value: boolean];
-}>();
-
-const handleUpdate = (value: boolean | string) => {
-  emit("update:modelValue", Boolean(value));
-};
-
-const toggleCheckbox = () => {
-  emit("update:modelValue", !props.modelValue);
-};
-</script>

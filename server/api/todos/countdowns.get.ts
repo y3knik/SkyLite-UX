@@ -1,7 +1,8 @@
-import prisma from "~/lib/prisma";
 import consola from "consola";
 
-export default defineEventHandler(async (event) => {
+import prisma from "~/lib/prisma";
+
+export default defineEventHandler(async (_event) => {
   try {
     const now = new Date();
 

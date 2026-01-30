@@ -1,7 +1,8 @@
-import type { Todo, CountdownTodo } from "~/types/database";
 import consola from "consola";
 
-export const useCountdowns = () => {
+import type { Todo } from "~/types/database";
+
+export function useCountdowns() {
   const countdowns = ref<Todo[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -32,7 +33,8 @@ export const useCountdowns = () => {
    * Get the earliest upcoming countdown
    */
   const getEarliestCountdown = (): Todo | null => {
-    if (countdowns.value.length === 0) return null;
+    if (countdowns.value.length === 0)
+      return null;
 
     // Countdowns are already sorted by due date (earliest first) from the API
     const earliest = countdowns.value[0];
@@ -43,7 +45,8 @@ export const useCountdowns = () => {
    * Calculate days remaining until the event
    */
   const calculateDaysRemaining = (dueDate: Date | string | null): number => {
-    if (!dueDate) return -1;
+    if (!dueDate)
+      return -1;
 
     const due = new Date(dueDate);
     const now = new Date();
@@ -62,7 +65,8 @@ export const useCountdowns = () => {
    * Check if the cached message needs to be refreshed (>24 hours old)
    */
   const needsMessageRefresh = (messageGeneratedAt: Date | string | null): boolean => {
-    if (!messageGeneratedAt) return true;
+    if (!messageGeneratedAt)
+      return true;
 
     const generated = new Date(messageGeneratedAt);
     const now = new Date();
@@ -72,16 +76,31 @@ export const useCountdowns = () => {
   };
 
   /**
+   * Get a simple fallback message when AI generation fails
+   */
+  const getFallbackMessage = (eventName: string, daysRemaining: number): string => {
+    if (daysRemaining === 0) {
+      return `Today is the day! ${eventName} is here!`;
+    }
+    else if (daysRemaining === 1) {
+      return `Only 1 day until ${eventName}!`;
+    }
+    else {
+      return `Only ${daysRemaining} days until ${eventName}!`;
+    }
+  };
+
+  /**
    * Get or generate a countdown message for a todo
    */
   const getCountdownMessage = async (
     todo: Todo,
-    forceRefresh: boolean = false
+    forceRefresh: boolean = false,
   ): Promise<string> => {
     // Check if we need to refresh the message
-    const shouldRefresh = forceRefresh ||
-                         !todo.countdownMessage ||
-                         needsMessageRefresh(todo.messageGeneratedAt);
+    const shouldRefresh = forceRefresh
+      || !todo.countdownMessage
+      || needsMessageRefresh(todo.messageGeneratedAt);
 
     // If we have a valid cached message, use it
     if (!shouldRefresh && todo.countdownMessage) {
@@ -123,21 +142,6 @@ export const useCountdowns = () => {
     }
   };
 
-  /**
-   * Get a simple fallback message when AI generation fails
-   */
-  const getFallbackMessage = (eventName: string, daysRemaining: number): string => {
-    if (daysRemaining === 0) {
-      return `Today is the day! ${eventName} is here!`;
-    }
-    else if (daysRemaining === 1) {
-      return `Only 1 day until ${eventName}!`;
-    }
-    else {
-      return `Only ${daysRemaining} days until ${eventName}!`;
-    }
-  };
-
   return {
     countdowns,
     loading,
@@ -149,4 +153,4 @@ export const useCountdowns = () => {
     getCountdownMessage,
     getFallbackMessage,
   };
-};
+}

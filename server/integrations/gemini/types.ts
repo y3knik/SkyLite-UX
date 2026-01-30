@@ -1,16 +1,16 @@
-export interface GeminiGenerateRequest {
+export type GeminiGenerateRequest = {
   prompt: string;
   temperature?: number;
   maxTokens?: number;
-}
+};
 
-export interface CountdownMessageRequest {
+export type CountdownMessageRequest = {
   eventName: string;
   daysRemaining: number;
-}
+};
 
-export interface CountdownMessageResponse {
+export type CountdownMessageResponse = {
   message: string;
   cached: boolean;
   generatedAt: Date;
-}
+};

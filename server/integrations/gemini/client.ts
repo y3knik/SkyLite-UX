@@ -1,6 +1,8 @@
-import type { GeminiGenerateRequest, CountdownMessageRequest } from "./types";
-import { getGeminiConfig } from "../../utils/geminiConfig";
 import consola from "consola";
+
+import type { GeminiGenerateRequest } from "./types";
+
+import { getGeminiConfig } from "../../utils/geminiConfig";
 
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 const GEMINI_MODEL = "gemini-1.5-flash";
@@ -15,7 +17,7 @@ export class GeminiClient {
 
   async generateCountdownMessage(
     eventName: string,
-    daysRemaining: number
+    daysRemaining: number,
   ): Promise<string> {
     if (!this.apiKey) {
       consola.warn("Gemini API key not configured. Using fallback message.");
@@ -31,7 +33,8 @@ export class GeminiClient {
       });
 
       return message;
-    } catch (error) {
+    }
+    catch (error) {
       consola.error("Failed to generate countdown message:", error);
       return this.getFallbackMessage(eventName, daysRemaining);
     }
@@ -114,9 +117,11 @@ export class GeminiClient {
   private buildCountdownPrompt(eventName: string, daysRemaining: number): string {
     if (daysRemaining === 0) {
       return `Write a short celebratory message about "${eventName}" happening TODAY. Max 10 words. Must include 2-3 relevant emojis. Make it exciting and fun, not just stating it's today. Focus on the joy and celebration of the event itself. Example style: "Time to party! 🎉🎂✨" Family-friendly.`;
-    } else if (daysRemaining === 1) {
+    }
+    else if (daysRemaining === 1) {
       return `Write a short anticipatory message about "${eventName}" happening TOMORROW. Max 10 words. Must include 2-3 relevant emojis. Make it magical and exciting, not just stating it's tomorrow. Focus on building excitement for the event. Example style: "Almost time to celebrate! 🎊✨🎈" Family-friendly.`;
-    } else {
+    }
+    else {
       return `Write a short exciting message about "${eventName}" coming up soon. Max 10 words. Must include 2-3 relevant emojis. Be creative and fun - don't mention the number of days or "countdown". Focus on the excitement and anticipation of the event itself. Example style: "Get ready for an amazing celebration! 🎉🎊✨" Family-friendly.`;
     }
   }
@@ -124,9 +129,11 @@ export class GeminiClient {
   private getFallbackMessage(eventName: string, daysRemaining: number): string {
     if (daysRemaining === 0) {
       return `Time to celebrate! 🎉🎂✨`;
-    } else if (daysRemaining === 1) {
+    }
+    else if (daysRemaining === 1) {
       return `Almost here! Get excited! 🎊✨`;
-    } else {
+    }
+    else {
       return `Something special is coming! 🎈✨`;
     }
   }
