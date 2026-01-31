@@ -239,37 +239,52 @@ async function fetchWeather() {
 
 async function fetchUpcomingEvents() {
   try {
-    // Get all enabled Google Calendar integrations (multiple accounts)
+    // Get all enabled calendar integrations (Google, iCal, etc.)
     const integrations = await $fetch<any[]>("/api/integrations");
-    const googleCalendarIntegrations = integrations.filter(
-      (i: any) => i.type === "calendar" && i.service === "google" && i.enabled,
+    const calendarIntegrations = integrations.filter(
+      (i: any) => i.type === "calendar" && i.enabled,
     );
 
-    if (googleCalendarIntegrations.length === 0) {
+    if (calendarIntegrations.length === 0) {
       upcomingEvents.value = [];
       return;
     }
 
-    // Fetch events from all Google Calendar integrations in parallel
-    const eventPromises = googleCalendarIntegrations.map(integration =>
-      $fetch<{ events: CalendarEvent[] }>(
-        `/api/integrations/google_calendar/events?integrationId=${integration.id}`,
-      ).catch((error) => {
-        consola.error(`Failed to fetch events from integration ${integration.id}:`, error);
+    // Fetch events from all calendar integrations in parallel
+    const eventPromises = calendarIntegrations.map((integration) => {
+      // Determine the correct API endpoint based on service type
+      let endpoint: string;
+      if (integration.service === "google") {
+        endpoint = `/api/integrations/google_calendar/events?integrationId=${integration.id}`;
+      }
+      else if (integration.service === "ical") {
+        endpoint = `/api/integrations/iCal?integrationId=${integration.id}`;
+      }
+      else {
+        consola.warn(`Unknown calendar service: ${integration.service}`);
+        return Promise.resolve({ events: [] });
+      }
+
+      return $fetch<{ events: CalendarEvent[] }>(endpoint).catch((error) => {
+        consola.error(`Failed to fetch events from ${integration.service} integration ${integration.id}:`, error);
         return { events: [] };
-      }),
-    );
+      });
+    });
 
     const responses = await Promise.all(eventPromises);
 
     // Merge all events from all integrations
     const allEvents = responses.flatMap(response => response.events);
 
+    consola.info(`[Home] Fetched ${allEvents.length} total events from ${calendarIntegrations.length} integrations`);
+
     // Filter for upcoming events and sort by start time
     const now = new Date();
     const upcoming = allEvents
       .filter(event => new Date(event.start) > now)
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+    consola.info(`[Home] Showing ${upcoming.length} upcoming events`);
 
     upcomingEvents.value = upcoming;
   }

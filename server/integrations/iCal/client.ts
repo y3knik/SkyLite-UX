@@ -13,11 +13,15 @@ export class ICalServerService {
     const vcalendar = new ical.Component(jcalData);
     const vevents = vcalendar.getAllSubcomponents("vevent");
 
+    consola.info(`ICalServerService: Fetched ${vevents.length} events from iCal feed`);
+
     const events: ICalEvent[] = [];
 
     const now = new Date();
     const startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
     const endDate = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate());
+
+    consola.debug(`ICalServerService: Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
     for (const vevent of vevents) {
       const rrule = vevent.getFirstPropertyValue("rrule");
@@ -38,12 +42,27 @@ export class ICalServerService {
     const dtstart = vevent.getFirstPropertyValue("dtstart") as ical.Time;
     const dtend = vevent.getFirstPropertyValue("dtend") as ical.Time;
 
-    const startUTC = dtstart
-      ? dtstart.convertToZone(ical.TimezoneService.get("UTC")).toString()
-      : new Date().toISOString().replace(".000", "");
-    const endUTC = dtend
-      ? dtend.convertToZone(ical.TimezoneService.get("UTC")).toString()
-      : new Date().toISOString().replace(".000", "");
+    // Check if this is an all-day event (DATE vs DATETIME)
+    const isAllDay = dtstart && dtstart.isDate;
+
+    let startUTC: string;
+    let endUTC: string;
+
+    if (isAllDay) {
+      // For all-day events, don't convert timezone - use the date as-is
+      // All-day events are stored as DATE (e.g., 20250130) not DATETIME
+      startUTC = dtstart.toString();
+      endUTC = dtend ? dtend.toString() : dtstart.toString();
+    }
+    else {
+      // For timed events, convert to UTC
+      startUTC = dtstart
+        ? dtstart.convertToZone(ical.TimezoneService.get("UTC")).toString()
+        : new Date().toISOString().replace(".000", "");
+      endUTC = dtend
+        ? dtend.convertToZone(ical.TimezoneService.get("UTC")).toString()
+        : new Date().toISOString().replace(".000", "");
+    }
 
     return {
       type: "VEVENT",
@@ -143,30 +162,41 @@ export class ICalServerService {
         return null;
       }
 
-      const originalStart = dtstart.toJSDate();
-      const originalEnd = dtend ? dtend.toJSDate() : originalStart;
-      const duration = originalEnd.getTime() - originalStart.getTime();
-
-      const newStart = occurrenceTime.toJSDate();
-      const newEnd = new Date(newStart.getTime() + duration);
-
       const isAllDay = dtstart.isDate;
 
-      let start: Date;
-      let end: Date;
+      let startUTC: string;
+      let endUTC: string;
 
       if (isAllDay) {
-        start = new Date(Date.UTC(newStart.getUTCFullYear(), newStart.getUTCMonth(), newStart.getUTCDate(), 0, 0, 0, 0));
-        end = new Date(Date.UTC(newEnd.getUTCFullYear(), newEnd.getUTCMonth(), newEnd.getUTCDate(), 0, 0, 0, 0));
+        // For all-day recurring events, work directly with ical.Time (DATE format)
+        // Don't convert to JS Date and back - this avoids timezone issues
+
+        // Calculate the duration in days
+        const originalStartDate = dtstart.toJSDate();
+        const originalEndDate = dtend ? dtend.toJSDate() : originalStartDate;
+        const durationDays = Math.round((originalEndDate.getTime() - originalStartDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Use occurrenceTime as-is for start (it's already a DATE)
+        startUTC = occurrenceTime.toString();
+
+        // Calculate end date by adding duration
+        const endTime = occurrenceTime.clone();
+        endTime.addDuration(new ical.Duration({ days: durationDays || 1 }));
+        endUTC = endTime.toString();
       }
       else {
-        start = newStart;
-        end = newEnd;
-      }
+        // For timed recurring events, calculate using JS dates and duration
+        const originalStart = dtstart.toJSDate();
+        const originalEnd = dtend ? dtend.toJSDate() : originalStart;
+        const duration = originalEnd.getTime() - originalStart.getTime();
 
-      // Convert to UTC and format as iCal string
-      const startUTC = ical.Time.fromJSDate(start, true).toString();
-      const endUTC = ical.Time.fromJSDate(end, true).toString();
+        const newStart = occurrenceTime.toJSDate();
+        const newEnd = new Date(newStart.getTime() + duration);
+
+        // Convert to UTC and format as iCal string
+        startUTC = ical.Time.fromJSDate(newStart, false).convertToZone(ical.TimezoneService.get("UTC")).toString();
+        endUTC = ical.Time.fromJSDate(newEnd, false).convertToZone(ical.TimezoneService.get("UTC")).toString();
+      }
 
       const eventInstance: ICalEvent = {
         type: "VEVENT",
