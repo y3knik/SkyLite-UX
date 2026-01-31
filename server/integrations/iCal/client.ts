@@ -4,6 +4,8 @@ import ical from "ical.js";
 import type { ICalEvent } from "./types";
 
 // Simple in-memory cache for iCal feeds to avoid rate limiting
+// Version in cache key to bust cache when format changes
+const CACHE_VERSION = "v2";
 const iCalCache = new Map<string, { events: ICalEvent[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
@@ -12,7 +14,8 @@ export class ICalServerService {
 
   async fetchEventsFromUrl(url: string): Promise<ICalEvent[]> {
     // Check cache first to avoid rate limiting
-    const cached = iCalCache.get(url);
+    const cacheKey = `${CACHE_VERSION}:${url}`;
+    const cached = iCalCache.get(cacheKey);
     const nowTimestamp = Date.now();
 
     if (cached && (nowTimestamp - cached.timestamp) < CACHE_TTL) {
@@ -26,7 +29,7 @@ export class ICalServerService {
     if (!response.ok) {
       // If we have stale cache and get rate limited, return stale data
       if (response.status === 429 && cached) {
-        consola.warn(`[iCal ${this.integrationId}] Rate limited (429), using stale cache`);
+        consola.warn(`[iCal ${this.integrationId}] Rate limited (429), using stale cache from ${cacheKey}`);
         return cached.events;
       }
 
@@ -74,7 +77,8 @@ export class ICalServerService {
     consola.info(`[iCal ${this.integrationId}] Processed ${events.length} total event instances (${vevents.length} source events)`);
 
     // Cache the results to avoid rate limiting
-    iCalCache.set(url, { events, timestamp: Date.now() });
+    const cacheKey = `${CACHE_VERSION}:${url}`;
+    iCalCache.set(cacheKey, { events, timestamp: Date.now() });
     consola.debug(`[iCal ${this.integrationId}] Cached ${events.length} events for 5 minutes`);
 
     return events;
