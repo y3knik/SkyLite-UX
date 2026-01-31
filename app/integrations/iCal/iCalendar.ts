@@ -133,17 +133,32 @@ export class ICalService implements CalendarIntegrationService {
     }
 
     return result.events.map((event) => {
-      const start = new Date(event.dtstart);
-      const end = new Date(event.dtend);
-
-      // Determine if this is an all-day event based on iCalendar RFC 5545 standard
-      // All-day events typically have:
-      // 1. DATE value type for DTSTART (no time component)
-      // 2. DATETIME with time 00:00:00 for both DTSTART and DTEND
+      // Parse iCal date/time format properly
+      // DATE format: "20250130" -> need to insert separators
+      // DATETIME format: "20250130T120000Z" -> ISO 8601 compatible
       const isDateOnly = !event.dtstart.includes("T") && !event.dtstart.includes("Z");
+
+      let start: Date;
+      let end: Date;
+
+      if (isDateOnly) {
+        // DATE format: "20250130" -> "2025-01-30"
+        const startStr = event.dtstart.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+        const endStr = event.dtend.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+        start = new Date(startStr);
+        end = new Date(endStr);
+      }
+      else {
+        // DATETIME format: "20250130T120000Z" -> "2025-01-30T12:00:00Z"
+        const startStr = event.dtstart.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(.*)$/, "$1-$2-$3T$4:$5:$6$7");
+        const endStr = event.dtend.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(.*)$/, "$1-$2-$3T$4:$5:$6$7");
+        start = new Date(startStr);
+        end = new Date(endStr);
+      }
+
       const isMidnightToMidnight = event.dtstart.includes("T00:00:00")
         && event.dtend.includes("T00:00:00")
-        && new Date(event.dtend).getTime() - new Date(event.dtstart).getTime() === 24 * 60 * 60 * 1000;
+        && end.getTime() - start.getTime() === 24 * 60 * 60 * 1000;
 
       const isAllDay = isDateOnly || isMidnightToMidnight;
 

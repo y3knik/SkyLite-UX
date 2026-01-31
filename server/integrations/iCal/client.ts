@@ -13,10 +13,10 @@ export class ICalServerService {
   async fetchEventsFromUrl(url: string): Promise<ICalEvent[]> {
     // Check cache first to avoid rate limiting
     const cached = iCalCache.get(url);
-    const now = Date.now();
+    const nowTimestamp = Date.now();
 
-    if (cached && (now - cached.timestamp) < CACHE_TTL) {
-      consola.debug(`[iCal ${this.integrationId}] Using cached data (${Math.round((now - cached.timestamp) / 1000)}s old)`);
+    if (cached && (nowTimestamp - cached.timestamp) < CACHE_TTL) {
+      consola.debug(`[iCal ${this.integrationId}] Using cached data (${Math.round((nowTimestamp - cached.timestamp) / 1000)}s old)`);
       return cached.events;
     }
 
