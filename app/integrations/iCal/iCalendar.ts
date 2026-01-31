@@ -112,6 +112,8 @@ export class ICalService implements CalendarIntegrationService {
     }
     const result = await $fetch<{ events: ICalEvent[] }>("/api/integrations/iCal", { query });
 
+    consola.info(`[iCal ${this.integrationId}] Fetched ${result.events.length} events from feed`);
+
     let users: UserWithColor[] = [];
     if (this.useUserColors && this.user && this.user.length > 0) {
       try {
@@ -154,8 +156,12 @@ export class ICalService implements CalendarIntegrationService {
         color = this.eventColor || DEFAULT_LOCAL_EVENT_COLOR;
       }
 
+      // Make event ID unique across all iCal integrations by combining integrationId + UID
+      // This prevents conflicts when multiple iCal feeds have events with the same UID
+      const uniqueId = `${this.integrationId}-${event.uid}`;
+
       return {
-        id: event.uid,
+        id: uniqueId,
         title: event.summary,
         description: event.description || "",
         start,
@@ -165,6 +171,7 @@ export class ICalService implements CalendarIntegrationService {
         location: event.location,
         ical_event: event,
         integrationId: this.integrationId,
+        calendarId: this.integrationId, // Add calendarId to track which feed this came from
         users: this.useUserColors ? users : undefined,
       };
     });

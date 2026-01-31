@@ -28,12 +28,15 @@ export class ICalServerService {
 
       if (rrule) {
         const expandedEvents = this.expandRecurringEvent(vevent, startDate, endDate);
+        consola.debug(`[iCal ${this.integrationId}] Expanded recurring event into ${expandedEvents.length} instances`);
         events.push(...expandedEvents);
       }
       else {
         events.push(this.parseICalEvent(vevent));
       }
     }
+
+    consola.info(`[iCal ${this.integrationId}] Processed ${events.length} total event instances (${vevents.length} source events)`);
 
     return events;
   }
