@@ -8,7 +8,22 @@ export class ICalServerService {
 
   async fetchEventsFromUrl(url: string): Promise<ICalEvent[]> {
     const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch iCal feed: HTTP ${response.status} ${response.statusText}`);
+    }
+
     const icalData = await response.text();
+
+    // Check if response is actually iCal data (not HTML error page)
+    if (icalData.trim().startsWith("<!DOCTYPE") || icalData.trim().startsWith("<html")) {
+      throw new Error("The URL returned an HTML page instead of an iCal file. Please verify the URL is correct and points to a .ics file (secret calendar URL).");
+    }
+
+    if (!icalData.includes("BEGIN:VCALENDAR")) {
+      throw new Error("The URL did not return valid iCal data. Please check the URL and ensure it's a secret iCal/ICS calendar feed.");
+    }
+
     const jcalData = ical.parse(icalData);
     const vcalendar = new ical.Component(jcalData);
     const vevents = vcalendar.getAllSubcomponents("vevent");

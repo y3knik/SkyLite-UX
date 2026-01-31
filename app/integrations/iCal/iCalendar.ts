@@ -47,11 +47,15 @@ export class ICalService implements CalendarIntegrationService {
 
   async validate(): Promise<boolean> {
     try {
+      consola.info(`[iCal ${this.integrationId}] Starting validation...`);
       const query: Record<string, string> = { integrationId: this.integrationId };
       if (this.integrationId === "temp" || this.integrationId.startsWith("temp-")) {
         query.baseUrl = this.baseUrl;
       }
-      await $fetch<{ events: ICalEvent[] }>("/api/integrations/iCal", { query });
+
+      consola.debug(`[iCal ${this.integrationId}] Fetching from API with query:`, query);
+      const result = await $fetch<{ events: ICalEvent[] }>("/api/integrations/iCal", { query });
+      consola.info(`[iCal ${this.integrationId}] Validation successful - fetched ${result.events.length} events`);
 
       this.status = {
         isConnected: true,
@@ -61,6 +65,7 @@ export class ICalService implements CalendarIntegrationService {
       return true;
     }
     catch (error) {
+      consola.error(`[iCal ${this.integrationId}] Validation failed:`, error);
       this.status = {
         isConnected: false,
         lastChecked: new Date(),
