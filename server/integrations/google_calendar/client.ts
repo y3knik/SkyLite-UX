@@ -109,11 +109,12 @@ export class GoogleCalendarServerService {
         }
       }
       catch (error: unknown) {
-        const err = error as { code?: number; message?: string; response?: { data?: { error?: string } } };
+        const err = error as { code?: number; message?: string; response?: { status?: number; data?: { error?: string } } };
 
-        // Check for refresh token expiration or revocation
+        // Check for refresh token expiration or revocation (including HTTP 401 responses)
         if (
-          err?.message?.includes("invalid_grant")
+          err?.response?.status === 401
+          || err?.message?.includes("invalid_grant")
           || err?.message?.includes("Token has been expired or revoked")
           || err?.response?.data?.error === "invalid_grant"
         ) {
