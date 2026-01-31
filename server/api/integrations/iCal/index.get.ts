@@ -43,8 +43,13 @@ function convertToCalendarEvent(
     end = new Date(endStr);
   }
 
-  const isMidnightToMidnight = event.dtstart.includes("T00:00:00")
-    && event.dtend.includes("T00:00:00")
+  // Check if this is a midnight-to-midnight event (timed event spanning exactly 24 hours)
+  const isMidnightToMidnight = start.getUTCHours() === 0
+    && start.getUTCMinutes() === 0
+    && start.getUTCSeconds() === 0
+    && end.getUTCHours() === 0
+    && end.getUTCMinutes() === 0
+    && end.getUTCSeconds() === 0
     && end.getTime() - start.getTime() === 24 * 60 * 60 * 1000;
 
   const isAllDay = isDateOnly || isMidnightToMidnight;
@@ -176,7 +181,7 @@ export default defineEventHandler(async (event) => {
     const rawEvents = await service.fetchEventsFromUrl(icalUrl);
 
     const calendarEvents = rawEvents.map(event =>
-      convertToCalendarEvent(event, integrationId, eventColor, users, useUserColors)
+      convertToCalendarEvent(event, integrationId, eventColor, users, useUserColors),
     );
 
     return { events: calendarEvents };

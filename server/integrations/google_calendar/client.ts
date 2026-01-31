@@ -69,10 +69,12 @@ export class GoogleCalendarServerService {
     const credentials = this.oauth2Client.credentials;
     const now = Date.now();
     const expiryDate = credentials.expiry_date;
+    const accessToken = credentials.access_token;
 
     // Per Google OAuth2 best practices, refresh token 5 minutes before expiry
     // https://developers.google.com/identity/protocols/oauth2#expiration
-    const needsRefresh = !expiryDate || expiryDate < now + 300000;
+    // Also refresh if access_token is missing
+    const needsRefresh = !accessToken || !expiryDate || expiryDate < now + 300000;
 
     if (!needsRefresh) {
       return;
@@ -220,10 +222,11 @@ export class GoogleCalendarServerService {
         allEvents.push(...events);
       }
       catch (error: unknown) {
-        const err = error as { code?: number; message?: string; response?: { data?: { error?: string } } };
+        const err = error as { code?: number; message?: string; response?: { status?: number; data?: { error?: string } } };
 
-        // Check for authentication errors
+        // Check for authentication errors (including HTTP 401 responses)
         const isAuthError = err?.code === 401
+          || err?.response?.status === 401
           || err?.message?.includes("Invalid Credentials")
           || err?.message?.includes("invalid_grant")
           || err?.message?.includes("Refresh token expired")

@@ -294,19 +294,43 @@ async function fetchUpcomingEvents() {
       }));
     }
 
-    // Filter for upcoming events and sort by start time
+    // Filter for ongoing and upcoming events using end time, and sort by start time
     const now = new Date();
     consola.debug(`[Home] Current time: ${now.toISOString()}`);
 
     const upcoming = allEvents
       .filter((event) => {
         const eventStart = new Date(event.start);
-        // Skip invalid dates
+        // Skip invalid start dates
         if (Number.isNaN(eventStart.getTime())) {
-          consola.warn(`[Home] Invalid date for event "${event.title}": ${event.start}`);
+          consola.warn(`[Home] Invalid start date for event "${event.title}": ${event.start}`);
           return false;
         }
-        return eventStart > now;
+
+        // Use end time when present to include ongoing events
+        if (event.end) {
+          const eventEnd = new Date(event.end);
+          // Skip invalid end dates
+          if (Number.isNaN(eventEnd.getTime())) {
+            consola.warn(`[Home] Invalid end date for event "${event.title}": ${event.end}`);
+            return false;
+          }
+          // Include event if it hasn't ended yet
+          return eventEnd > now;
+        }
+
+        // For events without end time, assume 1-hour duration for timed events
+        // or end of day for all-day events
+        const defaultEnd = new Date(eventStart);
+        if (event.allDay) {
+          // All-day events end at midnight of the next day
+          defaultEnd.setUTCHours(23, 59, 59, 999);
+        }
+        else {
+          // Timed events default to 1-hour duration
+          defaultEnd.setHours(defaultEnd.getHours() + 1);
+        }
+        return defaultEnd > now;
       })
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
