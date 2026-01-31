@@ -53,8 +53,7 @@ export class ICalService implements CalendarIntegrationService {
         query.baseUrl = this.baseUrl;
       }
 
-      consola.debug(`[iCal ${this.integrationId}] Fetching from API with query:`, query);
-      const result = await $fetch<{ events: ICalEvent[] }>("/api/integrations/iCal", { query });
+      const result = await $fetch<{ events: CalendarEvent[] }>("/api/integrations/iCal", { query });
       consola.info(`[iCal ${this.integrationId}] Validation successful - fetched ${result.events.length} events`);
 
       this.status = {
@@ -85,7 +84,7 @@ export class ICalService implements CalendarIntegrationService {
       if (this.integrationId === "temp" || this.integrationId.startsWith("temp-")) {
         query.baseUrl = this.baseUrl;
       }
-      await $fetch<{ events: ICalEvent[] }>("/api/integrations/iCal", { query });
+      await $fetch<{ events: CalendarEvent[] }>("/api/integrations/iCal", { query });
 
       this.status = {
         isConnected: true,
@@ -115,86 +114,15 @@ export class ICalService implements CalendarIntegrationService {
     if (this.integrationId === "temp" || this.integrationId.startsWith("temp-")) {
       query.baseUrl = this.baseUrl;
     }
-    const result = await $fetch<{ events: ICalEvent[] }>("/api/integrations/iCal", { query });
+
+    // The API endpoint now handles all transformation from ICalEvent to CalendarEvent
+    // including date parsing, color handling, user assignment, and unique ID generation
+    const result = await $fetch<{ events: CalendarEvent[] }>("/api/integrations/iCal", { query });
 
     consola.info(`[iCal ${this.integrationId}] Fetched ${result.events.length} events from feed`);
 
-    let users: UserWithColor[] = [];
-    if (this.useUserColors && this.user && this.user.length > 0) {
-      try {
-        const allUsers = await $fetch<{ id: string; name: string; color: string | null }[]>("/api/users");
-        if (allUsers) {
-          users = allUsers.filter((user: UserWithColor) => this.user?.includes(user.id));
-        }
-      }
-      catch (error) {
-        consola.warn("iCalendar: Failed to fetch users for iCal integration:", error);
-      }
-    }
-
-    return result.events.map((event) => {
-      // Parse iCal date/time format properly
-      // DATE format: "20250130" -> need to insert separators
-      // DATETIME format: "20250130T120000Z" -> ISO 8601 compatible
-      const isDateOnly = !event.dtstart.includes("T") && !event.dtstart.includes("Z");
-
-      let start: Date;
-      let end: Date;
-
-      if (isDateOnly) {
-        // DATE format: "20250130" -> "2025-01-30"
-        const startStr = event.dtstart.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
-        const endStr = event.dtend.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
-        start = new Date(startStr);
-        end = new Date(endStr);
-      }
-      else {
-        // DATETIME format: "20250130T120000Z" -> "2025-01-30T12:00:00Z"
-        const startStr = event.dtstart.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(.*)$/, "$1-$2-$3T$4:$5:$6$7");
-        const endStr = event.dtend.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(.*)$/, "$1-$2-$3T$4:$5:$6$7");
-        start = new Date(startStr);
-        end = new Date(endStr);
-      }
-
-      const isMidnightToMidnight = event.dtstart.includes("T00:00:00")
-        && event.dtend.includes("T00:00:00")
-        && end.getTime() - start.getTime() === 24 * 60 * 60 * 1000;
-
-      const isAllDay = isDateOnly || isMidnightToMidnight;
-
-      let color: string | string[] | undefined = this.eventColor || DEFAULT_LOCAL_EVENT_COLOR;
-      if (this.useUserColors && users.length > 0) {
-        const userColors = users.map((user: UserWithColor) => user.color).filter((color): color is string => color !== null);
-        if (userColors.length > 0) {
-          color = userColors.length === 1 ? userColors[0] : userColors;
-        }
-        else {
-          color = this.eventColor || DEFAULT_LOCAL_EVENT_COLOR;
-        }
-      }
-      else {
-        color = this.eventColor || DEFAULT_LOCAL_EVENT_COLOR;
-      }
-
-      // Make event ID unique across all iCal integrations by combining integrationId + UID
-      // This prevents conflicts when multiple iCal feeds have events with the same UID
-      const uniqueId = `${this.integrationId}-${event.uid}`;
-
-      return {
-        id: uniqueId,
-        title: event.summary,
-        description: event.description || "",
-        start,
-        end,
-        allDay: isAllDay,
-        color,
-        location: event.location,
-        ical_event: event,
-        integrationId: this.integrationId,
-        calendarId: this.integrationId, // Add calendarId to track which feed this came from
-        users: this.useUserColors ? users : undefined,
-      };
-    });
+    // Events are already fully transformed by the API, just return them
+    return result.events;
   }
 }
 

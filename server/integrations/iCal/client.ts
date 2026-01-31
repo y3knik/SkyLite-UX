@@ -5,7 +5,7 @@ import type { ICalEvent } from "./types";
 
 // Simple in-memory cache for iCal feeds to avoid rate limiting
 // Version in cache key to bust cache when format changes
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v4";
 const iCalCache = new Map<string, { events: ICalEvent[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
@@ -56,8 +56,9 @@ export class ICalServerService {
     const events: ICalEvent[] = [];
 
     const now = new Date();
-    const startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-    const endDate = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate());
+    // Start from today at midnight UTC (not 1 year ago) to avoid showing past recurring events
+    const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const endDate = new Date(Date.UTC(now.getUTCFullYear() + 2, now.getUTCMonth(), now.getUTCDate()));
 
     consola.debug(`ICalServerService: Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
@@ -70,14 +71,28 @@ export class ICalServerService {
         events.push(...expandedEvents);
       }
       else {
-        events.push(this.parseICalEvent(vevent));
+        // For non-recurring events, include them if they end on or after today
+        const parsedEvent = this.parseICalEvent(vevent);
+        const dtstart = vevent.getFirstPropertyValue("dtstart") as ical.Time;
+        const dtend = vevent.getFirstPropertyValue("dtend") as ical.Time;
+
+        if (dtstart) {
+          const eventEndDate = dtend ? dtend.toJSDate() : dtstart.toJSDate();
+          // Include event if it ends on or after the start date (today)
+          if (eventEndDate >= startDate) {
+            events.push(parsedEvent);
+          }
+        }
+        else {
+          // If no start date, include it anyway
+          events.push(parsedEvent);
+        }
       }
     }
 
     consola.info(`[iCal ${this.integrationId}] Processed ${events.length} total event instances (${vevents.length} source events)`);
 
-    // Cache the results to avoid rate limiting
-    const cacheKey = `${CACHE_VERSION}:${url}`;
+    // Cache the results to avoid rate limiting (reuse cacheKey from above)
     iCalCache.set(cacheKey, { events, timestamp: Date.now() });
     consola.debug(`[iCal ${this.integrationId}] Cached ${events.length} events for 5 minutes`);
 
