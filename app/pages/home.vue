@@ -257,7 +257,8 @@ async function fetchUpcomingEvents() {
       if (integration.service === "google") {
         endpoint = `/api/integrations/google_calendar/events?integrationId=${integration.id}`;
       }
-      else if (integration.service === "ical") {
+      else if (integration.service === "iCal" || integration.service === "ical") {
+        // Support both "iCal" and "ical" for backwards compatibility
         endpoint = `/api/integrations/iCal?integrationId=${integration.id}`;
       }
       else {
