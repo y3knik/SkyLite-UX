@@ -86,7 +86,7 @@ export class GoogleCalendarServerService {
     this.refreshPromise = (async () => {
       try {
         consola.debug("GoogleCalendarServerService: Refreshing access token...");
-        const response = await this.oauth2Client.refreshAccessToken();
+        await this.oauth2Client.refreshAccessToken();
 
         const newCredentials = this.oauth2Client.credentials;
         const newAccessToken = newCredentials.access_token;

@@ -282,14 +282,14 @@ async function fetchUpcomingEvents() {
     // Debug: Log first few event dates to see what we're getting
     if (allEvents.length > 0) {
       const sampleEvents = allEvents.slice(0, 10);
-      consola.debug("[Home] Sample event dates:", sampleEvents.map(e => {
+      consola.debug("[Home] Sample event dates:", sampleEvents.map((e) => {
         const parsed = new Date(e.start);
         return {
           title: e.title,
           startRaw: e.start,
           startType: typeof e.start,
           startParsed: parsed,
-          isValid: !isNaN(parsed.getTime()),
+          isValid: !Number.isNaN(parsed.getTime()),
         };
       }));
     }
@@ -299,10 +299,10 @@ async function fetchUpcomingEvents() {
     consola.debug(`[Home] Current time: ${now.toISOString()}`);
 
     const upcoming = allEvents
-      .filter(event => {
+      .filter((event) => {
         const eventStart = new Date(event.start);
         // Skip invalid dates
-        if (isNaN(eventStart.getTime())) {
+        if (Number.isNaN(eventStart.getTime())) {
           consola.warn(`[Home] Invalid date for event "${event.title}": ${event.start}`);
           return false;
         }
