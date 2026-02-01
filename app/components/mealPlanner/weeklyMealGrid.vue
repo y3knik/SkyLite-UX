@@ -249,7 +249,7 @@ function onAccordionLeave(el: Element) {
     <!-- Move mode overlay (mobile) -->
     <div
       v-if="movingMeal && isMobile"
-      class="fixed inset-0 z-40 bg-black/80 p-4 overflow-y-auto"
+      class="fixed inset-0 z-40 bg-black/80 p-4 overflow-y-auto overflow-x-hidden"
     >
       <!-- Header -->
       <div class="bg-default rounded-lg p-4 mb-4 sticky top-0 z-10 shadow-lg">
@@ -310,7 +310,7 @@ function onAccordionLeave(el: Element) {
     </div>
 
     <!-- Mobile Layout: Vertical day-by-day layout with ACCORDION -->
-    <div v-if="isMobile" class="space-y-3">
+    <div v-if="isMobile" class="space-y-3 overflow-x-hidden">
       <div
         v-for="dayOfWeek in 7"
         :key="dayOfWeek - 1"
