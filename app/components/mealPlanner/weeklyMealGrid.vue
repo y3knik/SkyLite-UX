@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { format } from "date-fns";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 
 import type { Meal, MealType } from "~/types/database";
 
@@ -84,13 +84,29 @@ onMounted(() => {
   expandedDay.value = getDefaultExpandedDay();
 });
 
+// Track if we should preserve the expanded day across data reloads
+const preserveExpandedDay = ref(false);
+const preservedDay = ref<number | null>(null);
+
 // Watch for week changes
 watch(() => props.weekStart, () => {
   // Reset expanded day when week changes
   expandedDay.value = getDefaultExpandedDay();
+  preserveExpandedDay.value = false;
+  preservedDay.value = null;
 
   // Close any open forms when week changes
   closeInlineForm();
+});
+
+// Watch for meals changes to preserve accordion state
+watch(() => props.meals, () => {
+  if (preserveExpandedDay.value && preservedDay.value !== null) {
+    expandedDay.value = preservedDay.value;
+    // Reset the preserve flag after applying
+    preserveExpandedDay.value = false;
+    preservedDay.value = null;
+  }
 });
 
 const mealGrid = computed(() => {
@@ -178,7 +194,7 @@ function closeInlineForm() {
 }
 
 // Handle form save
-function handleInlineFormSave(data: { name: string; description: string; daysInAdvance: number }) {
+async function handleInlineFormSave(data: { name: string; description: string; daysInAdvance: number }) {
   if (!inlineFormState.value)
     return;
 
@@ -202,11 +218,13 @@ function handleInlineFormSave(data: { name: string; description: string; daysInA
   closeInlineForm();
 
   // Keep the accordion expanded on the day where we just added/edited
+  // Use nextTick to ensure it persists after parent reloads data
+  await nextTick();
   expandedDay.value = currentDay;
 }
 
 // Handle form delete
-function handleInlineFormDelete() {
+async function handleInlineFormDelete() {
   if (!inlineFormState.value?.editingMeal)
     return;
 
@@ -217,6 +235,8 @@ function handleInlineFormDelete() {
   closeInlineForm();
 
   // Keep the accordion expanded on the same day
+  // Use nextTick to ensure it persists after parent reloads data
+  await nextTick();
   expandedDay.value = currentDay;
 }
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import DebugConsole from "~/components/debug/DebugConsole.vue";
 import GlobalAppLoading from "~/components/global/globalAppLoading.vue";
 import GlobalDock from "~/components/global/globalDock.vue";
 import GlobalSideBar from "~/components/global/globalSideBar.vue";
@@ -37,9 +36,6 @@ onNuxtReady(() => {
         <GlobalDock />
       </div>
     </div>
-
-    <!-- Debug Console (only in Capacitor builds) -->
-    <DebugConsole />
   </UApp>
 </template>
 
