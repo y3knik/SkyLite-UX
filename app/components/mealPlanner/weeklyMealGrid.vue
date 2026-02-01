@@ -249,29 +249,31 @@ function onAccordionLeave(el: Element) {
     <!-- Move mode overlay (mobile) -->
     <div
       v-if="movingMeal && isMobile"
-      class="fixed inset-0 z-40 bg-black/80 p-4 overflow-y-auto overflow-x-hidden"
+      class="fixed inset-0 z-40 bg-black/80 overflow-y-auto"
     >
-      <!-- Header -->
-      <div class="bg-default rounded-lg p-4 mb-4 sticky top-0 z-10 shadow-lg">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="font-semibold text-lg">
-            Move "{{ movingMeal.name }}"
-          </h3>
-          <UButton
-            icon="i-lucide-x"
-            variant="ghost"
-            size="lg"
-            aria-label="Cancel move"
-            @click="cancelMoveMode"
-          />
+      <div class="min-h-full p-4 max-w-full">
+        <!-- Header -->
+        <div class="bg-default rounded-lg p-4 mb-4 sticky top-4 z-10 shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-lg truncate pr-2">
+              Move "{{ movingMeal.name }}"
+            </h3>
+            <UButton
+              icon="i-lucide-x"
+              variant="ghost"
+              size="lg"
+              aria-label="Cancel move"
+              class="flex-shrink-0"
+              @click="cancelMoveMode"
+            />
+          </div>
+          <p class="text-sm text-muted">
+            Tap a destination slot below
+          </p>
         </div>
-        <p class="text-sm text-muted">
-          Tap a destination slot below
-        </p>
-      </div>
 
-      <!-- Destination picker (scrollable list of days) -->
-      <div class="space-y-4 pb-4">
+        <!-- Destination picker (scrollable list of days) -->
+        <div class="space-y-4 pb-4">
         <div
           v-for="dayOfWeek in 7"
           :key="dayOfWeek - 1"
@@ -306,6 +308,7 @@ function onAccordionLeave(el: Element) {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
 
