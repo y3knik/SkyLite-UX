@@ -106,10 +106,10 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
             </UButton>
           </div>
         </div>
-        <div v-else class="h-full overflow-auto">
+        <div v-else class="h-full">
           <!-- Mobile: vertical stack, Desktop: horizontal scroll -->
-          <div class="md:overflow-x-auto overflow-y-auto h-full pb-4">
-            <div class="flex flex-col md:flex-row gap-4 md:gap-6 md:min-w-max h-full">
+          <div class="h-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto pb-4">
+            <div class="flex flex-col md:flex-row gap-4 md:gap-6 md:min-w-max md:h-full">
               <div
                 v-for="(list, listIndex) in sortedLists"
                 :key="list.id"

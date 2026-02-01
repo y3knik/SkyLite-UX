@@ -702,12 +702,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex h-screen w-full flex-col">
-    <div class="py-5 sm:px-4 sticky top-0 z-40 bg-default border-b border-default flex-shrink-0">
+  <div class="flex h-screen w-full flex-col overflow-hidden">
+    <div class="py-5 sm:px-4 flex-shrink-0 bg-default border-b border-default">
       <GlobalDateHeader />
     </div>
 
-    <div class="flex-1 overflow-hidden p-4">
+    <div class="flex-1 min-h-0 p-4">
       <GlobalList
         :lists="todoLists"
         :loading="columnsLoading || todosLoading"
