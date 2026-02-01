@@ -79,12 +79,14 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
 const expandedLists = ref<Set<string>>(new Set());
 
 function toggleListExpanded(listId: string) {
-  if (expandedLists.value.has(listId)) {
-    expandedLists.value.delete(listId);
+  const newSet = new Set(expandedLists.value);
+  if (newSet.has(listId)) {
+    newSet.delete(listId);
   }
   else {
-    expandedLists.value.add(listId);
+    newSet.add(listId);
   }
+  expandedLists.value = newSet;
 }
 
 function isListExpanded(listId: string) {
@@ -132,8 +134,8 @@ function isListExpanded(listId: string) {
                 class="flex-shrink-0 w-full md:w-80 flex flex-col bg-default md:rounded-lg border-b md:border border-default md:shadow-sm md:h-full"
               >
                 <div
-                  class="p-4 md:border-b border-default bg-default md:rounded-t-lg md:cursor-default cursor-pointer"
-                  @click="() => { if (typeof window !== 'undefined' && window.innerWidth < 768) toggleListExpanded(list.id); }"
+                  class="p-4 md:border-b border-default bg-default md:rounded-t-lg cursor-pointer md:cursor-default"
+                  @click.stop="toggleListExpanded(list.id)"
                 >
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -170,7 +172,7 @@ function isListExpanded(listId: string) {
                         class="md:hidden h-5 w-5 text-muted flex-shrink-0 ml-2"
                       />
                     </div>
-                    <div class="flex gap-1 md:flex hidden">
+                    <div class="hidden md:flex gap-1">
                       <div
                         v-if="showReorder"
                         class="flex flex-col gap-1 items-center justify-center"
