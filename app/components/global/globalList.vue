@@ -124,10 +124,10 @@ function isListExpanded(listId: string) {
             </UButton>
           </div>
         </div>
-        <div v-else class="h-full">
+        <div v-else class="h-full overflow-x-hidden">
           <!-- Mobile: vertical stack, Desktop: horizontal scroll -->
-          <div class="h-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto md:pb-4">
-            <div class="flex flex-col md:flex-row md:gap-6 md:min-w-max md:h-full">
+          <div class="h-full overflow-y-auto overflow-x-hidden md:overflow-y-hidden md:overflow-x-auto md:pb-4">
+            <div class="flex flex-col md:flex-row md:gap-6 md:min-w-max md:h-full overflow-x-hidden md:overflow-x-visible">
               <div
                 v-for="(list, listIndex) in sortedLists"
                 :key="list.id"
