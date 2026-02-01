@@ -19,6 +19,8 @@ export default defineNuxtConfig({
   // Route rules to prevent preloading errors in Capacitor
   routeRules: {
     "/mealPlanner": { prerender: false },
+    "/mealplanner": { prerender: false },
+    "/toDoLists": { prerender: false },
     "/mobile-settings": { prerender: false },
     "/home": { prerender: false },
   },
@@ -182,6 +184,11 @@ export default defineNuxtConfig({
           "../server/plugins/01.logging.ts",
           "../server/plugins/02.syncManager.ts",
         ],
+    // Disable prerendering for Capacitor builds (all routes are client-side only)
+    // eslint-disable-next-line node/no-process-env
+    prerender: process.env.CAPACITOR_BUILD === "true"
+      ? { routes: [] }
+      : undefined,
   },
 
   plugins: [

@@ -50,21 +50,30 @@ onMounted(async () => {
       });
 
       try {
-        // Clear cached data first to force fresh API calls
+        // Fetch directly from API using $fetch
+        const promises = [];
+
         if (needsTodosFetch) {
-          consola.info("[toDoLists] Clearing todos cache");
-          todos.value = null;
-        }
-        if (needsColumnsFetch) {
-          consola.info("[toDoLists] Clearing todo-columns cache");
-          todoColumns.value = null;
+          consola.info("[toDoLists] Fetching todos from API");
+          promises.push(
+            $fetch<Todo[]>("/api/todos").then((data) => {
+              consola.info("[toDoLists] Todos fetched:", data?.length || 0);
+              todos.value = data;
+            }),
+          );
         }
 
-        // Fetch both in parallel with direct API calls
-        await Promise.all([
-          needsTodosFetch ? fetchTodos() : Promise.resolve(),
-          needsColumnsFetch ? refreshNuxtData("todo-columns") : Promise.resolve(),
-        ]);
+        if (needsColumnsFetch) {
+          consola.info("[toDoLists] Fetching todo-columns from API");
+          promises.push(
+            $fetch<TodoColumn[]>("/api/todo-columns").then((data) => {
+              consola.info("[toDoLists] Todo-columns fetched:", data?.length || 0);
+              todoColumns.value = data;
+            }),
+          );
+        }
+
+        await Promise.all(promises);
         consola.info("[toDoLists] Data fetched successfully - todos:", todos.value?.length, "columns:", todoColumns.value?.length);
       }
       catch (err) {
