@@ -184,6 +184,9 @@ function handleInlineFormSave(data: { name: string; description: string; daysInA
 
   const { dayOfWeek, mealType, editingMeal } = inlineFormState.value;
 
+  // Store the day we're on before closing the form
+  const currentDay = dayOfWeek;
+
   if (editingMeal) {
     // Emit edit event to parent
     emit("editMeal", {
@@ -197,6 +200,9 @@ function handleInlineFormSave(data: { name: string; description: string; daysInA
   }
 
   closeInlineForm();
+
+  // Keep the accordion expanded on the day where we just added/edited
+  expandedDay.value = currentDay;
 }
 
 // Handle form delete
@@ -204,8 +210,14 @@ function handleInlineFormDelete() {
   if (!inlineFormState.value?.editingMeal)
     return;
 
+  // Store the day before closing
+  const currentDay = inlineFormState.value.dayOfWeek;
+
   emit("deleteMeal", inlineFormState.value.editingMeal);
   closeInlineForm();
+
+  // Keep the accordion expanded on the same day
+  expandedDay.value = currentDay;
 }
 
 // Accordion animation hooks
