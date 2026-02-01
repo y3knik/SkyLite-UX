@@ -707,7 +707,7 @@ onMounted(async () => {
       <GlobalDateHeader />
     </div>
 
-    <div class="flex-1 min-h-0 p-4">
+    <div class="flex-1 min-h-0 md:p-4">
       <GlobalList
         :lists="todoLists"
         :loading="columnsLoading || todosLoading"

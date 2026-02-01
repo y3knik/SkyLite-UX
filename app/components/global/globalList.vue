@@ -74,6 +74,22 @@ const showItemEdit = computed(() => {
 function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyListWithIntegration & { source: "integration" | "native" } {
   return "source" in list && (list.source === "integration" || list.source === "native");
 }
+
+// Track which lists are expanded on mobile (all collapsed by default)
+const expandedLists = ref<Set<string>>(new Set());
+
+function toggleListExpanded(listId: string) {
+  if (expandedLists.value.has(listId)) {
+    expandedLists.value.delete(listId);
+  }
+  else {
+    expandedLists.value.add(listId);
+  }
+}
+
+function isListExpanded(listId: string) {
+  return expandedLists.value.has(listId);
+}
 </script>
 
 <template>
@@ -108,14 +124,17 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
         </div>
         <div v-else class="h-full">
           <!-- Mobile: vertical stack, Desktop: horizontal scroll -->
-          <div class="h-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto pb-4">
-            <div class="flex flex-col md:flex-row gap-4 md:gap-6 md:min-w-max md:h-full">
+          <div class="h-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto md:pb-4">
+            <div class="flex flex-col md:flex-row md:gap-6 md:min-w-max md:h-full">
               <div
                 v-for="(list, listIndex) in sortedLists"
                 :key="list.id"
-                class="flex-shrink-0 w-full md:w-80 flex flex-col bg-default rounded-lg border border-default shadow-sm md:h-full"
+                class="flex-shrink-0 w-full md:w-80 flex flex-col bg-default md:rounded-lg border-b md:border border-default md:shadow-sm md:h-full"
               >
-                <div class="p-4 border-b border-default bg-default rounded-t-lg">
+                <div
+                  class="p-4 md:border-b border-default bg-default md:rounded-t-lg md:cursor-default cursor-pointer"
+                  @click="() => { if (typeof window !== 'undefined' && window.innerWidth < 768) toggleListExpanded(list.id); }"
+                >
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2 flex-1 min-w-0">
                       <div
@@ -145,8 +164,13 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
                       <h2 class="text-lg font-semibold text-highlighted truncate">
                         {{ list.name }}
                       </h2>
+                      <!-- Mobile expand/collapse indicator -->
+                      <UIcon
+                        :name="isListExpanded(list.id) ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                        class="md:hidden h-5 w-5 text-muted flex-shrink-0 ml-2"
+                      />
                     </div>
-                    <div class="flex gap-1">
+                    <div class="flex gap-1 md:flex hidden">
                       <div
                         v-if="showReorder"
                         class="flex flex-col gap-1 items-center justify-center"
@@ -267,7 +291,11 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
                   <div v-else-if="!list.items || list.items.length === 0 && showProgress" class="text-sm text-muted py-4.5" />
                 </div>
 
-                <div class="flex-1 p-4 overflow-y-auto">
+                <!-- Content - always visible on desktop, collapsible on mobile -->
+                <div
+                  class="flex-1 p-4 overflow-y-auto"
+                  :class="{ 'hidden md:block': !isListExpanded(list.id) }"
+                >
                   <div v-if="typeof showAdd === 'function' ? showAdd(list) : showAdd" class="flex justify-center mb-4">
                     <UButton
                       size="xl"
