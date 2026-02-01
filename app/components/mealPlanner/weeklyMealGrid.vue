@@ -251,7 +251,7 @@ function onAccordionLeave(el: Element) {
       v-if="movingMeal && isMobile"
       class="fixed inset-0 z-40 bg-black/80 overflow-y-auto"
     >
-      <div class="min-h-full p-4 max-w-full">
+      <div class="p-4 min-h-full">
         <!-- Header -->
         <div class="bg-default rounded-lg p-4 mb-4 sticky top-4 z-10 shadow-lg">
           <div class="flex items-center justify-between mb-2">
