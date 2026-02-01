@@ -107,12 +107,13 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
           </div>
         </div>
         <div v-else class="h-full">
-          <div class="h-full overflow-x-auto pb-4">
-            <div class="flex gap-6 min-w-max h-full">
+          <!-- Mobile: vertical stack, Desktop: horizontal scroll -->
+          <div class="h-full md:overflow-x-auto pb-4">
+            <div class="flex flex-col md:flex-row gap-4 md:gap-6 md:min-w-max md:h-full">
               <div
                 v-for="(list, listIndex) in sortedLists"
                 :key="list.id"
-                class="flex-shrink-0 w-80 h-full flex flex-col bg-default rounded-lg border border-default shadow-sm"
+                class="flex-shrink-0 w-full md:w-80 md:h-full flex flex-col bg-default rounded-lg border border-default shadow-sm"
               >
                 <div class="p-4 border-b border-default bg-default rounded-t-lg">
                   <div class="flex items-center justify-between mb-3">
@@ -153,6 +154,7 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
                       >
                         <template v-if="listIndex > 0 && listIndex < sortedLists.length - 1">
                           <UButton
+                            class="hidden md:inline-flex"
                             icon="i-lucide-chevron-left"
                             size="xs"
                             variant="ghost"
@@ -161,6 +163,16 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
                             @click="_emit('reorderList', list.id, 'up')"
                           />
                           <UButton
+                            class="md:hidden"
+                            icon="i-lucide-chevron-up"
+                            size="xs"
+                            variant="ghost"
+                            color="neutral"
+                            aria-label="Move list up"
+                            @click="_emit('reorderList', list.id, 'up')"
+                          />
+                          <UButton
+                            class="hidden md:inline-flex"
                             icon="i-lucide-chevron-right"
                             size="xs"
                             variant="ghost"
@@ -168,10 +180,20 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
                             aria-label="Move list right"
                             @click="_emit('reorderList', list.id, 'down')"
                           />
+                          <UButton
+                            class="md:hidden"
+                            icon="i-lucide-chevron-down"
+                            size="xs"
+                            variant="ghost"
+                            color="neutral"
+                            aria-label="Move list down"
+                            @click="_emit('reorderList', list.id, 'down')"
+                          />
                         </template>
                         <template v-else-if="listIndex > 0">
                           <div style="height: 16px;" />
                           <UButton
+                            class="hidden md:inline-flex"
                             icon="i-lucide-chevron-left"
                             size="xs"
                             variant="ghost"
@@ -179,16 +201,35 @@ function hasIntegrationProperties(list: AnyListWithIntegration): list is AnyList
                             aria-label="Move list left"
                             @click="_emit('reorderList', list.id, 'up')"
                           />
+                          <UButton
+                            class="md:hidden"
+                            icon="i-lucide-chevron-up"
+                            size="xs"
+                            variant="ghost"
+                            color="neutral"
+                            aria-label="Move list up"
+                            @click="_emit('reorderList', list.id, 'up')"
+                          />
                           <div style="height: 16px;" />
                         </template>
                         <template v-else-if="listIndex < sortedLists.length - 1">
                           <div style="height: 16px;" />
                           <UButton
+                            class="hidden md:inline-flex"
                             icon="i-lucide-chevron-right"
                             size="xs"
                             variant="ghost"
                             color="neutral"
                             aria-label="Move list right"
+                            @click="_emit('reorderList', list.id, 'down')"
+                          />
+                          <UButton
+                            class="md:hidden"
+                            icon="i-lucide-chevron-down"
+                            size="xs"
+                            variant="ghost"
+                            color="neutral"
+                            aria-label="Move list down"
                             @click="_emit('reorderList', list.id, 'down')"
                           />
                           <div style="height: 16px;" />
