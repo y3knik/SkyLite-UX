@@ -50,12 +50,22 @@ onMounted(async () => {
       });
 
       try {
-        // Fetch both in parallel
+        // Clear cached data first to force fresh API calls
+        if (needsTodosFetch) {
+          consola.info("[toDoLists] Clearing todos cache");
+          todos.value = null;
+        }
+        if (needsColumnsFetch) {
+          consola.info("[toDoLists] Clearing todo-columns cache");
+          todoColumns.value = null;
+        }
+
+        // Fetch both in parallel with direct API calls
         await Promise.all([
           needsTodosFetch ? fetchTodos() : Promise.resolve(),
           needsColumnsFetch ? refreshNuxtData("todo-columns") : Promise.resolve(),
         ]);
-        consola.info("[toDoLists] Data fetched successfully");
+        consola.info("[toDoLists] Data fetched successfully - todos:", todos.value?.length, "columns:", todoColumns.value?.length);
       }
       catch (err) {
         consola.error("[toDoLists] Failed to fetch data:", err);
