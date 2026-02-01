@@ -33,6 +33,40 @@ watch(() => todoLists.value, (newVal) => {
   consola.info(`[toDoLists] todoLists computed: ${newVal?.length || 0} lists`, newVal);
 }, { immediate: true });
 
+// In Capacitor, fetch data if missing (appInit may have skipped if no server URL)
+onMounted(async () => {
+  const isCapacitor = typeof window !== "undefined" && "Capacitor" in window;
+  if (isCapacitor) {
+    consola.info("[toDoLists] Capacitor detected - checking if data needs fetching");
+
+    // Check if todos or todo-columns are missing/invalid
+    const needsTodosFetch = !todos.value || !Array.isArray(todos.value) || todos.value.length === 0;
+    const needsColumnsFetch = !todoColumns.value || !Array.isArray(todoColumns.value) || todoColumns.value.length === 0;
+
+    if (needsTodosFetch || needsColumnsFetch) {
+      consola.info("[toDoLists] Data missing in Capacitor - fetching now", {
+        needsTodosFetch,
+        needsColumnsFetch,
+      });
+
+      try {
+        // Fetch both in parallel
+        await Promise.all([
+          needsTodosFetch ? fetchTodos() : Promise.resolve(),
+          needsColumnsFetch ? refreshNuxtData("todo-columns") : Promise.resolve(),
+        ]);
+        consola.info("[toDoLists] Data fetched successfully");
+      }
+      catch (err) {
+        consola.error("[toDoLists] Failed to fetch data:", err);
+      }
+    }
+    else {
+      consola.info("[toDoLists] Data already available, no fetch needed");
+    }
+  }
+});
+
 // Google Tasks and Calendar Reminders
 const googleTasks = ref<any[]>([]);
 const calendarReminders = ref<any[]>([]);

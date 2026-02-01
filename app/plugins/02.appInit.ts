@@ -22,12 +22,24 @@ export default defineNuxtPlugin(async () => {
   const isCapacitorBuild = import.meta.env.CAPACITOR_BUILD === "true" || process.env.CAPACITOR_BUILD === "true";
   const fetchOnServer = !isCapacitorBuild;
 
+  // In Capacitor, check if server URL is configured before fetching
+  const isCapacitorRuntime = typeof window !== "undefined" && "Capacitor" in window;
+  const hasServerUrl = isCapacitorRuntime && window.__CAPACITOR_SERVER_URL__;
+
   consola.info("[AppInit] Environment:", {
     isCapacitorBuild,
+    isCapacitorRuntime,
+    hasServerUrl,
     fetchOnServer,
     isServer: import.meta.server,
     isClient: import.meta.client,
   });
+
+  // Skip all data fetching in Capacitor if no server URL is configured
+  if (isCapacitorRuntime && !hasServerUrl) {
+    consola.warn("[AppInit] Skipping data fetch - no server URL configured in Capacitor");
+    return;
+  }
 
   try {
     const apiUrl = `https://tz.add-to-calendar-technology.com/api/${encodeURIComponent(browserTimezone)}.ics`;
