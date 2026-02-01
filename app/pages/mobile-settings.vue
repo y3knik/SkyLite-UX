@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { consola } from "consola";
 import { onMounted, onUnmounted, ref } from "vue";
 
 import { useOfflineSync } from "~/composables/useOfflineSync";
