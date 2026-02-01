@@ -249,11 +249,11 @@ function onAccordionLeave(el: Element) {
     <!-- Move mode overlay (mobile) -->
     <div
       v-if="movingMeal && isMobile"
-      class="fixed inset-0 z-40 bg-black/80 overflow-y-auto"
+      class="fixed top-0 left-[50px] right-0 bottom-0 z-40 bg-black/80 overflow-y-auto p-4"
     >
-      <div class="p-4 min-h-full">
+      <div class="w-full max-w-full">
         <!-- Header -->
-        <div class="bg-default rounded-lg p-4 mb-4 sticky top-4 z-10 shadow-lg">
+        <div class="bg-default rounded-lg p-4 mb-4 sticky top-0 z-10 shadow-lg">
           <div class="flex items-center justify-between mb-2">
             <h3 class="font-semibold text-lg truncate pr-2">
               Move "{{ movingMeal.name }}"
