@@ -23,8 +23,18 @@ export default defineNuxtPlugin(async () => {
         // Get current server URL (may have been updated in mobile-settings)
         const currentServerUrl = window.__CAPACITOR_SERVER_URL__;
 
-        consola.info(`[Capacitor $fetch] >>> FETCH CALLED: ${url}`);
-        consola.debug("[Capacitor $fetch] Options:", options, "Server URL:", currentServerUrl || "NOT SET");
+        consola.debug(`[Capacitor $fetch] >>> FETCH CALLED: ${url}`);
+
+        // Sanitize options for logging (redact sensitive headers)
+        const sanitizedOptions = options
+          ? {
+              ...options,
+              headers: options.headers ? { ...options.headers, authorization: "[REDACTED]", cookie: "[REDACTED]" } : undefined,
+              body: options.body ? "[REDACTED]" : undefined,
+            }
+          : undefined;
+
+        consola.debug("[Capacitor $fetch] Server URL:", currentServerUrl || "NOT SET", "Method:", sanitizedOptions?.method || "GET");
 
         // If no server URL configured, reject API calls
         if (!currentServerUrl && typeof url === "string" && url.startsWith("/api/")) {
@@ -42,8 +52,8 @@ export default defineNuxtPlugin(async () => {
         const promise = originalFetch(url, options);
 
         promise.then(
-          (result) => consola.info(`[Capacitor $fetch] <<< SUCCESS: ${url}`),
-          (error) => consola.error(`[Capacitor $fetch] <<< FAILED: ${url}`, error)
+          () => consola.info(`[Capacitor $fetch] <<< SUCCESS: ${url}`),
+          error => consola.error(`[Capacitor $fetch] <<< FAILED: ${url}`, error),
         );
 
         return promise;

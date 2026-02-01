@@ -28,10 +28,9 @@ watch(() => todos.value, (newVal) => {
   consola.info(`[toDoLists] todos data changed: ${newVal?.length || 0} todos`, newVal);
 }, { immediate: true });
 
-// Also watch the computed result
-watch(() => todoLists.value, (newVal) => {
-  consola.info(`[toDoLists] todoLists computed: ${newVal?.length || 0} lists`, newVal);
-}, { immediate: true });
+// Track if data has been fetched to avoid refetching empty arrays
+const todosFetched = ref(false);
+const todoColumnsFetched = ref(false);
 
 // In Capacitor, fetch data if missing (appInit may have skipped if no server URL)
 onMounted(async () => {
@@ -39,9 +38,9 @@ onMounted(async () => {
   if (isCapacitor) {
     consola.info("[toDoLists] Capacitor detected - checking if data needs fetching");
 
-    // Check if todos or todo-columns are missing/invalid
-    const needsTodosFetch = !todos.value || !Array.isArray(todos.value) || todos.value.length === 0;
-    const needsColumnsFetch = !todoColumns.value || !Array.isArray(todoColumns.value) || todoColumns.value.length === 0;
+    // Check if todos or todo-columns are missing/invalid (don't treat empty arrays as missing if already fetched)
+    const needsTodosFetch = !todosFetched.value && (!todos.value || !Array.isArray(todos.value));
+    const needsColumnsFetch = !todoColumnsFetched.value && (!todoColumns.value || !Array.isArray(todoColumns.value));
 
     if (needsTodosFetch || needsColumnsFetch) {
       consola.info("[toDoLists] Data missing in Capacitor - fetching now", {
@@ -59,6 +58,7 @@ onMounted(async () => {
             $fetch<Todo[]>("/api/todos").then((data) => {
               consola.info("[toDoLists] Todos fetched:", data?.length || 0);
               todos.value = data;
+              todosFetched.value = true;
             }),
           );
         }
@@ -69,6 +69,7 @@ onMounted(async () => {
             $fetch<TodoColumn[]>("/api/todo-columns").then((data) => {
               consola.info("[toDoLists] Todo-columns fetched:", data?.length || 0);
               todoColumns.value = data;
+              todoColumnsFetched.value = true;
             }),
           );
         }
@@ -82,8 +83,23 @@ onMounted(async () => {
     }
     else {
       consola.info("[toDoLists] Data already available, no fetch needed");
+      todosFetched.value = true;
+      todoColumnsFetched.value = true;
     }
   }
+  else {
+    // Non-Capacitor environment - fetch if data missing
+    if (!todosFetched.value && (!todos.value || !Array.isArray(todos.value))) {
+      await fetchTodos();
+      todosFetched.value = true;
+    }
+  }
+
+  // Fetch Google Tasks and Calendar Reminders
+  await Promise.all([
+    fetchGoogleTasks(),
+    fetchCalendarReminders(),
+  ]);
 });
 
 // Google Tasks and Calendar Reminders
@@ -690,15 +706,6 @@ async function handleToggleTodo(itemId: string, completed: boolean) {
     consola.error("Todo Lists: Failed to toggle todo:", error);
   }
 }
-
-// Fetch Google Tasks and Calendar Reminders on mount
-onMounted(async () => {
-  await Promise.all([
-    fetchTodos(),
-    fetchGoogleTasks(),
-    fetchCalendarReminders(),
-  ]);
-});
 </script>
 
 <template>

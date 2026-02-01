@@ -19,7 +19,7 @@ export default defineNuxtPlugin(async () => {
 
   // In Capacitor builds (static), always use client-side data fetching
   // Check build-time env var, not runtime Capacitor detection
-  const isCapacitorBuild = import.meta.env.CAPACITOR_BUILD === "true" || process.env.CAPACITOR_BUILD === "true";
+  const isCapacitorBuild = import.meta.env.CAPACITOR_BUILD === "true";
   const fetchOnServer = !isCapacitorBuild;
 
   // In Capacitor, check if server URL is configured before fetching
@@ -124,10 +124,12 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? (key) => {
-          consola.info("[AppInit] getCachedData called for calendar-events, returning undefined");
-          return undefined;
-        } : undefined,
+        getCachedData: isCapacitorBuild
+          ? (_key) => {
+              consola.info("[AppInit] getCachedData called for calendar-events, returning undefined");
+              return undefined;
+            }
+          : undefined,
       }),
 
       useAsyncData("todos", async () => {
@@ -145,10 +147,12 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? (key) => {
-          consola.info("[AppInit] getCachedData called for todos, returning undefined");
-          return undefined;
-        } : undefined,
+        getCachedData: isCapacitorBuild
+          ? (_key) => {
+              consola.info("[AppInit] getCachedData called for todos, returning undefined");
+              return undefined;
+            }
+          : undefined,
       }),
 
       useAsyncData("native-shopping-lists", () => {
@@ -157,10 +161,12 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? (key) => {
-          consola.info("[AppInit] getCachedData called for native-shopping-lists, returning undefined");
-          return undefined;
-        } : undefined,
+        getCachedData: isCapacitorBuild
+          ? (_key) => {
+              consola.info("[AppInit] getCachedData called for native-shopping-lists, returning undefined");
+              return undefined;
+            }
+          : undefined,
       }),
 
       useAsyncData("todo-columns", async () => {
@@ -178,10 +184,12 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? (key) => {
-          consola.info("[AppInit] getCachedData called for todo-columns, returning undefined");
-          return undefined;
-        } : undefined,
+        getCachedData: isCapacitorBuild
+          ? (_key) => {
+              consola.info("[AppInit] getCachedData called for todo-columns, returning undefined");
+              return undefined;
+            }
+          : undefined,
       }),
 
       useAsyncData("meal-plans", () => {
@@ -190,10 +198,12 @@ export default defineNuxtPlugin(async () => {
       }, {
         server: fetchOnServer,
         lazy: false,
-        getCachedData: isCapacitorBuild ? (key) => {
-          consola.info("[AppInit] getCachedData called for meal-plans, returning undefined");
-          return undefined;
-        } : undefined,
+        getCachedData: isCapacitorBuild
+          ? (_key) => {
+              consola.info("[AppInit] getCachedData called for meal-plans, returning undefined");
+              return undefined;
+            }
+          : undefined,
       }),
     ]);
 

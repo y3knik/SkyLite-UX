@@ -306,41 +306,41 @@ function onAccordionLeave(el: Element) {
 
         <!-- Destination picker (scrollable list of days) -->
         <div class="space-y-4 pb-4">
-        <div
-          v-for="dayOfWeek in 7"
-          :key="dayOfWeek - 1"
-          class="bg-default rounded-lg overflow-hidden shadow-md"
-        >
-          <!-- Day header -->
-          <div class="p-3 bg-muted/10 font-semibold text-sm border-b border-default">
-            {{ dayNames[dayOfWeek - 1] }} - {{ getDayDate(dayOfWeek - 1) }}
-          </div>
+          <div
+            v-for="dayOfWeek in 7"
+            :key="dayOfWeek - 1"
+            class="bg-default rounded-lg overflow-hidden shadow-md"
+          >
+            <!-- Day header -->
+            <div class="p-3 bg-muted/10 font-semibold text-sm border-b border-default">
+              {{ dayNames[dayOfWeek - 1] }} - {{ getDayDate(dayOfWeek - 1) }}
+            </div>
 
-          <!-- Meal type buttons -->
-          <div class="p-3 space-y-2">
-            <button
-              v-for="mealType in mealTypes"
-              :key="mealType"
-              :disabled="dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType"
-              class="w-full p-3 border-2 rounded-lg text-left active:bg-primary/5 transition-colors"
-              :class="[
-                dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType
-                  ? 'border-default bg-muted/10 text-muted cursor-not-allowed'
-                  : 'border-primary/30 hover:bg-primary/5 hover:border-primary',
-              ]"
-              @click="moveMealToSlot(dayOfWeek - 1, mealType)"
-            >
-              <span class="text-sm font-medium">{{ mealTypeLabels[mealType] }}</span>
-              <span
-                v-if="dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType"
-                class="text-xs text-muted ml-2"
+            <!-- Meal type buttons -->
+            <div class="p-3 space-y-2">
+              <button
+                v-for="mealType in mealTypes"
+                :key="mealType"
+                :disabled="dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType"
+                class="w-full p-3 border-2 rounded-lg text-left active:bg-primary/5 transition-colors"
+                :class="[
+                  dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType
+                    ? 'border-default bg-muted/10 text-muted cursor-not-allowed'
+                    : 'border-primary/30 hover:bg-primary/5 hover:border-primary',
+                ]"
+                @click="moveMealToSlot(dayOfWeek - 1, mealType)"
               >
-                (current)
-              </span>
-            </button>
+                <span class="text-sm font-medium">{{ mealTypeLabels[mealType] }}</span>
+                <span
+                  v-if="dayOfWeek - 1 === movingMeal.dayOfWeek && mealType === movingMeal.mealType"
+                  class="text-xs text-muted ml-2"
+                >
+                  (current)
+                </span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
 

@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Mobile UX Enhancements**
   - Meal planner accordion now preserves state after adding/editing/deleting meals
   - Accordion stays open on the correct day instead of closing or jumping to Monday
+  - Todo columns are collapsible on mobile with tap-to-expand functionality
+  - Mobile UI has no horizontal scrollbars on todo lists and meal planner pages
   - Implemented Vue nextTick() and watchers for reliable state preservation
 - **Clean Production Experience**
   - Removed debug console floating button from mobile app
