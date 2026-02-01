@@ -54,6 +54,7 @@ export function useTodos() {
           isCountdown: todoData.isCountdown || false,
           countdownMessage: todoData.countdownMessage || null,
           messageGeneratedAt: todoData.messageGeneratedAt || null,
+          todoColumn: null,
         };
 
         return tempTodo;
