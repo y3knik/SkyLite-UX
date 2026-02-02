@@ -136,7 +136,7 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
             try {
               resolve(JSON.parse(data));
             }
-            catch (err) {
+            catch (_err) {
               req.destroy();
               reject(new Error("Failed to parse geocoding response"));
             }
