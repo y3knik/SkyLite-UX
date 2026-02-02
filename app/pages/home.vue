@@ -79,7 +79,7 @@ const todayHighLow = computed(() => {
   if (!today)
     return null;
 
-  const unit = homeSettings.value?.temperatureUnit === "fahrenheit" ? "°" : "°";
+  const unit = homeSettings.value?.temperatureUnit === "fahrenheit" ? "°F" : "°C";
   return {
     high: `${today.tempMax}${unit}`,
     low: `${today.tempMin}${unit}`,
