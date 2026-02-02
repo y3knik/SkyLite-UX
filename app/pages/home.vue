@@ -13,6 +13,7 @@ const weather = ref<{
   temperature: number;
   description: string;
   code: number;
+  location?: string;
   daily?: Array<{
     date: string;
     tempMax: number;
@@ -68,6 +69,18 @@ const temperature = computed(() => {
   const temp = weather.value.temperature;
   const unit = homeSettings.value?.temperatureUnit === "fahrenheit" ? "°F" : "°C";
   return `${Math.round(temp)}${unit}`;
+});
+
+const todayHighLow = computed(() => {
+  if (!weather.value?.daily || weather.value.daily.length === 0)
+    return null;
+
+  const today = weather.value.daily[0];
+  const unit = homeSettings.value?.temperatureUnit === "fahrenheit" ? "°" : "°";
+  return {
+    high: `${today.tempMax}${unit}`,
+    low: `${today.tempMin}${unit}`,
+  };
 });
 
 // Helper function to get weather icon for forecast
@@ -210,6 +223,7 @@ async function fetchWeather() {
       temperature: number;
       weatherCode: number;
       weatherDescription: string;
+      location?: string;
       daily?: Array<{
         date: string;
         tempMax: number;
@@ -229,6 +243,7 @@ async function fetchWeather() {
       temperature: response.temperature,
       description: response.weatherDescription,
       code: response.weatherCode,
+      location: response.location,
       daily: response.daily,
     };
   }
@@ -596,13 +611,24 @@ function formatEventTime(dateString: string | Date) {
           to="/settings"
           class="text-white text-right bg-black/30 backdrop-blur-sm hover:bg-black/40 rounded-lg p-4 transition-colors cursor-pointer block"
         >
+          <!-- Location Name -->
+          <div v-if="weather.location" class="text-sm opacity-70 mb-2">
+            {{ weather.location }}
+          </div>
+
           <div class="text-4xl">
             {{ weatherIcon }}
           </div>
           <div class="text-xl mt-2">
             {{ temperature }}
           </div>
-          <div class="text-sm opacity-80">
+
+          <!-- Today's High/Low -->
+          <div v-if="todayHighLow" class="text-sm opacity-80 mt-1">
+            H: {{ todayHighLow.high }} L: {{ todayHighLow.low }}
+          </div>
+
+          <div class="text-sm opacity-80 mt-1">
             {{ weather.description }}
           </div>
 

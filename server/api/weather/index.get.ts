@@ -5,6 +5,7 @@ type WeatherResponse = {
   temperature: number;
   weatherCode: number;
   weatherDescription: string;
+  location?: string;
   daily: Array<{
     date: string;
     tempMax: number;
@@ -98,6 +99,32 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
   const temperatureUnit = query.temperatureUnit as string || "celsius";
 
   try {
+    // Fetch location name via reverse geocoding (Open-Meteo geocoding API)
+    let locationName: string | undefined;
+    try {
+      const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lng}&count=1&language=en&format=json`;
+      consola.debug("Fetching location name from Open-Meteo Geocoding API");
+      const geocodeData: any = await httpsGet(geocodeUrl);
+
+      if (geocodeData?.results && geocodeData.results.length > 0) {
+        const result = geocodeData.results[0];
+        // Build location string: "City, State/Region" or "City, Country"
+        const parts: string[] = [];
+        if (result.name)
+          parts.push(result.name);
+        if (result.admin1)
+          parts.push(result.admin1); // State/Region
+        else if (result.country)
+          parts.push(result.country);
+
+        locationName = parts.join(", ");
+        consola.debug(`Resolved location: ${locationName}`);
+      }
+    }
+    catch (geocodeError) {
+      consola.warn("Failed to fetch location name, continuing without it:", geocodeError);
+    }
+
     // Build query string manually
     const params = new URLSearchParams({
       latitude: lat.toString(),
@@ -157,6 +184,7 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
       temperature: Math.round(weather.current.temperature_2m),
       weatherCode: weather.current.weather_code,
       weatherDescription: getWeatherDescription(weather.current.weather_code),
+      location: locationName,
       daily: dailyForecast,
     };
   }
