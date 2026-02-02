@@ -109,11 +109,14 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
 
       // Make request with custom User-Agent (required by Nominatim)
       const geocodeData: any = await new Promise((resolve, reject) => {
+        let req: ReturnType<typeof https.get>;
+
         const timeout = setTimeout(() => {
+          req.destroy();
           reject(new Error("Geocoding request timeout"));
         }, 10000);
 
-        https.get(geocodeUrl, {
+        req = https.get(geocodeUrl, {
           headers: {
             "User-Agent": "SkyLite-UX/1.0 (Family Dashboard)",
           },
@@ -121,6 +124,7 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
           if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
             res.resume();
             clearTimeout(timeout);
+            req.destroy();
             reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
             return;
           }
@@ -133,11 +137,13 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
               resolve(JSON.parse(data));
             }
             catch (err) {
+              req.destroy();
               reject(new Error("Failed to parse geocoding response"));
             }
           });
         }).on("error", (err) => {
           clearTimeout(timeout);
+          req.destroy();
           reject(err);
         });
       });
