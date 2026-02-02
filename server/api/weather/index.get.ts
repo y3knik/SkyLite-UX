@@ -99,23 +99,71 @@ export default defineEventHandler(async (event): Promise<WeatherResponse> => {
   const temperatureUnit = query.temperatureUnit as string || "celsius";
 
   try {
-    // Fetch location name via reverse geocoding (Open-Meteo geocoding API)
+    // Fetch location name via reverse geocoding (Nominatim/OpenStreetMap)
     let locationName: string | undefined;
     try {
-      const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lng}&count=1&language=en&format=json`;
-      consola.debug("Fetching location name from Open-Meteo Geocoding API");
-      const geocodeData: any = await httpsGet(geocodeUrl);
+      // Nominatim reverse geocoding - free, no API key needed
+      // Using zoom=10 for city-level results
+      const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&addressdetails=1`;
+      consola.debug("Fetching location name from Nominatim (OpenStreetMap)");
 
-      if (geocodeData?.results && geocodeData.results.length > 0) {
-        const result = geocodeData.results[0];
-        // Build location string: "City, State/Region" or "City, Country"
+      // Make request with custom User-Agent (required by Nominatim)
+      const geocodeData: any = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Geocoding request timeout"));
+        }, 10000);
+
+        https.get(geocodeUrl, {
+          headers: {
+            "User-Agent": "SkyLite-UX/1.0 (Family Dashboard)",
+          },
+        }, (res) => {
+          if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+            res.resume();
+            clearTimeout(timeout);
+            reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+            return;
+          }
+
+          let data = "";
+          res.on("data", chunk => data += chunk);
+          res.on("end", () => {
+            clearTimeout(timeout);
+            try {
+              resolve(JSON.parse(data));
+            }
+            catch (err) {
+              reject(new Error("Failed to parse geocoding response"));
+            }
+          });
+        }).on("error", (err) => {
+          clearTimeout(timeout);
+          reject(err);
+        });
+      });
+
+      if (geocodeData?.address) {
+        const addr = geocodeData.address;
+        // Build location string: "City, Province/State" or "City, Country"
         const parts: string[] = [];
-        if (result.name)
-          parts.push(result.name);
-        if (result.admin1)
-          parts.push(result.admin1); // State/Region
-        else if (result.country)
-          parts.push(result.country);
+
+        // Try city/town/village
+        if (addr.city)
+          parts.push(addr.city);
+        else if (addr.town)
+          parts.push(addr.town);
+        else if (addr.village)
+          parts.push(addr.village);
+        else if (addr.municipality)
+          parts.push(addr.municipality);
+
+        // Add state/province or country
+        if (addr.state)
+          parts.push(addr.state);
+        else if (addr.province)
+          parts.push(addr.province);
+        else if (addr.country)
+          parts.push(addr.country);
 
         locationName = parts.join(", ");
         consola.debug(`Resolved location: ${locationName}`);
