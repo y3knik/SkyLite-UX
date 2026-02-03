@@ -1,7 +1,7 @@
 import { consola } from "consola";
 
 import prisma from "~/lib/prisma";
-import { getStorageDir } from "~/server/utils/photoStorage";
+import { getStorageDir } from "../../utils/photoStorage";
 
 /**
  * Resets all photo cache references in the database
