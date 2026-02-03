@@ -182,9 +182,20 @@ export default defineEventHandler(async (event) => {
 
         return buffer;
       }
-      catch (fileError) {
-        consola.warn(`Local file not found, will download: ${photo.localImagePath}`, fileError);
-        // Fall through to download
+      catch (fileError: any) {
+        // Only fall back to download if file doesn't exist
+        if (fileError.code === "ENOENT") {
+          consola.warn(`Local file not found, will download: ${photo.localImagePath}`);
+          // Fall through to download
+        }
+        else {
+          // For other errors (permissions, IO errors, etc.), surface the issue
+          consola.error(`Failed to read local photo file ${photo.localImagePath}:`, fileError);
+          throw createError({
+            statusCode: 500,
+            message: `Failed to read local photo file: ${fileError.message || "Unknown error"}`,
+          });
+        }
       }
     }
 
