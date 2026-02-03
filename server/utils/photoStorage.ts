@@ -12,7 +12,7 @@ function getStorageDirectory(): string {
   // Try to get from runtime config first (preferred for Nuxt/Nitro)
   try {
     const config = useRuntimeConfig();
-    if (config.photosStoragePath) {
+    if (config.photosStoragePath && typeof config.photosStoragePath === "string") {
       return join(config.photosStoragePath);
     }
   }
