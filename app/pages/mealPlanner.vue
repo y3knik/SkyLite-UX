@@ -84,6 +84,7 @@ async function loadWeekMealPlan() {
         weekStart: currentWeekStart.value,
         order: 0,
         meals: [],
+        _count: { meals: 0 },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
