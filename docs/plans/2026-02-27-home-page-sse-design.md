@@ -15,7 +15,7 @@ Extend the existing SSE sync manager (Approach A) rather than creating a separat
 
 ### Data Flow
 
-```
+```text
 HOME PAGE (home.vue)
   onMounted:
     1. Fetch all widget data (one-time)

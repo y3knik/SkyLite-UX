@@ -339,7 +339,11 @@ async function initializeWeatherBroadcast() {
     const refreshIntervalMs = (homeSettings.refreshInterval || 6.0) * 3600000;
 
     weatherInterval = setInterval(async () => {
-      await broadcastWeatherUpdate(homeSettings);
+      const latestSettings = await prisma.homeSettings.findFirst();
+      if (!latestSettings?.weatherEnabled || !latestSettings.latitude || !latestSettings.longitude) {
+        return;
+      }
+      await broadcastWeatherUpdate(latestSettings);
     }, refreshIntervalMs);
 
     await broadcastWeatherUpdate(homeSettings);
@@ -370,10 +374,6 @@ async function broadcastWeatherUpdate(homeSettings: any) {
     const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
 
     const weather: any = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error("Weather request timeout"));
-      }, 30000);
-
       const req = https.get(url, (res: any) => {
         if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
           res.resume();
@@ -390,6 +390,9 @@ async function broadcastWeatherUpdate(homeSettings: any) {
           catch (err) { reject(err); }
         });
       });
+      const timeout = setTimeout(() => {
+        req.destroy(new Error("Weather request timeout"));
+      }, 30000);
       req.on("error", (err: Error) => {
         clearTimeout(timeout);
         reject(err);

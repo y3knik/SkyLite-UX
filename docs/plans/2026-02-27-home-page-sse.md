@@ -10,6 +10,8 @@
 
 ---
 
+## Tasks
+
 ### Task 1: Extend SyncEvent types for home page events
 
 **Files:**

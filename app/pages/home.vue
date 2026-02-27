@@ -197,57 +197,16 @@ useHomeSSE({
       consola.debug("[Home] Meals updated via SSE");
     }
   },
-  onTodosUpdate: (data) => {
-    if (homeSettings.value?.todosEnabled && data) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      const filtered = (data || [])
-        .filter((todo: any) => {
-          if (!todo.completed) {
-            if (!todo.dueDate)
-              return true;
-            const dueDateObj = new Date(todo.dueDate);
-            const dueDate = new Date(dueDateObj.getUTCFullYear(), dueDateObj.getUTCMonth(), dueDateObj.getUTCDate());
-            return dueDate >= today && dueDate < tomorrow;
-          }
-          return false;
-        })
-        .slice(0, 5);
-
-      todaysTasks.value = filtered;
-      consola.debug("[Home] Tasks updated via SSE");
+  onTodosUpdate: async () => {
+    if (homeSettings.value?.todosEnabled) {
+      await fetchTodaysTasks();
+      consola.debug("[Home] Tasks refreshed after SSE signal");
     }
   },
-  onEventsUpdate: (data) => {
-    if (homeSettings.value?.eventsEnabled && data) {
-      const now = new Date();
-      const upcoming = (data || [])
-        .filter((event: any) => {
-          const eventStart = new Date(event.start);
-          if (Number.isNaN(eventStart.getTime()))
-            return false;
-          if (event.end) {
-            const eventEnd = new Date(event.end);
-            if (Number.isNaN(eventEnd.getTime()))
-              return false;
-            return eventEnd > now;
-          }
-          const defaultEnd = new Date(eventStart);
-          if (event.allDay) {
-            defaultEnd.setUTCHours(23, 59, 59, 999);
-          }
-          else {
-            defaultEnd.setHours(defaultEnd.getHours() + 1);
-          }
-          return defaultEnd > now;
-        })
-        .sort((a: any, b: any) => new Date(a.start).getTime() - new Date(b.start).getTime());
-
-      upcomingEvents.value = upcoming;
-      consola.debug("[Home] Events updated via SSE");
+  onEventsUpdate: async () => {
+    if (homeSettings.value?.eventsEnabled) {
+      await fetchUpcomingEvents();
+      consola.debug("[Home] Events refreshed after SSE signal");
     }
   },
   onCountdownsUpdate: (_data) => {

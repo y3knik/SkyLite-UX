@@ -73,7 +73,7 @@ export type ServerSyncEvent = {
   integrationId?: string;
   integrationType?: string;
   service?: string;
-  data: SyncData | any;
+  data: SyncData | Record<string, unknown>;
   timestamp: Date;
   success: boolean;
   error?: string;

@@ -40,7 +40,7 @@ export async function broadcastHomeUpdate(eventType: HomeUpdateEventType): Promi
   }
 }
 
-async function fetchDataForEventType(eventType: HomeUpdateEventType): Promise<any> {
+async function fetchDataForEventType(eventType: HomeUpdateEventType): Promise<Record<string, unknown> | Record<string, unknown>[] | null> {
   const prisma = await import("../../app/lib/prisma").then(m => m.default);
 
   switch (eventType) {
@@ -86,6 +86,10 @@ async function fetchDataForEventType(eventType: HomeUpdateEventType): Promise<an
             },
           },
         },
+        orderBy: [
+          { priority: "desc" },
+          { createdAt: "desc" },
+        ],
         take: 20,
       });
     }
