@@ -207,7 +207,8 @@ useHomeSSE({
       const filtered = (data || [])
         .filter((todo: any) => {
           if (!todo.completed) {
-            if (!todo.dueDate) return true;
+            if (!todo.dueDate)
+              return true;
             const dueDateObj = new Date(todo.dueDate);
             const dueDate = new Date(dueDateObj.getUTCFullYear(), dueDateObj.getUTCMonth(), dueDateObj.getUTCDate());
             return dueDate >= today && dueDate < tomorrow;
@@ -226,10 +227,12 @@ useHomeSSE({
       const upcoming = (data || [])
         .filter((event: any) => {
           const eventStart = new Date(event.start);
-          if (Number.isNaN(eventStart.getTime())) return false;
+          if (Number.isNaN(eventStart.getTime()))
+            return false;
           if (event.end) {
             const eventEnd = new Date(event.end);
-            if (Number.isNaN(eventEnd.getTime())) return false;
+            if (Number.isNaN(eventEnd.getTime()))
+              return false;
             return eventEnd > now;
           }
           const defaultEnd = new Date(eventStart);
