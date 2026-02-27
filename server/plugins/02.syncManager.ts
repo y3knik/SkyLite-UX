@@ -339,11 +339,16 @@ async function initializeWeatherBroadcast() {
     const refreshIntervalMs = (homeSettings.refreshInterval || 6.0) * 3600000;
 
     weatherInterval = setInterval(async () => {
-      const latestSettings = await prisma.homeSettings.findFirst();
-      if (!latestSettings?.weatherEnabled || !latestSettings.latitude || !latestSettings.longitude) {
-        return;
+      try {
+        const latestSettings = await prisma.homeSettings.findFirst();
+        if (!latestSettings?.weatherEnabled || !latestSettings.latitude || !latestSettings.longitude) {
+          return;
+        }
+        await broadcastWeatherUpdate(latestSettings);
       }
-      await broadcastWeatherUpdate(latestSettings);
+      catch (error) {
+        consola.error("Sync Manager: Weather interval callback failed:", error);
+      }
     }, refreshIntervalMs);
 
     await broadcastWeatherUpdate(homeSettings);

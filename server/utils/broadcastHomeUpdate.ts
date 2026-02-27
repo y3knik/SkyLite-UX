@@ -1,3 +1,4 @@
+import { addDays } from "date-fns";
 import { consola } from "consola";
 
 import type { HomeUpdateEventType } from "../../app/types/sync";
@@ -45,23 +46,46 @@ async function fetchDataForEventType(eventType: HomeUpdateEventType): Promise<Re
 
   switch (eventType) {
     case "meals_update": {
+      // calculatedDate is computed from mealPlan.weekStart + meal.dayOfWeek,
+      // not a DB column. Replicate the byDateRange query pattern.
       const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-      const tomorrow = new Date(now);
+      const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const tomorrow = new Date(startDate);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+      const endDate = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 23, 59, 59, 999);
 
-      return prisma.meal.findMany({
+      // Look back up to 6 days for meal plans whose meals may fall in today/tomorrow
+      const lookbackDate = addDays(startDate, -6);
+
+      const mealPlans = await prisma.mealPlan.findMany({
         where: {
-          calculatedDate: {
-            gte: new Date(`${today}T00:00:00`),
-            lte: new Date(`${tomorrowStr}T23:59:59`),
+          weekStart: {
+            gte: lookbackDate,
+            lte: endDate,
           },
         },
         include: {
-          mealPlan: true,
+          meals: true,
         },
       });
+
+      const mealsWithDates: Record<string, unknown>[] = [];
+
+      for (const mealPlan of mealPlans) {
+        for (const meal of mealPlan.meals) {
+          const mealDate = addDays(mealPlan.weekStart, meal.dayOfWeek);
+
+          if (mealDate >= startDate && mealDate <= endDate) {
+            mealsWithDates.push({
+              ...meal,
+              calculatedDate: mealDate,
+              mealPlanWeekStart: mealPlan.weekStart,
+            });
+          }
+        }
+      }
+
+      return mealsWithDates;
     }
 
     case "todos_update": {
@@ -121,8 +145,14 @@ async function fetchDataForEventType(eventType: HomeUpdateEventType): Promise<Re
         },
         include: {
           users: {
-            include: {
-              user: true,
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
             },
           },
         },

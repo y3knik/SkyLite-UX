@@ -1,7 +1,5 @@
 # Home Page SSE Migration Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
-
 **Goal:** Replace the home page's 5 independent polling intervals with SSE listeners that react to server-side data changes in real-time.
 
 **Architecture:** Extend the existing sync manager (`server/plugins/02.syncManager.ts`) with new event types (`weather_update`, `meals_update`, `todos_update`, `events_update`, `countdowns_update`). API mutation routes call a new `broadcastHomeUpdate()` utility after successful CRUD operations. The home page subscribes to these events via a new `useHomeSSE()` composable while keeping initial data fetches on mount.
