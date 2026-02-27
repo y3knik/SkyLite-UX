@@ -1,4 +1,5 @@
 import prisma from "~/lib/prisma";
+import { broadcastHomeUpdate } from "~/utils/broadcastHomeUpdate";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -33,6 +34,7 @@ export default defineEventHandler(async (event) => {
       where: { id: actualId },
     });
 
+    broadcastHomeUpdate("events_update").catch(() => {});
     return {
       success: true,
       message: isExpandedEvent

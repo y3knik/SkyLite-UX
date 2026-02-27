@@ -1,4 +1,6 @@
 import prisma from "~/lib/prisma";
+import { broadcastHomeUpdate } from "~/utils/broadcastHomeUpdate";
+
 
 export default defineEventHandler(async (event) => {
   try {
@@ -13,6 +15,8 @@ export default defineEventHandler(async (event) => {
     );
 
     await Promise.all(updatePromises);
+
+    broadcastHomeUpdate("todos_update").catch(() => {});
 
     return { success: true };
   }

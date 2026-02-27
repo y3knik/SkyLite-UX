@@ -1,4 +1,6 @@
 import prisma from "~/lib/prisma";
+import { broadcastHomeUpdate } from "~/utils/broadcastHomeUpdate";
+
 
 export default defineEventHandler(async (event) => {
   try {
@@ -44,6 +46,11 @@ export default defineEventHandler(async (event) => {
         },
       },
     });
+
+    broadcastHomeUpdate("todos_update").catch(() => {});
+    if (body.isCountdown) {
+      broadcastHomeUpdate("countdowns_update").catch(() => {});
+    }
 
     return todo;
   }

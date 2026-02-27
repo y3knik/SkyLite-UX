@@ -1,4 +1,5 @@
 import prisma from "~/lib/prisma";
+import { broadcastHomeUpdate } from "~/utils/broadcastHomeUpdate";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -14,6 +15,8 @@ export default defineEventHandler(async (event) => {
     await prisma.mealPlan.delete({
       where: { id },
     });
+
+    broadcastHomeUpdate("meals_update").catch(() => {});
 
     return { success: true };
   }
