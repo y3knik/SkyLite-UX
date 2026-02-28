@@ -42,7 +42,7 @@ describe("SyncEvent types", () => {
 });
 ```
 
-**Step 2: Run test to verify it fails**
+**Step 2: Run test to verify it passes**
 
 Run: `cd /c/Skylight && npx vitest run tests/unit/types/sync-types.test.ts`
 Expected: PASS (this is a type-level change, the test documents intent)
@@ -299,8 +299,14 @@ async function fetchDataForEventType(eventType: HomeUpdateEventType): Promise<an
         },
         include: {
           users: {
-            include: {
-              user: true,
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
             },
           },
         },
