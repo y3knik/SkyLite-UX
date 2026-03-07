@@ -112,6 +112,26 @@ function getDayName(dateStr: string, _daysFromNow: number): string {
   return days[date.getDay()] || "Sun";
 }
 
+// Midnight crossing detector — refreshes widget data when the calendar day changes
+const midnightDetector = createMidnightDetector();
+
+function refreshEnabledWidgets(): Promise<void>[] {
+  const fetches: Promise<void>[] = [];
+  if (homeSettings.value?.weatherEnabled && homeSettings.value.latitude != null && homeSettings.value.longitude != null) {
+    fetches.push(fetchWeather());
+  }
+  if (homeSettings.value?.eventsEnabled) {
+    fetches.push(fetchUpcomingEvents());
+  }
+  if (homeSettings.value?.todosEnabled) {
+    fetches.push(fetchTodaysTasks());
+  }
+  if (homeSettings.value?.mealsEnabled) {
+    fetches.push(fetchTodaysMenu());
+  }
+  return fetches;
+}
+
 // Fetch photos and settings on mount
 onMounted(async () => {
   await Promise.all([
@@ -124,20 +144,8 @@ onMounted(async () => {
   intervals.value.push(setInterval(updateClock, 1000));
 
   // Initial data fetches (one-time, no polling intervals) — run in parallel
-  const initialFetches: Promise<void>[] = [];
-  if (homeSettings.value?.weatherEnabled && homeSettings.value.latitude && homeSettings.value.longitude) {
-    initialFetches.push(fetchWeather());
-  }
-  if (homeSettings.value?.eventsEnabled) {
-    initialFetches.push(fetchUpcomingEvents());
-  }
-  if (homeSettings.value?.todosEnabled) {
-    initialFetches.push(fetchTodaysTasks());
-  }
-  if (homeSettings.value?.mealsEnabled) {
-    initialFetches.push(fetchTodaysMenu());
-  }
-  await Promise.allSettled(initialFetches);
+  await Promise.allSettled(refreshEnabledWidgets());
+  midnightDetector.markInitialized();
 });
 
 // Clear all intervals on unmount
@@ -191,18 +199,7 @@ watch(
   (newStatus) => {
     if (newStatus === "connected" && previousConnectionStatus.value !== "connected") {
       consola.info("[Home] SSE reconnected, refreshing all widget data");
-      if (homeSettings.value?.weatherEnabled && homeSettings.value.latitude && homeSettings.value.longitude) {
-        fetchWeather();
-      }
-      if (homeSettings.value?.eventsEnabled) {
-        fetchUpcomingEvents();
-      }
-      if (homeSettings.value?.todosEnabled) {
-        fetchTodaysTasks();
-      }
-      if (homeSettings.value?.mealsEnabled) {
-        fetchTodaysMenu();
-      }
+      refreshEnabledWidgets();
     }
     previousConnectionStatus.value = newStatus;
   },
@@ -267,10 +264,16 @@ function updateClock() {
     month: "long",
     day: "numeric",
   });
+
+  // Detect midnight crossing and re-fetch all widget data for the new day
+  if (midnightDetector.check(now)) {
+    consola.info("[Home] Midnight crossing detected, refreshing all widget data for new day");
+    refreshEnabledWidgets();
+  }
 }
 
 async function fetchWeather() {
-  if (!homeSettings.value?.latitude || !homeSettings.value?.longitude)
+  if (homeSettings.value?.latitude == null || homeSettings.value?.longitude == null)
     return;
 
   try {
