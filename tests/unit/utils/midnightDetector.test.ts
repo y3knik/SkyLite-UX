@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createMidnightDetector } from "../../../app/utils/midnightDetector";
 
@@ -91,7 +91,12 @@ describe("createMidnightDetector", () => {
   });
 
   it("should default to current date when no seed date provided", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15, 10, 0, 0)); // Jan 15
+
     const detector = createMidnightDetector();
-    expect(detector.currentDay).toBe(new Date().getDate());
+    expect(detector.currentDay).toBe(15);
+
+    vi.useRealTimers();
   });
 });

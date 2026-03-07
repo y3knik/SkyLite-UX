@@ -117,7 +117,7 @@ const midnightDetector = createMidnightDetector();
 
 function refreshEnabledWidgets(): Promise<void>[] {
   const fetches: Promise<void>[] = [];
-  if (homeSettings.value?.weatherEnabled && homeSettings.value.latitude && homeSettings.value.longitude) {
+  if (homeSettings.value?.weatherEnabled && homeSettings.value.latitude != null && homeSettings.value.longitude != null) {
     fetches.push(fetchWeather());
   }
   if (homeSettings.value?.eventsEnabled) {
@@ -273,7 +273,7 @@ function updateClock() {
 }
 
 async function fetchWeather() {
-  if (!homeSettings.value?.latitude || !homeSettings.value?.longitude)
+  if (homeSettings.value?.latitude == null || homeSettings.value?.longitude == null)
     return;
 
   try {
