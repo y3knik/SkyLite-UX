@@ -255,6 +255,9 @@ function startSlideshow() {
   }, transitionSpeed));
 }
 
+// Track the current calendar day so we can detect midnight crossings
+const currentDay = ref(new Date().getDate());
+
 function updateClock() {
   const now = new Date();
   currentTime.value = now.toLocaleTimeString("en-US", {
@@ -267,6 +270,25 @@ function updateClock() {
     month: "long",
     day: "numeric",
   });
+
+  // Detect midnight crossing and re-fetch all widget data for the new day
+  const day = now.getDate();
+  if (day !== currentDay.value) {
+    currentDay.value = day;
+    consola.info("[Home] Midnight crossing detected, refreshing all widget data for new day");
+    if (homeSettings.value?.weatherEnabled && homeSettings.value.latitude && homeSettings.value.longitude) {
+      fetchWeather();
+    }
+    if (homeSettings.value?.eventsEnabled) {
+      fetchUpcomingEvents();
+    }
+    if (homeSettings.value?.todosEnabled) {
+      fetchTodaysTasks();
+    }
+    if (homeSettings.value?.mealsEnabled) {
+      fetchTodaysMenu();
+    }
+  }
 }
 
 async function fetchWeather() {
