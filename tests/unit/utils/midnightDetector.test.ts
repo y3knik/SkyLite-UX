@@ -3,6 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMidnightDetector } from "../../../app/utils/midnightDetector";
 
 describe("createMidnightDetector", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("should track the initial day from the seed date", () => {
     const friday = new Date(2026, 2, 6, 23, 59, 0); // Fri Mar 6 at 23:59
     const detector = createMidnightDetector(friday);
@@ -96,7 +100,5 @@ describe("createMidnightDetector", () => {
 
     const detector = createMidnightDetector();
     expect(detector.currentDay).toBe(15);
-
-    vi.useRealTimers();
   });
 });
