@@ -76,6 +76,28 @@ watch(() => props.meals, () => {
   savingSlots.value.clear();
 });
 
+// Fallback: clear saving state after 5s in case parent never confirms
+const savingTimeouts = new Map<MealType, ReturnType<typeof setTimeout>>();
+function startSavingTimeout(mealType: MealType) {
+  clearSavingTimeout(mealType);
+  savingTimeouts.set(mealType, setTimeout(() => {
+    savingSlots.value.delete(mealType);
+    savingTimeouts.delete(mealType);
+  }, 5000));
+}
+function clearSavingTimeout(mealType: MealType) {
+  const existing = savingTimeouts.get(mealType);
+  if (existing) {
+    clearTimeout(existing);
+    savingTimeouts.delete(mealType);
+  }
+}
+onUnmounted(() => {
+  for (const timeout of savingTimeouts.values()) {
+    clearTimeout(timeout);
+  }
+});
+
 function handleFocus(mealType: MealType) {
   editingSlots.value.add(mealType);
 }
@@ -98,6 +120,7 @@ function handleBlur(slot: MealSlot) {
   else if (value !== "") {
     // New meal
     savingSlots.value.add(slot.type);
+    startSavingTimeout(slot.type);
     emit("saveMeal", { date: props.date, mealType: slot.type, name: value });
   }
 }

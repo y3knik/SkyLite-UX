@@ -179,6 +179,7 @@ async function handleUpdateMealName(data: { mealId: string; name: string }) {
 }
 
 // Handle meal delete (from card — clears text)
+// TODO: add undo toast for accidental deletions
 async function handleDeleteMeal(mealId: string) {
   try {
     await deleteMeal(mealId);
@@ -201,7 +202,7 @@ function handleOpenDetail(meal: MealWithDate) {
 async function handleDetailSave(data: { mealId: string; description: string; daysInAdvance: number }) {
   try {
     await updateMeal(data.mealId, {
-      description: data.description || undefined,
+      description: data.description,
       daysInAdvance: data.daysInAdvance,
     });
     // Update local state
