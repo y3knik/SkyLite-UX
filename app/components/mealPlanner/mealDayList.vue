@@ -147,12 +147,30 @@ function getDayOfWeek(date: Date): number {
 async function handleSaveMeal(data: { date: Date; mealType: MealType; name: string }) {
   try {
     const planId = await ensureMealPlan(data.date);
-    await addMealToPlan(planId, {
+    const newMeal = await addMealToPlan(planId, {
       name: data.name,
       mealType: data.mealType,
       dayOfWeek: getDayOfWeek(data.date),
     });
-    // Refresh meals for that day's week range
+
+    // Immediately show the meal in local state (covers offline temp meals)
+    if (newMeal) {
+      const mealWithDate: MealWithDate = {
+        ...newMeal,
+        calculatedDate: data.date,
+        mealPlanWeekStart: startOfWeek(data.date, { weekStartsOn: 1 }),
+      };
+      // Upsert: replace if exists (by id), otherwise append
+      const existingIdx = meals.value.findIndex(m => m.id === mealWithDate.id);
+      if (existingIdx !== -1) {
+        meals.value[existingIdx] = mealWithDate;
+      }
+      else {
+        meals.value = [...meals.value, mealWithDate];
+      }
+    }
+
+    // Refresh from server to ensure consistency
     const weekStart = startOfWeek(data.date, { weekStartsOn: 1 });
     await fetchMeals(weekStart, addDays(weekStart, 6));
   }
@@ -215,6 +233,8 @@ async function handleDetailSave(data: { mealId: string; description: string; day
       };
     }
     showSuccess("Saved", "Meal details updated.");
+    detailSheetOpen.value = false;
+    detailMeal.value = null;
   }
   catch (detailError) {
     consola.error("Failed to update meal details:", detailError);
@@ -224,6 +244,8 @@ async function handleDetailSave(data: { mealId: string; description: string; day
 
 // Handle detail sheet delete
 async function handleDetailDelete(mealId: string) {
+  detailSheetOpen.value = false;
+  detailMeal.value = null;
   await handleDeleteMeal(mealId);
 }
 
@@ -272,7 +294,7 @@ onMounted(() => {
     <MealDetailSheet
       :meal="detailMeal"
       :open="detailSheetOpen"
-      @update:open="detailSheetOpen = $event"
+      @update:open="(val: boolean) => { detailSheetOpen = val; if (!val) detailMeal = null; }"
       @save="handleDetailSave"
       @delete="handleDetailDelete"
     />

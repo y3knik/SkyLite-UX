@@ -23,19 +23,20 @@ watch(() => props.meal, (meal) => {
 }, { immediate: true });
 
 function handleSave() {
-  if (!props.meal) return;
+  if (!props.meal)
+    return;
+  const clamped = Math.max(0, Math.min(7, Number(daysInAdvance.value) || 0));
   emit("save", {
     mealId: props.meal.id,
     description: description.value.trim(),
-    daysInAdvance: daysInAdvance.value,
+    daysInAdvance: clamped,
   });
-  emit("update:open", false);
 }
 
 function handleDelete() {
-  if (!props.meal) return;
+  if (!props.meal)
+    return;
   emit("delete", props.meal.id);
-  emit("update:open", false);
 }
 </script>
 

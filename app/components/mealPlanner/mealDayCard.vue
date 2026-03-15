@@ -106,6 +106,10 @@ function handleBlur(slot: MealSlot) {
   editingSlots.value.delete(slot.type);
   const value = inputValues.value[slot.type].trim();
 
+  // Guard: skip if a save is already in-flight for this slot
+  if (savingSlots.value.has(slot.type))
+    return;
+
   if (slot.meal) {
     // Existing meal
     if (value === "") {
@@ -175,6 +179,7 @@ function handleKeydown(event: KeyboardEvent, _slot: MealSlot) {
           v-model="inputValues[slot.type]"
           type="text"
           :placeholder="slot.label"
+          :aria-label="`${slot.label} input`"
           class="flex-1 bg-transparent text-sm outline-none placeholder:text-muted/50"
           :class="{ 'opacity-50': savingSlots.has(slot.type) }"
           enterkeyhint="done"
@@ -187,7 +192,7 @@ function handleKeydown(event: KeyboardEvent, _slot: MealSlot) {
         <button
           v-if="slot.meal"
           class="p-1 rounded hover:bg-muted/10 active:bg-muted/20 flex-shrink-0"
-          aria-label="Meal details"
+          :aria-label="`Open ${slot.label} details`"
           @click="emit('openDetail', slot.meal!)"
         >
           <UIcon name="i-lucide-chevron-right" class="h-4 w-4 text-muted" />

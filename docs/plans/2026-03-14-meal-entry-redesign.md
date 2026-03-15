@@ -10,7 +10,7 @@
 
 ---
 
-### Task 1: Create `mealDayCard.vue` component
+## Task 1: Create `mealDayCard.vue` component
 
 **Files:**
 - Create: `app/components/mealPlanner/mealDayCard.vue`
@@ -201,7 +201,7 @@ git commit -m "feat(meal): add mealDayCard component with inline text inputs"
 
 ---
 
-### Task 2: Create `mealDetailSheet.vue` bottom sheet component
+## Task 2: Create `mealDetailSheet.vue` bottom sheet component
 
 **Files:**
 - Create: `app/components/mealPlanner/mealDetailSheet.vue`
@@ -329,7 +329,7 @@ git commit -m "feat(meal): add mealDetailSheet bottom sheet component"
 
 ---
 
-### Task 3: Create `mealDayList.vue` infinite scroll component
+## Task 3: Create `mealDayList.vue` infinite scroll component
 
 **Files:**
 - Create: `app/components/mealPlanner/mealDayList.vue`
@@ -610,7 +610,7 @@ git commit -m "feat(meal): add mealDayList infinite scroll component"
 
 ---
 
-### Task 4: Rewrite `mealPlanner.vue` page to use new components
+## Task 4: Rewrite `mealPlanner.vue` page to use new components
 
 **Files:**
 - Modify: `app/pages/mealPlanner.vue` (full rewrite)
@@ -653,7 +653,7 @@ git commit -m "feat(meal): rewrite mealPlanner page with infinite scroll day lis
 
 ---
 
-### Task 5: Delete old components
+## Task 5: Delete old components
 
 **Files:**
 - Delete: `app/components/mealPlanner/weeklyMealGrid.vue`
@@ -682,7 +682,7 @@ git commit -m "refactor(meal): remove old weeklyMealGrid, mealFormInline, mealDi
 
 ---
 
-### Task 6: Verify the app builds and runs
+## Task 6: Verify the app builds and runs
 
 **Step 1: Run type check**
 
@@ -708,7 +708,7 @@ git commit -m "fix(meal): address build/lint issues from meal entry redesign"
 
 ---
 
-### Task 7: Check for other references to old meal components and update
+## Task 7: Check for other references to old meal components and update
 
 **Files:**
 - Check: Any file that imports or references `preparationReminders`, old meal dialog, or weekly grid concepts
@@ -737,7 +737,7 @@ git commit -m "refactor(meal): clean up remaining references to weekly navigatio
 
 ---
 
-### Task 8: Update home page meal widget if it references old patterns
+## Task 8: Update home page meal widget if it references old patterns
 
 **Step 1: Search for meal references in home page**
 
