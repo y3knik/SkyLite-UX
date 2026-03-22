@@ -26,7 +26,8 @@ export default defineEventHandler(async (event) => {
     const cached = false; // This is a fresh generation
 
     // If todoId is provided, update the todo with the new message
-    if (todoId) {
+    // Skip synthetic IDs (e.g. holiday fallback countdowns that aren't real todos)
+    if (todoId && !todoId.startsWith("holiday-")) {
       try {
         await prisma.todo.update({
           where: { id: todoId },
