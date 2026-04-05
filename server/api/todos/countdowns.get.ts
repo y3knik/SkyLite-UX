@@ -8,7 +8,14 @@ import { getNextUpcomingHoliday } from "../../utils/nagerDateApi";
 
 export default defineEventHandler(async (_event) => {
   try {
+    // Use start of today in local timezone to avoid timezone issues
+    // Countdowns stored at local midnight should be included for "today"
     const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
 
     // Query for all uncompleted countdown todos with future due dates
     const countdowns = await prisma.todo.findMany({
@@ -16,7 +23,7 @@ export default defineEventHandler(async (_event) => {
         isCountdown: true,
         completed: false,
         dueDate: {
-          gte: now,
+          gte: startOfToday,
         },
       },
       orderBy: {
@@ -114,8 +121,7 @@ export default defineEventHandler(async (_event) => {
         isHoliday: true,
       },
     ];
-  }
-  catch (error) {
+  } catch (error) {
     consola.error("Failed to fetch countdowns:", error);
     throw createError({
       statusCode: 500,
