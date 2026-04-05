@@ -16,7 +16,7 @@
         android:id="@+id/tvEmpty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No meals planned"
+        android:text="@string/widget_no_meals"
         android:textColor="@color/widget_text_secondary"
         android:textSize="12sp"
         android:gravity="center"

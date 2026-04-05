@@ -43,18 +43,7 @@ class SkyliteWidget2x2 : AppWidgetProvider() {
                     }
                 }
 
-                val intent = Intent(context, MainActivity::class.java).apply {
-                    action = ACTION_OPEN_MEAL_PLANNER
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    putExtra("route", "/mealPlanner")
-                }
-
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    appWidgetId,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
+                val pendingIntent = createMealPlannerPendingIntent(context, appWidgetId)
 
                 views.setOnClickPendingIntent(R.id.layoutTodayMeals, pendingIntent)
                 views.setOnClickPendingIntent(R.id.tvEmpty, pendingIntent)
@@ -62,6 +51,20 @@ class SkyliteWidget2x2 : AppWidgetProvider() {
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
+        }
+
+        private fun createMealPlannerPendingIntent(context: Context, appWidgetId: Int): PendingIntent {
+            val intent = Intent(context, MainActivity::class.java).apply {
+                action = ACTION_OPEN_MEAL_PLANNER
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("route", "/mealPlanner")
+            }
+            return PendingIntent.getActivity(
+                context,
+                appWidgetId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
 
         private fun populateMealSection(

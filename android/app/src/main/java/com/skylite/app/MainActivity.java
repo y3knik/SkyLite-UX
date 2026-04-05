@@ -2,12 +2,12 @@ package com.skylite.app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.webkit.WebView;
 import org.json.JSONObject;
 import java.util.Collections;
 import java.util.Set;
 
 import com.getcapacitor.BridgeActivity;
-import com.getcapacitor.Bridge;
 
 public class MainActivity extends BridgeActivity {
     private static final Set<String> ALLOWED_WIDGET_ROUTES =
@@ -32,11 +32,7 @@ public class MainActivity extends BridgeActivity {
     public void onStart() {
         super.onStart();
         if (pendingRoute != null) {
-            Bridge bridge = getBridge();
-            if (bridge != null) {
-                String js = "window.location.hash = " + JSONObject.quote(pendingRoute) + ";";
-                bridge.evalOnLoadUrl(js);
-            }
+            navigateToRoute(pendingRoute);
             pendingRoute = null;
         }
     }
@@ -49,15 +45,19 @@ public class MainActivity extends BridgeActivity {
                 if (!ALLOWED_WIDGET_ROUTES.contains(route)) {
                     return;
                 }
-                Bridge bridge = getBridge();
-                if (bridge != null) {
-                    String js = "window.location.hash = " + JSONObject.quote(route) + ";";
-                    bridge.evalOnLoadUrl(js);
+                WebView webView = getBridge().getWebView();
+                if (webView != null) {
+                    navigateToRoute(route);
                 } else {
                     pendingRoute = route;
                 }
                 intent.removeExtra("route");
             }
         }
+    }
+
+    private void navigateToRoute(String route) {
+        String js = "window.location.hash = " + JSONObject.quote(route) + ";";
+        getBridge().getWebView().evaluateJavascript(js, null);
     }
 }
