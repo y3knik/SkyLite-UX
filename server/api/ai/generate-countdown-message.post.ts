@@ -36,9 +36,11 @@ export default defineEventHandler(async (event) => {
           },
         });
         consola.info(`Updated countdown message for todo ${todoId}`);
-      }
-      catch (updateError) {
-        consola.error(`Failed to update todo ${todoId} with message:`, updateError);
+      } catch (updateError) {
+        consola.error(
+          `Failed to update todo ${todoId} with message:`,
+          updateError,
+        );
         // Don't throw - we still want to return the generated message
       }
     }
@@ -48,8 +50,7 @@ export default defineEventHandler(async (event) => {
       cached,
       generatedAt,
     };
-  }
-  catch (error) {
+  } catch (error) {
     consola.error("Failed to generate countdown message:", error);
     throw createError({
       statusCode: 500,

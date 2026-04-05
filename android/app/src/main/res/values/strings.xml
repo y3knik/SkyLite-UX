@@ -4,4 +4,7 @@
     <string name="title_activity_main">SkyLite</string>
     <string name="package_name">com.skylite.app</string>
     <string name="custom_url_scheme">com.skylite.app</string>
+    <string name="widget_today">TODAY</string>
+    <string name="widget_tomorrow">TOMORROW</string>
+    <string name="widget_no_meals">No meals planned</string>
 </resources>
