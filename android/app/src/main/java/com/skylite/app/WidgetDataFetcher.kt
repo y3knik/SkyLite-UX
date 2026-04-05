@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -29,12 +28,6 @@ object WidgetDataFetcher {
     private const val PREFS_NAME = "CapacitorStorage"
     private const val KEY_SERVER_URL = "serverUrl"
     private const val TIMEOUT_MS = 10000
-
-    private val mealTypeLabels = mapOf(
-        "BREAKFAST" to "Breakfast",
-        "LUNCH" to "Lunch",
-        "DINNER" to "Dinner"
-    )
 
     private val mealTypeIcons = mapOf(
         "BREAKFAST" to R.drawable.ic_meal_breakfast,
@@ -121,65 +114,12 @@ object WidgetDataFetcher {
 
         Log.d(TAG, "Parsing meals - todayApiDay=$todayApiDay, tomorrowApiDay=$tomorrowApiDay")
 
-        val plansArray = JSONArray(jsonResponse)
-
-        if (plansArray.length() == 0) {
-            return WidgetData(
-                todayMeals = emptyList(),
-                tomorrowMeals = emptyList(),
-                error = null
-            )
-        }
-
-        val latestPlan = plansArray.getJSONObject(0)
-        val mealsArray = latestPlan.optJSONArray("meals") ?: JSONArray()
-
-        val todayMeals = mutableListOf<MealInfo>()
-        val tomorrowMeals = mutableListOf<MealInfo>()
-
-        for (i in 0 until mealsArray.length()) {
-            val meal = mealsArray.getJSONObject(i)
-            val dayOfWeek = when {
-                meal.has("dayOfWeek") -> meal.optInt("dayOfWeek", -1)
-                meal.has("n") -> meal.optInt("n", -1)
-                else -> -1
-            }
-            if (dayOfWeek !in 0..6) continue
-            val name = meal.optString("name", "").trim()
-            if (name.isEmpty()) continue
-            val mealType = meal.optString("mealType", "DINNER").uppercase()
-            val mealTypeLabel = mealTypeLabels[mealType] ?: mealType
-
-            val mealInfo = MealInfo(
-                name = name,
-                mealType = mealType,
-                mealTypeLabel = mealTypeLabel
-            )
-
-            when (dayOfWeek) {
-                todayApiDay -> todayMeals.add(mealInfo)
-                tomorrowApiDay -> tomorrowMeals.add(mealInfo)
-            }
-        }
-
-        todayMeals.sortBy { getMealTypeOrder(it.mealType) }
-        tomorrowMeals.sortBy { getMealTypeOrder(it.mealType) }
-
-        Log.d(TAG, "Parsed: ${todayMeals.size} today meals, ${tomorrowMeals.size} tomorrow meals")
+        val parsed = MealPlanParser.parseMealPlans(jsonResponse, todayApiDay, tomorrowApiDay)
 
         return WidgetData(
-            todayMeals = todayMeals,
-            tomorrowMeals = tomorrowMeals,
-            error = null
+            todayMeals = parsed.todayMeals.map { MealInfo(it.name, it.mealType, it.mealTypeLabel) },
+            tomorrowMeals = parsed.tomorrowMeals.map { MealInfo(it.name, it.mealType, it.mealTypeLabel) },
+            error = parsed.error
         )
-    }
-
-    private fun getMealTypeOrder(mealType: String): Int {
-        return when (mealType) {
-            "BREAKFAST" -> 0
-            "LUNCH" -> 1
-            "DINNER" -> 2
-            else -> 3
-        }
     }
 }
