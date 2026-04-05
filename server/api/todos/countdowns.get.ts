@@ -6,24 +6,16 @@ import prisma from "../../../app/lib/prisma";
 import { getHolidayCache, saveHolidayCache } from "../../utils/holidayCache";
 import { getNextUpcomingHoliday } from "../../utils/nagerDateApi";
 
+import { getCountdownCutoff } from "../../utils/countdownCutoff";
+
 export default defineEventHandler(async (_event) => {
   try {
-    // Use start of today in local timezone to avoid timezone issues
-    // Countdowns stored at local midnight should be included for "today"
-    const now = new Date();
-    const startOfToday = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
-
-    // Query for all uncompleted countdown todos with future due dates
     const countdowns = await prisma.todo.findMany({
       where: {
         isCountdown: true,
         completed: false,
         dueDate: {
-          gte: startOfToday,
+          gte: getCountdownCutoff(),
         },
       },
       orderBy: {
