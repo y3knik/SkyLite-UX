@@ -138,7 +138,12 @@ object WidgetDataFetcher {
 
         for (i in 0 until mealsArray.length()) {
             val meal = mealsArray.getJSONObject(i)
-            val dayOfWeek = meal.getInt("dayOfWeek")
+            val dayOfWeek = when {
+                meal.has("dayOfWeek") -> meal.optInt("dayOfWeek", -1)
+                meal.has("n") -> meal.optInt("n", -1)
+                else -> -1
+            }
+            if (dayOfWeek !in 0..6) continue
             val name = meal.getString("name")
             val mealType = meal.optString("mealType", "DINNER")
             val mealTypeLabel = mealTypeLabels[mealType] ?: mealType
