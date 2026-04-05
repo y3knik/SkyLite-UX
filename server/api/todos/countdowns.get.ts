@@ -6,17 +6,16 @@ import prisma from "../../../app/lib/prisma";
 import { getHolidayCache, saveHolidayCache } from "../../utils/holidayCache";
 import { getNextUpcomingHoliday } from "../../utils/nagerDateApi";
 
+import { getCountdownCutoff } from "../../utils/countdownCutoff";
+
 export default defineEventHandler(async (_event) => {
   try {
-    const now = new Date();
-
-    // Query for all uncompleted countdown todos with future due dates
     const countdowns = await prisma.todo.findMany({
       where: {
         isCountdown: true,
         completed: false,
         dueDate: {
-          gte: now,
+          gte: getCountdownCutoff(),
         },
       },
       orderBy: {
@@ -114,8 +113,7 @@ export default defineEventHandler(async (_event) => {
         isHoliday: true,
       },
     ];
-  }
-  catch (error) {
+  } catch (error) {
     consola.error("Failed to fetch countdowns:", error);
     throw createError({
       statusCode: 500,
