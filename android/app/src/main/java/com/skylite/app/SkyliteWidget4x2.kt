@@ -90,8 +90,6 @@ class SkyliteWidget4x2 : AppWidgetProvider() {
             views.removeAllViews(containerId)
 
             for (meal in meals) {
-                val iconResId = WidgetDataFetcher.getMealIcon(meal.mealType)
-
                 views.addView(
                     containerId,
                     RemoteViews(context.packageName, android.R.layout.simple_list_item_1).apply {

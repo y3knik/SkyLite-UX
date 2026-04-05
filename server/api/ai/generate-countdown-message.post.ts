@@ -26,8 +26,7 @@ export default defineEventHandler(async (event) => {
     const cached = false; // This is a fresh generation
 
     // If todoId is provided, update the todo with the new message
-    // Skip synthetic IDs (e.g. holiday fallback countdowns that aren't real todos)
-    if (todoId && !todoId.startsWith("holiday-")) {
+    if (todoId) {
       try {
         await prisma.todo.update({
           where: { id: todoId },
@@ -37,9 +36,11 @@ export default defineEventHandler(async (event) => {
           },
         });
         consola.info(`Updated countdown message for todo ${todoId}`);
-      }
-      catch (updateError) {
-        consola.error(`Failed to update todo ${todoId} with message:`, updateError);
+      } catch (updateError) {
+        consola.error(
+          `Failed to update todo ${todoId} with message:`,
+          updateError,
+        );
         // Don't throw - we still want to return the generated message
       }
     }
@@ -49,8 +50,7 @@ export default defineEventHandler(async (event) => {
       cached,
       generatedAt,
     };
-  }
-  catch (error) {
+  } catch (error) {
     consola.error("Failed to generate countdown message:", error);
     throw createError({
       statusCode: 500,
